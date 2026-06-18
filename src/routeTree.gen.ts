@@ -23,6 +23,12 @@ import { Route as AdminSignalementsRouteImport } from './routes/admin/signalemen
 import { Route as AdminAlertesRouteImport } from './routes/admin/alertes'
 import { Route as ServicesIndexRouteImport } from './routes/services/index'
 import { Route as ServicesSignalementIdRouteImport } from './routes/services/signalement.$id'
+import { Route as PlatformIndexRouteImport } from './routes/platform/index'
+import { Route as PlatformCommunesRouteImport } from './routes/platform/communes'
+import { Route as PlatformUsersRouteImport } from './routes/platform/users'
+import { Route as PlatformLicencesRouteImport } from './routes/platform/licences'
+import { Route as PlatformStatsRouteImport } from './routes/platform/stats'
+import { Route as PlatformSupportRouteImport } from './routes/platform/support'
 
 const UrgencesRoute = UrgencesRouteImport.update({
   id: '/urgences',
@@ -94,6 +100,36 @@ const ServicesSignalementIdRoute = ServicesSignalementIdRouteImport.update({
   path: '/services/signalement/$id',
   getParentRoute: () => rootRouteImport,
 } as any)
+const PlatformIndexRoute = PlatformIndexRouteImport.update({
+  id: '/platform/',
+  path: '/platform',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const PlatformCommunesRoute = PlatformCommunesRouteImport.update({
+  id: '/platform/communes',
+  path: '/platform/communes',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const PlatformUsersRoute = PlatformUsersRouteImport.update({
+  id: '/platform/users',
+  path: '/platform/users',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const PlatformLicencesRoute = PlatformLicencesRouteImport.update({
+  id: '/platform/licences',
+  path: '/platform/licences',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const PlatformStatsRoute = PlatformStatsRouteImport.update({
+  id: '/platform/stats',
+  path: '/platform/stats',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const PlatformSupportRoute = PlatformSupportRouteImport.update({
+  id: '/platform/support',
+  path: '/platform/support',
+  getParentRoute: () => rootRouteImport,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -110,6 +146,12 @@ export interface FileRoutesByFullPath {
   '/admin/': typeof AdminIndexRoute
   '/services/': typeof ServicesIndexRoute
   '/services/signalement/$id': typeof ServicesSignalementIdRoute
+  '/platform/': typeof PlatformIndexRoute
+  '/platform/communes': typeof PlatformCommunesRoute
+  '/platform/users': typeof PlatformUsersRoute
+  '/platform/licences': typeof PlatformLicencesRoute
+  '/platform/stats': typeof PlatformStatsRoute
+  '/platform/support': typeof PlatformSupportRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -126,6 +168,12 @@ export interface FileRoutesByTo {
   '/admin': typeof AdminIndexRoute
   '/services': typeof ServicesIndexRoute
   '/services/signalement/$id': typeof ServicesSignalementIdRoute
+  '/platform': typeof PlatformIndexRoute
+  '/platform/communes': typeof PlatformCommunesRoute
+  '/platform/users': typeof PlatformUsersRoute
+  '/platform/licences': typeof PlatformLicencesRoute
+  '/platform/stats': typeof PlatformStatsRoute
+  '/platform/support': typeof PlatformSupportRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -143,6 +191,12 @@ export interface FileRoutesById {
   '/admin/': typeof AdminIndexRoute
   '/services/': typeof ServicesIndexRoute
   '/services/signalement/$id': typeof ServicesSignalementIdRoute
+  '/platform/': typeof PlatformIndexRoute
+  '/platform/communes': typeof PlatformCommunesRoute
+  '/platform/users': typeof PlatformUsersRoute
+  '/platform/licences': typeof PlatformLicencesRoute
+  '/platform/stats': typeof PlatformStatsRoute
+  '/platform/support': typeof PlatformSupportRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -161,6 +215,12 @@ export interface FileRouteTypes {
     | '/admin/'
     | '/services/'
     | '/services/signalement/$id'
+    | '/platform/'
+    | '/platform/communes'
+    | '/platform/users'
+    | '/platform/licences'
+    | '/platform/stats'
+    | '/platform/support'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -169,101 +229,4 @@ export interface FileRouteTypes {
     | '/fil'
     | '/onboarding'
     | '/profil'
-    | '/signaler'
-    | '/urgences'
-    | '/actualites'
-    | '/admin/alertes'
-    | '/admin/signalements'
-    | '/admin'
-    | '/services'
-    | '/services/signalement/$id'
-  id:
-    | '__root__'
-    | '/'
-    | '/auth'
-    | '/carte'
-    | '/fil'
-    | '/onboarding'
-    | '/profil'
-    | '/signaler'
-    | '/urgences'
-    | '/actualites'
-    | '/admin/alertes'
-    | '/admin/signalements'
-    | '/admin/'
-    | '/services/'
-    | '/services/signalement/$id'
-  fileRoutesById: FileRoutesById
-}
-export interface RootRouteChildren {
-  IndexRoute: typeof IndexRoute
-  AuthRoute: typeof AuthRoute
-  CarteRoute: typeof CarteRoute
-  FilRoute: typeof FilRoute
-  OnboardingRoute: typeof OnboardingRoute
-  ProfilRoute: typeof ProfilRoute
-  SignalerRoute: typeof SignalerRoute
-  UrgencesRoute: typeof UrgencesRoute
-  ActualitesRoute: typeof ActualitesRoute
-  AdminAlertesRoute: typeof AdminAlertesRoute
-  AdminSignalementsRoute: typeof AdminSignalementsRoute
-  AdminIndexRoute: typeof AdminIndexRoute
-  ServicesIndexRoute: typeof ServicesIndexRoute
-  ServicesSignalementIdRoute: typeof ServicesSignalementIdRoute
-}
-
-declare module '@tanstack/react-router' {
-  interface FileRoutesByPath {
-    '/urgences': {
-      id: '/urgences'
-      path: '/urgences'
-      fullPath: '/urgences'
-      preLoaderRoute: typeof UrgencesRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/signaler': {
-      id: '/signaler'
-      path: '/signaler'
-      fullPath: '/signaler'
-      preLoaderRoute: typeof SignalerRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/profil': {
-      id: '/profil'
-      path: '/profil'
-      fullPath: '/profil'
-      preLoaderRoute: typeof ProfilRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/onboarding': {
-      id: '/onboarding'
-      path: '/onboarding'
-      fullPath: '/onboarding'
-      preLoaderRoute: typeof OnboardingRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/fil': {
-      id: '/fil'
-      path: '/fil'
-      fullPath: '/fil'
-      preLoaderRoute: typeof FilRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/carte': {
-      id: '/carte'
-      path: '/carte'
-      fullPath: '/carte'
-      preLoaderRoute: typeof CarteRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/auth': {
-      id: '/auth'
-      path: '/auth'
-      fullPath: '/auth'
-      preLoaderRoute: typeof AuthRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/': {
-      id: '/'
-      path: '/'
-      fullPat
+   
