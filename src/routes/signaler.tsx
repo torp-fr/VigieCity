@@ -81,6 +81,13 @@ function ReportPage() {
       });
       if (!userId) throw new Error("Vous devez être connecté.");
 
+      // Fetch user's collectivity
+      const { data: profile } = await supabase
+        .from("profiles")
+        .select("collectivity_id")
+        .eq("id", userId)
+        .single();
+
       // Upload media
       const mediaPaths: string[] = [];
       for (const file of files) {
@@ -95,6 +102,7 @@ function ReportPage() {
 
       const { error } = await supabase.from("reports").insert({
         user_id: userId,
+        collectivity_id: profile?.collectivity_id ?? null,
         category: parsed.category as ReportCategoryValue,
         severity: parsed.severity,
         description: parsed.description,

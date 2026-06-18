@@ -1,5 +1,6 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { useEffect, useState } from "react";
 import {
   PhoneCall,
   AlertCircle,
@@ -31,18 +32,65 @@ export const Route = createFileRoute("/")({
 });
 
 function Home() {
-  const { data: alerts } = useQuery({
-    queryKey: ["alerts", "active"],
+  const queryClient = useQueryClient();
+  const [userId, setUserId] = useState<string | null>(null);
+
+  useEffect(() => {
+    supabase.auth.getUser().then(({ data }) => setUserId(data.user?.id ?? null));
+  }, []);
+
+  const { data: profile } = useQuery({
+    queryKey: ["profile", userId],
+    enabled: !!userId,
     queryFn: async () => {
-      const { data, error } = await supabase
+      const { data } = await supabase
+        .from("profiles")
+        .select("collectivity_id")
+        .eq("id", userId!)
+        .single();
+      return data;
+    },
+  });
+
+  const { data: alerts } = useQuery({
+    queryKey: ["alerts", "active", profile?.collectivity_id],
+    queryFn: async () => {
+      const now = new Date().toISOString();
+      let query = supabase
         .from("alerts")
         .select("id, title, message, severity, created_at, area_label")
+        .or(`expires_at.is.null,expires_at.gt.${now}`)
         .order("created_at", { ascending: false })
         .limit(3);
+
+      if (profile?.collectivity_id) {
+        query = query.or(
+          `collectivity_id.eq.${profile.collectivity_id},collectivity_id.is.null`,
+        );
+      } else {
+        query = query.is("collectivity_id", null);
+      }
+
+      const { data, error } = await query;
       if (error) throw error;
       return data;
     },
   });
+
+  // Realtime: refresh alerts on new INSERT
+  useEffect(() => {
+    const channel = supabase
+      .channel("alerts-realtime")
+      .on(
+        "postgres_changes",
+        { event: "INSERT", schema: "public", table: "alerts" },
+        () => queryClient.invalidateQueries({ queryKey: ["alerts"] }),
+      )
+      .subscribe();
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, [queryClient]);
 
   return (
     <div className="space-y-6 px-4 pt-5">

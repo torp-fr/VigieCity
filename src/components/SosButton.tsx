@@ -1,20 +1,65 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Siren, X } from "lucide-react";
 import { Link } from "@tanstack/react-router";
+import { supabase } from "@/integrations/supabase/client";
 
 /**
  * Bouton SOS — appel rapide vers le 112 + vibration.
  * Version MVP : ouvre une feuille de confirmation avant d'appeler,
  * pour éviter les fausses alertes. L'appel réel passe par tel:112.
+ * Chaque appel est loggé dans sos_events pour le suivi modérateur.
  */
 export function SosButton() {
   const [open, setOpen] = useState(false);
+  const [userId, setUserId] = useState<string | null>(null);
+  const [collectivityId, setCollectivityId] = useState<string | null>(null);
+
+  useEffect(() => {
+    supabase.auth.getUser().then(async ({ data }) => {
+      const uid = data.user?.id ?? null;
+      setUserId(uid);
+      if (uid) {
+        const { data: profile } = await supabase
+          .from("profiles")
+          .select("collectivity_id")
+          .eq("id", uid)
+          .single();
+        setCollectivityId(profile?.collectivity_id ?? null);
+      }
+    });
+  }, []);
 
   function trigger() {
     if (typeof navigator !== "undefined" && "vibrate" in navigator) {
       navigator.vibrate?.([200, 80, 200]);
     }
     setOpen(true);
+  }
+
+  async function logSosEvent(phoneNumber: string) {
+    if (!userId) return;
+    let lat: number | null = null;
+    let lng: number | null = null;
+    if (typeof navigator !== "undefined" && navigator.geolocation) {
+      await new Promise<void>((resolve) => {
+        navigator.geolocation.getCurrentPosition(
+          (pos) => {
+            lat = pos.coords.latitude;
+            lng = pos.coords.longitude;
+            resolve();
+          },
+          () => resolve(),
+          { timeout: 3000 },
+        );
+      });
+    }
+    await supabase.from("sos_events").insert({
+      user_id: userId,
+      collectivity_id: collectivityId,
+      lat,
+      lng,
+      message: `Appel ${phoneNumber} via VigieCity`,
+    });
   }
 
   return (
@@ -49,6 +94,7 @@ export function SosButton() {
             <div className="mt-4 grid gap-2">
               <a
                 href="tel:112"
+                onClick={() => { logSosEvent("112"); setOpen(false); }}
                 className="flex items-center justify-between rounded-2xl bg-sos p-4 text-sos-foreground"
               >
                 <span className="font-semibold">Appeler le 112</span>
@@ -56,6 +102,7 @@ export function SosButton() {
               </a>
               <a
                 href="tel:17"
+                onClick={() => { logSosEvent("17"); setOpen(false); }}
                 className="flex items-center justify-between rounded-2xl bg-primary p-4 text-primary-foreground"
               >
                 <span className="font-semibold">Appeler le 17</span>
@@ -63,6 +110,7 @@ export function SosButton() {
               </a>
               <a
                 href="tel:18"
+                onClick={() => { logSosEvent("18"); setOpen(false); }}
                 className="flex items-center justify-between rounded-2xl border border-border bg-card p-4"
               >
                 <span className="font-semibold">Appeler le 18</span>

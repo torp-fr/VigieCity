@@ -4,6 +4,8 @@ import {
   Link,
   createRootRouteWithContext,
   useRouter,
+  useNavigate,
+  useRouterState,
   HeadContent,
   Scripts,
 } from "@tanstack/react-router";
@@ -15,6 +17,9 @@ import { AppHeader } from "../components/AppHeader";
 import { BottomNav } from "../components/BottomNav";
 import { Toaster } from "../components/ui/sonner";
 import { supabase } from "@/integrations/supabase/client";
+
+// Routes that don't require onboarding check
+const SKIP_ONBOARDING_ROUTES = ["/auth", "/onboarding"];
 
 function NotFoundComponent() {
   return (
@@ -119,15 +124,46 @@ function RootShell({ children }: { children: ReactNode }) {
 function RootComponent() {
   const { queryClient } = Route.useRouteContext();
   const router = useRouter();
+  const navigate = useNavigate();
+  const pathname = useRouterState({ select: (s) => s.location.pathname });
 
   useEffect(() => {
-    const { data } = supabase.auth.onAuthStateChange((event) => {
+    const { data } = supabase.auth.onAuthStateChange(async (event, session) => {
       if (event !== "SIGNED_IN" && event !== "SIGNED_OUT" && event !== "USER_UPDATED") return;
       router.invalidate();
       if (event !== "SIGNED_OUT") queryClient.invalidateQueries();
+
+      // After sign-in, check if user needs onboarding
+      if (event === "SIGNED_IN" && session?.user) {
+        if (SKIP_ONBOARDING_ROUTES.includes(pathname)) return;
+        const { data: profile } = await supabase
+          .from("profiles")
+          .select("collectivity_id")
+          .eq("id", session.user.id)
+          .single();
+        if (!profile?.collectivity_id) {
+          navigate({ to: "/onboarding" });
+        }
+      }
     });
     return () => data.subscription.unsubscribe();
-  }, [router, queryClient]);
+  }, [router, queryClient, navigate, pathname]);
+
+  // On mount, check if logged-in user needs onboarding
+  useEffect(() => {
+    if (SKIP_ONBOARDING_ROUTES.includes(pathname)) return;
+    supabase.auth.getSession().then(async ({ data: { session } }) => {
+      if (!session?.user) return;
+      const { data: profile } = await supabase
+        .from("profiles")
+        .select("collectivity_id")
+        .eq("id", session.user.id)
+        .single();
+      if (!profile?.collectivity_id) {
+        navigate({ to: "/onboarding" });
+      }
+    });
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   return (
     <QueryClientProvider client={queryClient}>
