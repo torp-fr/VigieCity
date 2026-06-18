@@ -9,8 +9,32 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
+import { Route as UrgencesRouteImport } from './routes/urgences'
+import { Route as SignalerRouteImport } from './routes/signaler'
+import { Route as FilRouteImport } from './routes/fil'
+import { Route as AuthRouteImport } from './routes/auth'
 import { Route as IndexRouteImport } from './routes/index'
 
+const UrgencesRoute = UrgencesRouteImport.update({
+  id: '/urgences',
+  path: '/urgences',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const SignalerRoute = SignalerRouteImport.update({
+  id: '/signaler',
+  path: '/signaler',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const FilRoute = FilRouteImport.update({
+  id: '/fil',
+  path: '/fil',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AuthRoute = AuthRouteImport.update({
+  id: '/auth',
+  path: '/auth',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
@@ -19,28 +43,72 @@ const IndexRoute = IndexRouteImport.update({
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/auth': typeof AuthRoute
+  '/fil': typeof FilRoute
+  '/signaler': typeof SignalerRoute
+  '/urgences': typeof UrgencesRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/auth': typeof AuthRoute
+  '/fil': typeof FilRoute
+  '/signaler': typeof SignalerRoute
+  '/urgences': typeof UrgencesRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/auth': typeof AuthRoute
+  '/fil': typeof FilRoute
+  '/signaler': typeof SignalerRoute
+  '/urgences': typeof UrgencesRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/'
+  fullPaths: '/' | '/auth' | '/fil' | '/signaler' | '/urgences'
   fileRoutesByTo: FileRoutesByTo
-  to: '/'
-  id: '__root__' | '/'
+  to: '/' | '/auth' | '/fil' | '/signaler' | '/urgences'
+  id: '__root__' | '/' | '/auth' | '/fil' | '/signaler' | '/urgences'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  AuthRoute: typeof AuthRoute
+  FilRoute: typeof FilRoute
+  SignalerRoute: typeof SignalerRoute
+  UrgencesRoute: typeof UrgencesRoute
 }
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
+    '/urgences': {
+      id: '/urgences'
+      path: '/urgences'
+      fullPath: '/urgences'
+      preLoaderRoute: typeof UrgencesRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/signaler': {
+      id: '/signaler'
+      path: '/signaler'
+      fullPath: '/signaler'
+      preLoaderRoute: typeof SignalerRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/fil': {
+      id: '/fil'
+      path: '/fil'
+      fullPath: '/fil'
+      preLoaderRoute: typeof FilRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/auth': {
+      id: '/auth'
+      path: '/auth'
+      fullPath: '/auth'
+      preLoaderRoute: typeof AuthRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/': {
       id: '/'
       path: '/'
@@ -53,6 +121,10 @@ declare module '@tanstack/react-router' {
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  AuthRoute: AuthRoute,
+  FilRoute: FilRoute,
+  SignalerRoute: SignalerRoute,
+  UrgencesRoute: UrgencesRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
