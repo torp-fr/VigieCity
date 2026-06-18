@@ -14,16 +14,373 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      alerts: {
+        Row: {
+          area_label: string | null
+          collectivity_id: string | null
+          created_at: string
+          created_by: string | null
+          expires_at: string | null
+          id: string
+          message: string
+          severity: Database["public"]["Enums"]["report_severity"]
+          title: string
+        }
+        Insert: {
+          area_label?: string | null
+          collectivity_id?: string | null
+          created_at?: string
+          created_by?: string | null
+          expires_at?: string | null
+          id?: string
+          message: string
+          severity?: Database["public"]["Enums"]["report_severity"]
+          title: string
+        }
+        Update: {
+          area_label?: string | null
+          collectivity_id?: string | null
+          created_at?: string
+          created_by?: string | null
+          expires_at?: string | null
+          id?: string
+          message?: string
+          severity?: Database["public"]["Enums"]["report_severity"]
+          title?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "alerts_collectivity_id_fkey"
+            columns: ["collectivity_id"]
+            isOneToOne: false
+            referencedRelation: "collectivities"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      collectivities: {
+        Row: {
+          created_at: string
+          id: string
+          insee_code: string | null
+          name: string
+          postal_code: string | null
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          insee_code?: string | null
+          name: string
+          postal_code?: string | null
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          insee_code?: string | null
+          name?: string
+          postal_code?: string | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      emergency_contacts: {
+        Row: {
+          category: string
+          collectivity_id: string | null
+          created_at: string
+          description: string | null
+          hours: string | null
+          id: string
+          is_national: boolean
+          label: string
+          phone: string
+          priority: number
+          updated_at: string
+        }
+        Insert: {
+          category: string
+          collectivity_id?: string | null
+          created_at?: string
+          description?: string | null
+          hours?: string | null
+          id?: string
+          is_national?: boolean
+          label: string
+          phone: string
+          priority?: number
+          updated_at?: string
+        }
+        Update: {
+          category?: string
+          collectivity_id?: string | null
+          created_at?: string
+          description?: string | null
+          hours?: string | null
+          id?: string
+          is_national?: boolean
+          label?: string
+          phone?: string
+          priority?: number
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "emergency_contacts_collectivity_id_fkey"
+            columns: ["collectivity_id"]
+            isOneToOne: false
+            referencedRelation: "collectivities"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      profiles: {
+        Row: {
+          collectivity_id: string | null
+          created_at: string
+          display_name: string | null
+          district: string | null
+          id: string
+          is_voisin_vigilant: boolean
+          phone: string | null
+          updated_at: string
+        }
+        Insert: {
+          collectivity_id?: string | null
+          created_at?: string
+          display_name?: string | null
+          district?: string | null
+          id: string
+          is_voisin_vigilant?: boolean
+          phone?: string | null
+          updated_at?: string
+        }
+        Update: {
+          collectivity_id?: string | null
+          created_at?: string
+          display_name?: string | null
+          district?: string | null
+          id?: string
+          is_voisin_vigilant?: boolean
+          phone?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "profiles_collectivity_id_fkey"
+            columns: ["collectivity_id"]
+            isOneToOne: false
+            referencedRelation: "collectivities"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      reports: {
+        Row: {
+          approximate_address: string | null
+          category: Database["public"]["Enums"]["report_category"]
+          collectivity_id: string | null
+          created_at: string
+          description: string
+          id: string
+          is_anonymous: boolean
+          lat: number | null
+          lng: number | null
+          media_paths: string[]
+          occurred_at: string
+          severity: Database["public"]["Enums"]["report_severity"]
+          status: Database["public"]["Enums"]["report_status"]
+          title: string | null
+          updated_at: string
+          user_id: string | null
+        }
+        Insert: {
+          approximate_address?: string | null
+          category: Database["public"]["Enums"]["report_category"]
+          collectivity_id?: string | null
+          created_at?: string
+          description: string
+          id?: string
+          is_anonymous?: boolean
+          lat?: number | null
+          lng?: number | null
+          media_paths?: string[]
+          occurred_at?: string
+          severity?: Database["public"]["Enums"]["report_severity"]
+          status?: Database["public"]["Enums"]["report_status"]
+          title?: string | null
+          updated_at?: string
+          user_id?: string | null
+        }
+        Update: {
+          approximate_address?: string | null
+          category?: Database["public"]["Enums"]["report_category"]
+          collectivity_id?: string | null
+          created_at?: string
+          description?: string
+          id?: string
+          is_anonymous?: boolean
+          lat?: number | null
+          lng?: number | null
+          media_paths?: string[]
+          occurred_at?: string
+          severity?: Database["public"]["Enums"]["report_severity"]
+          status?: Database["public"]["Enums"]["report_status"]
+          title?: string | null
+          updated_at?: string
+          user_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "reports_collectivity_id_fkey"
+            columns: ["collectivity_id"]
+            isOneToOne: false
+            referencedRelation: "collectivities"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      sos_events: {
+        Row: {
+          audio_path: string | null
+          collectivity_id: string | null
+          created_at: string
+          id: string
+          lat: number | null
+          lng: number | null
+          message: string | null
+          resolved_at: string | null
+          user_id: string
+        }
+        Insert: {
+          audio_path?: string | null
+          collectivity_id?: string | null
+          created_at?: string
+          id?: string
+          lat?: number | null
+          lng?: number | null
+          message?: string | null
+          resolved_at?: string | null
+          user_id: string
+        }
+        Update: {
+          audio_path?: string | null
+          collectivity_id?: string | null
+          created_at?: string
+          id?: string
+          lat?: number | null
+          lng?: number | null
+          message?: string | null
+          resolved_at?: string | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "sos_events_collectivity_id_fkey"
+            columns: ["collectivity_id"]
+            isOneToOne: false
+            referencedRelation: "collectivities"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      trusted_contacts: {
+        Row: {
+          created_at: string
+          id: string
+          name: string
+          phone: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          name: string
+          phone: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          name?: string
+          phone?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      user_roles: {
+        Row: {
+          collectivity_id: string | null
+          created_at: string
+          id: string
+          role: Database["public"]["Enums"]["app_role"]
+          user_id: string
+        }
+        Insert: {
+          collectivity_id?: string | null
+          created_at?: string
+          id?: string
+          role: Database["public"]["Enums"]["app_role"]
+          user_id: string
+        }
+        Update: {
+          collectivity_id?: string | null
+          created_at?: string
+          id?: string
+          role?: Database["public"]["Enums"]["app_role"]
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "user_roles_collectivity_id_fkey"
+            columns: ["collectivity_id"]
+            isOneToOne: false
+            referencedRelation: "collectivities"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
     }
     Views: {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      has_role: {
+        Args: {
+          _role: Database["public"]["Enums"]["app_role"]
+          _user_id: string
+        }
+        Returns: boolean
+      }
+      has_role_in: {
+        Args: {
+          _collectivity: string
+          _role: Database["public"]["Enums"]["app_role"]
+          _user_id: string
+        }
+        Returns: boolean
+      }
     }
     Enums: {
-      [_ in never]: never
+      app_role: "citizen" | "moderator" | "admin"
+      report_category:
+        | "vehicule_suspect"
+        | "rodeur"
+        | "incivilite"
+        | "degradation"
+        | "accident"
+        | "animal"
+        | "eclairage"
+        | "depot_sauvage"
+        | "autre"
+      report_severity: "info" | "vigilance" | "urgent"
+      report_status:
+        | "pending"
+        | "published"
+        | "archived"
+        | "rejected"
+        | "transferred"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -150,6 +507,27 @@ export type CompositeTypes<
 
 export const Constants = {
   public: {
-    Enums: {},
+    Enums: {
+      app_role: ["citizen", "moderator", "admin"],
+      report_category: [
+        "vehicule_suspect",
+        "rodeur",
+        "incivilite",
+        "degradation",
+        "accident",
+        "animal",
+        "eclairage",
+        "depot_sauvage",
+        "autre",
+      ],
+      report_severity: ["info", "vigilance", "urgent"],
+      report_status: [
+        "pending",
+        "published",
+        "archived",
+        "rejected",
+        "transferred",
+      ],
+    },
   },
 } as const
