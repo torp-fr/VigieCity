@@ -1,0 +1,176 @@
+import { createFileRoute } from "@tanstack/react-router";
+import { useEffect, useState } from "react";
+import { useQuery } from "@tanstack/react-query";
+import { Loader2, Map as MapIcon } from "lucide-react";
+import { supabase } from "@/integrations/supabase/client";
+import { categoryLabel, categoryIcon } from "@/lib/categories";
+
+export const Route = createFileRoute("/carte")({
+  head: () => ({
+    meta: [
+      { title: "Carte du quartier — VigieCity" },
+      { name: "description", content: "Carte des signalements publiés dans votre quartier." },
+    ],
+  }),
+  component: CartePage,
+});
+
+type Report = {
+  id: string;
+  lat: number;
+  lng: number;
+  category: string;
+  severity: string;
+  description: string;
+  approximate_address: string | null;
+  created_at: string;
+};
+
+const SEVERITY_COLORS: Record<string, string> = {
+  info: "#6b7280",
+  vigilance: "#d97706",
+  urgent: "#dc2626",
+};
+
+function CartePage() {
+  const [userId, setUserId] = useState<string | null>(null);
+  const [mapReady, setMapReady] = useState(false);
+
+  useEffect(() => {
+    supabase.auth.getUser().then(({ data }) => setUserId(data.user?.id ?? null));
+  }, []);
+
+  const { data: reports, isLoading } = useQuery({
+    queryKey: ["reports", "carte"],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("reports")
+        .select("id, lat, lng, category, severity, description, approximate_address, created_at")
+        .eq("status", "published")
+        .not("lat", "is", null)
+        .not("lng", "is", null)
+        .order("created_at", { ascending: false })
+        .limit(200);
+      if (error) throw error;
+      return (data ?? []) as Report[];
+    },
+  });
+
+  useEffect(() => {
+    setMapReady(true);
+  }, []);
+
+  return (
+    <div className="flex flex-col" style={{ height: "calc(100vh - 120px)" }}>
+      <header className="flex items-center gap-2 px-4 py-3">
+        <MapIcon className="h-5 w-5 text-primary" />
+        <h1 className="text-lg font-bold">Carte du quartier</h1>
+        {reports && <span className="rounded-full bg-muted px-2 py-0.5 text-xs text-muted-foreground">{reports.length} signalement{reports.length !== 1 ? "s" : ""}</span>}
+      </header>
+
+      {isLoading ? (
+        <div className="flex flex-1 items-center justify-center">
+          <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
+        </div>
+      ) : mapReady ? (
+        <LeafletMap reports={reports ?? []} />
+      ) : null}
+    </div>
+  );
+}
+
+// Lazy-load Leaflet to avoid SSR issues
+function LeafletMap({ reports }: { reports: Report[] }) {
+  const mapId = "vigie-leaflet-map";
+
+  useEffect(() => {
+    let map: L.Map | null = null;
+
+    async function initMap() {
+      const L = (await import("leaflet")).default;
+      await import("leaflet/dist/leaflet.css");
+
+      // Fix default icon paths for bundlers
+      // @ts-ignore
+      delete L.Icon.Default.prototype._getIconUrl;
+      L.Icon.Default.mergeOptions({
+        iconRetinaUrl: "https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon-2x.png",
+        iconUrl: "https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon.png",
+        shadowUrl: "https://unpkg.com/leaflet@1.9.4/dist/images/marker-shadow.png",
+      });
+
+      const container = document.getElementById(mapId);
+      if (!container) return;
+
+      // Center on France if no reports, else on reports centroid
+      let center: [number, number] = [46.6, 2.3];
+      let zoom = 6;
+      if (reports.length > 0) {
+        const lats = reports.map((r) => r.lat);
+        const lngs = reports.map((r) => r.lng);
+        center = [
+          (Math.min(...lats) + Math.max(...lats)) / 2,
+          (Math.min(...lngs) + Math.max(...lngs)) / 2,
+        ];
+        zoom = 13;
+      }
+
+      map = L.map(container, { center, zoom });
+
+      L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
+        attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>',
+        maxZoom: 19,
+      }).addTo(map);
+
+      // Add markers
+      for (const r of reports) {
+        const color = SEVERITY_COLORS[r.severity] ?? SEVERITY_COLORS.info;
+        const icon = L.divIcon({
+          className: "",
+          html: `<div style="
+            width: 36px; height: 36px; border-radius: 50% 50% 50% 0;
+            background: ${color}; border: 2px solid white;
+            transform: rotate(-45deg);
+            box-shadow: 0 2px 6px rgba(0,0,0,.35);
+            display: flex; align-items: center; justify-content: center;
+          "><span style="transform: rotate(45deg); font-size: 16px; line-height: 1;">${categoryIcon(r.category)}</span></div>`,
+          iconSize: [36, 36],
+          iconAnchor: [18, 36],
+          popupAnchor: [0, -38],
+        });
+
+        const ago = timeAgo(r.created_at);
+        const addr = r.approximate_address ? `<p style="font-size:11px;color:#666;margin:2px 0">📍 ${r.approximate_address}</p>` : "";
+        const desc = r.description.length > 120 ? r.description.slice(0, 120) + "…" : r.description;
+
+        L.marker([r.lat, r.lng], { icon })
+          .bindPopup(`
+            <div style="min-width:180px;max-width:240px">
+              <b style="font-size:13px">${categoryLabel(r.category)}</b>
+              <span style="display:inline-block;margin-left:6px;padding:1px 6px;border-radius:999px;font-size:10px;font-weight:600;background:${color}22;color:${color};border:1px solid ${color}44">${r.severity}</span>
+              ${addr}
+              <p style="font-size:12px;margin:4px 0;color:#333">${desc}</p>
+              <p style="font-size:11px;color:#999;margin:0">${ago}</p>
+            </div>
+          `)
+          .addTo(map!);
+      }
+    }
+
+    initMap();
+
+    return () => {
+      if (map) map.remove();
+    };
+  }, [reports]);
+
+  return <div id={mapId} className="flex-1" style={{ minHeight: 0, height: "100%" }} />;
+}
+
+function timeAgo(iso: string) {
+  const diff = (Date.now() - new Date(iso).getTime()) / 1000;
+  if (diff < 60) return "à l'instant";
+  if (diff < 3600) return `il y a ${Math.floor(diff / 60)} min`;
+  if (diff < 86400) return `il y a ${Math.floor(diff / 3600)} h`;
+  return `il y a ${Math.floor(diff / 86400)} j`;
+}
