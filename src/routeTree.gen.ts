@@ -11,9 +11,15 @@
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as UrgencesRouteImport } from './routes/urgences'
 import { Route as SignalerRouteImport } from './routes/signaler'
+import { Route as ProfilRouteImport } from './routes/profil'
+import { Route as OnboardingRouteImport } from './routes/onboarding'
 import { Route as FilRouteImport } from './routes/fil'
+import { Route as CarteRouteImport } from './routes/carte'
 import { Route as AuthRouteImport } from './routes/auth'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as AdminIndexRouteImport } from './routes/admin/index'
+import { Route as AdminSignalementsRouteImport } from './routes/admin/signalements'
+import { Route as AdminAlertesRouteImport } from './routes/admin/alertes'
 
 const UrgencesRoute = UrgencesRouteImport.update({
   id: '/urgences',
@@ -25,9 +31,24 @@ const SignalerRoute = SignalerRouteImport.update({
   path: '/signaler',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ProfilRoute = ProfilRouteImport.update({
+  id: '/profil',
+  path: '/profil',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const OnboardingRoute = OnboardingRouteImport.update({
+  id: '/onboarding',
+  path: '/onboarding',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const FilRoute = FilRouteImport.update({
   id: '/fil',
   path: '/fil',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const CarteRoute = CarteRouteImport.update({
+  id: '/carte',
+  path: '/carte',
   getParentRoute: () => rootRouteImport,
 } as any)
 const AuthRoute = AuthRouteImport.update({
@@ -40,43 +61,116 @@ const IndexRoute = IndexRouteImport.update({
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AdminIndexRoute = AdminIndexRouteImport.update({
+  id: '/admin/',
+  path: '/admin/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AdminSignalementsRoute = AdminSignalementsRouteImport.update({
+  id: '/admin/signalements',
+  path: '/admin/signalements',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AdminAlertesRoute = AdminAlertesRouteImport.update({
+  id: '/admin/alertes',
+  path: '/admin/alertes',
+  getParentRoute: () => rootRouteImport,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/auth': typeof AuthRoute
+  '/carte': typeof CarteRoute
   '/fil': typeof FilRoute
+  '/onboarding': typeof OnboardingRoute
+  '/profil': typeof ProfilRoute
   '/signaler': typeof SignalerRoute
   '/urgences': typeof UrgencesRoute
+  '/admin/alertes': typeof AdminAlertesRoute
+  '/admin/signalements': typeof AdminSignalementsRoute
+  '/admin/': typeof AdminIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/auth': typeof AuthRoute
+  '/carte': typeof CarteRoute
   '/fil': typeof FilRoute
+  '/onboarding': typeof OnboardingRoute
+  '/profil': typeof ProfilRoute
   '/signaler': typeof SignalerRoute
   '/urgences': typeof UrgencesRoute
+  '/admin/alertes': typeof AdminAlertesRoute
+  '/admin/signalements': typeof AdminSignalementsRoute
+  '/admin': typeof AdminIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/auth': typeof AuthRoute
+  '/carte': typeof CarteRoute
   '/fil': typeof FilRoute
+  '/onboarding': typeof OnboardingRoute
+  '/profil': typeof ProfilRoute
   '/signaler': typeof SignalerRoute
   '/urgences': typeof UrgencesRoute
+  '/admin/alertes': typeof AdminAlertesRoute
+  '/admin/signalements': typeof AdminSignalementsRoute
+  '/admin/': typeof AdminIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/auth' | '/fil' | '/signaler' | '/urgences'
+  fullPaths:
+    | '/'
+    | '/auth'
+    | '/carte'
+    | '/fil'
+    | '/onboarding'
+    | '/profil'
+    | '/signaler'
+    | '/urgences'
+    | '/admin/alertes'
+    | '/admin/signalements'
+    | '/admin/'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/auth' | '/fil' | '/signaler' | '/urgences'
-  id: '__root__' | '/' | '/auth' | '/fil' | '/signaler' | '/urgences'
+  to:
+    | '/'
+    | '/auth'
+    | '/carte'
+    | '/fil'
+    | '/onboarding'
+    | '/profil'
+    | '/signaler'
+    | '/urgences'
+    | '/admin/alertes'
+    | '/admin/signalements'
+    | '/admin'
+  id:
+    | '__root__'
+    | '/'
+    | '/auth'
+    | '/carte'
+    | '/fil'
+    | '/onboarding'
+    | '/profil'
+    | '/signaler'
+    | '/urgences'
+    | '/admin/alertes'
+    | '/admin/signalements'
+    | '/admin/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AuthRoute: typeof AuthRoute
+  CarteRoute: typeof CarteRoute
   FilRoute: typeof FilRoute
+  OnboardingRoute: typeof OnboardingRoute
+  ProfilRoute: typeof ProfilRoute
   SignalerRoute: typeof SignalerRoute
   UrgencesRoute: typeof UrgencesRoute
+  AdminAlertesRoute: typeof AdminAlertesRoute
+  AdminSignalementsRoute: typeof AdminSignalementsRoute
+  AdminIndexRoute: typeof AdminIndexRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -95,11 +189,32 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof SignalerRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/profil': {
+      id: '/profil'
+      path: '/profil'
+      fullPath: '/profil'
+      preLoaderRoute: typeof ProfilRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/onboarding': {
+      id: '/onboarding'
+      path: '/onboarding'
+      fullPath: '/onboarding'
+      preLoaderRoute: typeof OnboardingRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/fil': {
       id: '/fil'
       path: '/fil'
       fullPath: '/fil'
       preLoaderRoute: typeof FilRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/carte': {
+      id: '/carte'
+      path: '/carte'
+      fullPath: '/carte'
+      preLoaderRoute: typeof CarteRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/auth': {
@@ -116,15 +231,42 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/admin/': {
+      id: '/admin/'
+      path: '/admin'
+      fullPath: '/admin/'
+      preLoaderRoute: typeof AdminIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/admin/signalements': {
+      id: '/admin/signalements'
+      path: '/admin/signalements'
+      fullPath: '/admin/signalements'
+      preLoaderRoute: typeof AdminSignalementsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/admin/alertes': {
+      id: '/admin/alertes'
+      path: '/admin/alertes'
+      fullPath: '/admin/alertes'
+      preLoaderRoute: typeof AdminAlertesRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AuthRoute: AuthRoute,
+  CarteRoute: CarteRoute,
   FilRoute: FilRoute,
+  OnboardingRoute: OnboardingRoute,
+  ProfilRoute: ProfilRoute,
   SignalerRoute: SignalerRoute,
   UrgencesRoute: UrgencesRoute,
+  AdminAlertesRoute: AdminAlertesRoute,
+  AdminSignalementsRoute: AdminSignalementsRoute,
+  AdminIndexRoute: AdminIndexRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
