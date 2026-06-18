@@ -16,10 +16,13 @@ import { Route as OnboardingRouteImport } from './routes/onboarding'
 import { Route as FilRouteImport } from './routes/fil'
 import { Route as CarteRouteImport } from './routes/carte'
 import { Route as AuthRouteImport } from './routes/auth'
+import { Route as ActualitesRouteImport } from './routes/actualites'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as AdminIndexRouteImport } from './routes/admin/index'
 import { Route as AdminSignalementsRouteImport } from './routes/admin/signalements'
 import { Route as AdminAlertesRouteImport } from './routes/admin/alertes'
+import { Route as ServicesIndexRouteImport } from './routes/services/index'
+import { Route as ServicesSignalementIdRouteImport } from './routes/services/signalement.$id'
 
 const UrgencesRoute = UrgencesRouteImport.update({
   id: '/urgences',
@@ -76,6 +79,21 @@ const AdminAlertesRoute = AdminAlertesRouteImport.update({
   path: '/admin/alertes',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ActualitesRoute = ActualitesRouteImport.update({
+  id: '/actualites',
+  path: '/actualites',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ServicesIndexRoute = ServicesIndexRouteImport.update({
+  id: '/services/',
+  path: '/services',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ServicesSignalementIdRoute = ServicesSignalementIdRouteImport.update({
+  id: '/services/signalement/$id',
+  path: '/services/signalement/$id',
+  getParentRoute: () => rootRouteImport,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -86,9 +104,12 @@ export interface FileRoutesByFullPath {
   '/profil': typeof ProfilRoute
   '/signaler': typeof SignalerRoute
   '/urgences': typeof UrgencesRoute
+  '/actualites': typeof ActualitesRoute
   '/admin/alertes': typeof AdminAlertesRoute
   '/admin/signalements': typeof AdminSignalementsRoute
   '/admin/': typeof AdminIndexRoute
+  '/services/': typeof ServicesIndexRoute
+  '/services/signalement/$id': typeof ServicesSignalementIdRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -99,9 +120,12 @@ export interface FileRoutesByTo {
   '/profil': typeof ProfilRoute
   '/signaler': typeof SignalerRoute
   '/urgences': typeof UrgencesRoute
+  '/actualites': typeof ActualitesRoute
   '/admin/alertes': typeof AdminAlertesRoute
   '/admin/signalements': typeof AdminSignalementsRoute
   '/admin': typeof AdminIndexRoute
+  '/services': typeof ServicesIndexRoute
+  '/services/signalement/$id': typeof ServicesSignalementIdRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -113,9 +137,12 @@ export interface FileRoutesById {
   '/profil': typeof ProfilRoute
   '/signaler': typeof SignalerRoute
   '/urgences': typeof UrgencesRoute
+  '/actualites': typeof ActualitesRoute
   '/admin/alertes': typeof AdminAlertesRoute
   '/admin/signalements': typeof AdminSignalementsRoute
   '/admin/': typeof AdminIndexRoute
+  '/services/': typeof ServicesIndexRoute
+  '/services/signalement/$id': typeof ServicesSignalementIdRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -128,9 +155,12 @@ export interface FileRouteTypes {
     | '/profil'
     | '/signaler'
     | '/urgences'
+    | '/actualites'
     | '/admin/alertes'
     | '/admin/signalements'
     | '/admin/'
+    | '/services/'
+    | '/services/signalement/$id'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -141,9 +171,12 @@ export interface FileRouteTypes {
     | '/profil'
     | '/signaler'
     | '/urgences'
+    | '/actualites'
     | '/admin/alertes'
     | '/admin/signalements'
     | '/admin'
+    | '/services'
+    | '/services/signalement/$id'
   id:
     | '__root__'
     | '/'
@@ -154,9 +187,12 @@ export interface FileRouteTypes {
     | '/profil'
     | '/signaler'
     | '/urgences'
+    | '/actualites'
     | '/admin/alertes'
     | '/admin/signalements'
     | '/admin/'
+    | '/services/'
+    | '/services/signalement/$id'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -168,9 +204,12 @@ export interface RootRouteChildren {
   ProfilRoute: typeof ProfilRoute
   SignalerRoute: typeof SignalerRoute
   UrgencesRoute: typeof UrgencesRoute
+  ActualitesRoute: typeof ActualitesRoute
   AdminAlertesRoute: typeof AdminAlertesRoute
   AdminSignalementsRoute: typeof AdminSignalementsRoute
   AdminIndexRoute: typeof AdminIndexRoute
+  ServicesIndexRoute: typeof ServicesIndexRoute
+  ServicesSignalementIdRoute: typeof ServicesSignalementIdRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -227,57 +266,4 @@ declare module '@tanstack/react-router' {
     '/': {
       id: '/'
       path: '/'
-      fullPath: '/'
-      preLoaderRoute: typeof IndexRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/admin/': {
-      id: '/admin/'
-      path: '/admin'
-      fullPath: '/admin/'
-      preLoaderRoute: typeof AdminIndexRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/admin/signalements': {
-      id: '/admin/signalements'
-      path: '/admin/signalements'
-      fullPath: '/admin/signalements'
-      preLoaderRoute: typeof AdminSignalementsRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/admin/alertes': {
-      id: '/admin/alertes'
-      path: '/admin/alertes'
-      fullPath: '/admin/alertes'
-      preLoaderRoute: typeof AdminAlertesRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-  }
-}
-
-const rootRouteChildren: RootRouteChildren = {
-  IndexRoute: IndexRoute,
-  AuthRoute: AuthRoute,
-  CarteRoute: CarteRoute,
-  FilRoute: FilRoute,
-  OnboardingRoute: OnboardingRoute,
-  ProfilRoute: ProfilRoute,
-  SignalerRoute: SignalerRoute,
-  UrgencesRoute: UrgencesRoute,
-  AdminAlertesRoute: AdminAlertesRoute,
-  AdminSignalementsRoute: AdminSignalementsRoute,
-  AdminIndexRoute: AdminIndexRoute,
-}
-export const routeTree = rootRouteImport
-  ._addFileChildren(rootRouteChildren)
-  ._addFileTypes<FileRouteTypes>()
-
-import type { getRouter } from './router.tsx'
-import type { startInstance } from './start.ts'
-declare module '@tanstack/react-start' {
-  interface Register {
-    ssr: true
-    router: Awaited<ReturnType<typeof getRouter>>
-    config: Awaited<ReturnType<typeof startInstance.getOptions>>
-  }
-}
+      fullPat

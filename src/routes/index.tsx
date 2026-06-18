@@ -8,6 +8,8 @@ import {
   ShieldAlert,
   Megaphone,
   ChevronRight,
+  Bell,
+  Building2,
 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { SosButton } from "@/components/SosButton";
@@ -115,6 +117,8 @@ function Home() {
         <QuickAction to="/urgences" icon={PhoneCall} label="Urgences" tone="primary" />
         <QuickAction to="/signaler" icon={AlertCircle} label="Signaler" tone="warning" />
         <QuickAction to="/fil" icon={Newspaper} label="Quartier" tone="muted" />
+        <QuickAction to="/actualites" icon={Bell} label="Actualités" tone="muted" />
+        <QuickAction to="/services/" icon={Building2} label="Services" tone="muted" />
       </section>
 
       {/* Alertes mairie */}
@@ -187,11 +191,4 @@ function QuickAction({
   return (
     <Link
       to={to}
-      className={`flex flex-col items-center justify-center gap-2 rounded-2xl p-4 shadow-card transition-transform active:scale-[0.97] ${toneCls}`}
-    >
-      <Icon className="h-6 w-6" />
-      <span className="text-sm font-semibold">{label}</span>
-      <ChevronRight className="h-3 w-3 opacity-50" />
-    </Link>
-  );
-}
+      className={`flex flex-col items-center justify-center gap-2 rounded-2xl p-4 shadow-card transition-transform active:scale-[
