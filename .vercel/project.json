@@ -1,0 +1,9 @@
+{
+  "projectId": "",
+  "orgId": "",
+  "name": "vigiecity-community-guardian",
+  "deploymentMetadata": {
+    "deploymentType": "npm",
+    "framework": "vite"
+  }
+}
