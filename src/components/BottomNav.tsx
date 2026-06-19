@@ -10,7 +10,7 @@ const baseItems = [
   { to: '/', label: 'Accueil', icon: Home },
   { to: '/urgences', label: 'Urgences', icon: PhoneCall },
   { to: '/signaler', label: 'Signaler', icon: AlertCircle },
-  { to: '/fil', label: 'Quartier', icon: Newspaper, badge: true },
+  { to: '/fil', label: 'Ma Ville', icon: Newspaper, badge: true },
   { to: '/carte', label: 'Carte', icon: Map },
   { to: '/profil', label: 'Profil', icon: User },
 ] as const;
