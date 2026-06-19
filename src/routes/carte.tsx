@@ -1,7 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useEffect, useRef, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
-import { Loader2, Map as MapIcon } from "lucide-react";
+import { Loader2, Map as MapIcon, Crosshair } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { categoryLabel, categoryIcon, REPORT_CATEGORIES, SEVERITY_OPTIONS } from "@/lib/categories";
 
@@ -93,6 +93,13 @@ function CartePage() {
         <div className="flex items-center gap-2">
           <MapIcon className="h-5 w-5 text-primary" />
           <h1 className="text-lg font-bold">Carte du quartier</h1>
+          <button
+            onClick={tracking ? stopTracking : startTracking}
+            title={tracking ? "Arrêter le suivi" : "Me localiser"}
+            className={`ml-auto flex h-8 w-8 items-center justify-center rounded-full border transition-colors ${tracking ? "border-primary bg-primary text-primary-foreground" : "border-border bg-card text-muted-foreground hover:text-primary"}`}
+          >
+            <Crosshair className={`h-4 w-4 ${tracking ? "animate-pulse" : ""}`} />
+          </button>
           {reports && (
             <span className="rounded-full bg-muted px-2 py-0.5 text-xs text-muted-foreground">
               {filteredReports.length}/{reports.length}
@@ -138,7 +145,7 @@ function CartePage() {
           <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
         </div>
       ) : (
-        <LeafletMap reports={filteredReports} allReports={reports ?? []} />
+        <LeafletMap reports={filteredReports} allReports={reports ?? []} userPos={userPos} />
       )}
     </div>
   );
@@ -171,12 +178,13 @@ function FilterChip({
 
 // ── Leaflet Map ────────────────────────────────────────────────────────────────
 // Stable mount: tiles loaded once, markers updated without re-centering.
-function LeafletMap({ reports, allReports }: { reports: Report[]; allReports: Report[] }) {
+function LeafletMap({ reports, allReports, userPos }: { reports: Report[]; allReports: Report[]; userPos?: [number, number] | null }) {
   const mapId = "vigie-leaflet-map";
   const mapRef = useRef<any>(null);          // L.Map
   const layerRef = useRef<any>(null);        // L.LayerGroup
   const centeredRef = useRef(false);
   const LRef = useRef<any>(null);
+  const userMarkerRef = useRef<any>(null);
 
   // Mount: init map tile layer
   useEffect(() => {
@@ -276,6 +284,31 @@ function LeafletMap({ reports, allReports }: { reports: Report[]; allReports: Re
 
     updateMarkers();
   }, [reports, allReports]);
+
+  // Marqueur position utilisateur
+  useEffect(() => {
+    if (!mapRef.current || !LRef.current) return;
+    const L = LRef.current;
+    if (userMarkerRef.current) { userMarkerRef.current.remove(); userMarkerRef.current = null; }
+    if (!userPos) return;
+
+    const userIcon = L.divIcon({
+      className: "",
+      html: `<div style="
+        width:20px;height:20px;border-radius:50%;
+        background:rgba(37,99,235,0.9);border:3px solid white;
+        box-shadow:0 0 0 4px rgba(37,99,235,0.3);
+      "></div>`,
+      iconSize: [20, 20],
+      iconAnchor: [10, 10],
+    });
+
+    userMarkerRef.current = L.marker(userPos, { icon: userIcon, zIndexOffset: 1000 })
+      .bindPopup("<b>Votre position</b>")
+      .addTo(mapRef.current);
+
+    mapRef.current.setView(userPos, Math.max(mapRef.current.getZoom(), 15));
+  }, [userPos]);
 
   return <div id={mapId} className="flex-1" style={{ minHeight: 0, height: "100%" }} />;
 }

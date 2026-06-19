@@ -52,11 +52,102 @@ function ProfilPage() {
       </header>
       <IdentitySection userId={userId} email={email} qc={qc} />
       <CommuneSection userId={userId} qc={qc} navigate={navigate} />
+      <AddressSection userId={userId} qc={qc} />
       <VoisinVigilantSection userId={userId} qc={qc} />
       <PushNotificationsSection />
       <TrustedContactsSection userId={userId} />
       <SignOutSection navigate={navigate} />
     </div>
+  );
+}
+
+// ── Adresse ───────────────────────────────────────────────────────────────────
+function AddressSection({ userId, qc }: { userId: string; qc: ReturnType<typeof useQueryClient> }) {
+  const { data: addr } = useQuery({
+    queryKey: ['profile-address', userId],
+    queryFn: async () => {
+      const { data } = await (supabase as any).from('profiles')
+        .select('address, postal_code, city').eq('id', userId).single();
+      return data as { address: string | null; postal_code: string | null; city: string | null } | null;
+    },
+  });
+
+  const [address, setAddress] = useState('');
+  const [postalCode, setPostalCode] = useState('');
+  const [city, setCity] = useState('');
+
+  useEffect(() => {
+    if (addr) {
+      setAddress(addr.address ?? '');
+      setPostalCode(addr.postal_code ?? '');
+      setCity(addr.city ?? '');
+    }
+  }, [addr]);
+
+  const save = useMutation({
+    mutationFn: async () => {
+      const { error } = await (supabase as any).from('profiles')
+        .update({ address: address.trim() || null, postal_code: postalCode.trim() || null, city: city.trim() || null })
+        .eq('id', userId);
+      if (error) throw error;
+    },
+    onSuccess: () => { qc.invalidateQueries({ queryKey: ['profile-address', userId] }); toast.success('Adresse mise à jour.'); },
+    onError: (e: Error) => toast.error(e.message),
+  });
+
+  const isDirty = address !== (addr?.address ?? '') || postalCode !== (addr?.postal_code ?? '') || city !== (addr?.city ?? '');
+
+  return (
+    <section className="rounded-2xl border border-border bg-card p-4 shadow-card space-y-3">
+      <h2 className="flex items-center gap-2 text-sm font-semibold uppercase tracking-wider text-muted-foreground">
+        <MapPin className="h-4 w-4" /> Mes coordonnées
+      </h2>
+      <p className="text-xs text-muted-foreground">
+        Utilisées par les services en cas d'intervention ou pour un contact direct.
+      </p>
+      <div className="space-y-2">
+        <div>
+          <label className="text-xs text-muted-foreground">Adresse</label>
+          <input
+            value={address}
+            onChange={(e) => setAddress(e.target.value)}
+            placeholder="12 rue des Lilas"
+            className="mt-1 w-full rounded-xl border border-input bg-background p-3 text-sm outline-none ring-ring focus:ring-2"
+          />
+        </div>
+        <div className="flex gap-2">
+          <div className="w-28">
+            <label className="text-xs text-muted-foreground">Code postal</label>
+            <input
+              value={postalCode}
+              onChange={(e) => setPostalCode(e.target.value)}
+              placeholder="66000"
+              inputMode="numeric"
+              maxLength={5}
+              className="mt-1 w-full rounded-xl border border-input bg-background p-3 text-sm outline-none ring-ring focus:ring-2"
+            />
+          </div>
+          <div className="flex-1">
+            <label className="text-xs text-muted-foreground">Ville</label>
+            <input
+              value={city}
+              onChange={(e) => setCity(e.target.value)}
+              placeholder="Perpignan"
+              className="mt-1 w-full rounded-xl border border-input bg-background p-3 text-sm outline-none ring-ring focus:ring-2"
+            />
+          </div>
+        </div>
+      </div>
+      <button
+        type="button"
+        disabled={save.isPending || !isDirty}
+        onClick={() => save.mutate()}
+        className="flex items-center gap-2 rounded-xl bg-primary px-4 py-2 text-sm font-medium text-primary-foreground disabled:opacity-40"
+      >
+        {save.isPending ? <Loader2 className="h-4 w-4 animate-spin" /> : <Save className="h-4 w-4" />}
+        Enregistrer
+      </button>
+    </section>
   );
 }
 
