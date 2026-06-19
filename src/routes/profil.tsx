@@ -258,12 +258,12 @@ function VoisinVigilantSection({ userId, qc }: { userId: string; qc: ReturnType<
           type="button"
           onClick={() => toggle.mutate(!active)}
           disabled={toggle.isPending}
-          className={`relative h-7 w-12 rounded-full transition-colors ${active ? "bg-primary" : "bg-muted"}`}
+          className={`relative h-7 w-12 overflow-hidden rounded-full transition-colors ${active ? "bg-primary" : "bg-muted"}`}
           aria-checked={active}
           role="switch"
         >
           <span
-            className={`absolute top-0.5 h-6 w-6 rounded-full bg-white shadow transition-transform ${active ? "translate-x-5" : "translate-x-0.5"}`}
+            className={`absolute top-0.5 left-0.5 h-6 w-6 rounded-full bg-white shadow transition-transform ${active ? "translate-x-5" : "translate-x-0"}`}
           />
         </button>
       </div>
@@ -312,12 +312,12 @@ function PushNotificationsSection() {
           <button
             type="button"
             onClick={state === "subscribed" ? unsubscribe : subscribe}
-            className={`relative h-7 w-12 rounded-full transition-colors ${state === "subscribed" ? "bg-primary" : "bg-muted"}`}
+            className={`relative h-7 w-12 overflow-hidden rounded-full transition-colors ${state === "subscribed" ? "bg-primary" : "bg-muted"}`}
             role="switch"
             aria-checked={state === "subscribed"}
           >
             <span
-              className={`absolute top-0.5 h-6 w-6 rounded-full bg-white shadow transition-transform ${state === "subscribed" ? "translate-x-5" : "translate-x-0.5"}`}
+              className={`absolute top-0.5 left-0.5 h-6 w-6 rounded-full bg-white shadow transition-transform ${state === "subscribed" ? "translate-x-5" : "translate-x-0"}`}
             />
           </button>
         )}
