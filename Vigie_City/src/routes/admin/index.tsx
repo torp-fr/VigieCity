@@ -39,9 +39,14 @@ function AdminIndex() {
     return (
       <div className="flex flex-col items-center justify-center px-4 pt-20 text-center">
         <Lock className="mx-auto h-10 w-10 text-muted-foreground" />
-        <h1 className="mt-3 text-xl font-semibold">Accès réservé</h1>
+        <h1 className="mt-3 text-xl font-semibold">Droits modérateur requis</h1>
         <p className="mt-2 text-sm text-muted-foreground">
-          Cette section est réservée aux modérateurs et administrateurs.
+          Votre compte n'a pas encore les droits modérateur. Contactez l'administrateur
+          de votre commune ou Baptiste à{" "}
+          <a href="mailto:admin@vigiecity.fr" className="underline hover:text-foreground">
+            admin@vigiecity.fr
+          </a>
+          .
         </p>
         <Link to="/" className="mt-5 inline-flex items-center gap-2 rounded-xl bg-primary px-5 py-3 text-sm font-semibold text-primary-foreground">
           Retour à l'accueil

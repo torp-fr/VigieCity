@@ -2,7 +2,7 @@ import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { z } from "zod";
-import { Camera, MapPin, Send, Loader2, ShieldOff } from "lucide-react";
+import { Camera, MapPin, Send, Loader2, ShieldOff, CheckCircle2, XCircle, Clock } from "lucide-react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { REPORT_CATEGORIES, SEVERITY_OPTIONS, type ReportCategoryValue } from "@/lib/categories";
@@ -34,6 +34,16 @@ const reportSchema = z.object({
   approximate_address: z.string().trim().max(200).optional(),
 });
 
+type GpsStatus = "idle" | "loading" | "ok" | "denied";
+
+async function hashFile(file: File): Promise<string> {
+  const buf = await file.arrayBuffer();
+  const digest = await crypto.subtle.digest("SHA-256", buf);
+  return Array.from(new Uint8Array(digest))
+    .map((b) => b.toString(16).padStart(2, "0"))
+    .join("");
+}
+
 function ReportPage() {
   const navigate = useNavigate();
   const qc = useQueryClient();
@@ -46,8 +56,10 @@ function ReportPage() {
   const [address, setAddress] = useState("");
   const [isAnonymous, setIsAnonymous] = useState(false);
   const [coords, setCoords] = useState<{ lat: number; lng: number } | null>(null);
+  const [gpsStatus, setGpsStatus] = useState<GpsStatus>("idle");
   const [files, setFiles] = useState<File[]>([]);
 
+  // Auth check
   useEffect(() => {
     supabase.auth.getUser().then(({ data }) => {
       setAuthed(!!data.user);
@@ -55,17 +67,36 @@ function ReportPage() {
     });
   }, []);
 
-  function getLocation() {
+  // Auto-trigger GPS at mount (RGPD : demande navigateur, silencieux si refusé)
+  useEffect(() => {
+    if (typeof navigator === "undefined" || !navigator.geolocation) return;
+    setGpsStatus("loading");
+    navigator.geolocation.getCurrentPosition(
+      (pos) => {
+        setCoords({ lat: pos.coords.latitude, lng: pos.coords.longitude });
+        setGpsStatus("ok");
+      },
+      () => setGpsStatus("denied"),
+      { enableHighAccuracy: true, timeout: 8000 },
+    );
+  }, []);
+
+  function retryGps() {
     if (typeof navigator === "undefined" || !navigator.geolocation) {
       toast.error("Géolocalisation indisponible sur cet appareil.");
       return;
     }
+    setGpsStatus("loading");
     navigator.geolocation.getCurrentPosition(
       (pos) => {
         setCoords({ lat: pos.coords.latitude, lng: pos.coords.longitude });
+        setGpsStatus("ok");
         toast.success("Position enregistrée.");
       },
-      () => toast.error("Impossible d'obtenir votre position."),
+      () => {
+        setGpsStatus("denied");
+        toast.error("Impossible d'obtenir votre position. Vérifiez les permissions du navigateur.");
+      },
       { enableHighAccuracy: true, timeout: 8000 },
     );
   }
@@ -88,15 +119,19 @@ function ReportPage() {
         .eq("id", userId)
         .single();
 
-      // Upload media
+      // Upload media with SHA-256 dedup
       const mediaPaths: string[] = [];
       for (const file of files) {
-        const ext = file.name.split(".").pop() || "bin";
-        const path = `${userId}/${crypto.randomUUID()}.${ext}`;
+        const [hash, ext] = await Promise.all([
+          hashFile(file),
+          Promise.resolve(file.name.split(".").pop() || "bin"),
+        ]);
+        const path = `${userId}/${hash}.${ext}`;
         const { error } = await supabase.storage
           .from("report-media")
-          .upload(path, file, { contentType: file.type });
-        if (error) throw error;
+          .upload(path, file, { contentType: file.type, upsert: false });
+        // upsert: false → skip if identical file already exists (same hash = same content)
+        if (error && error.message !== "The resource already exists") throw error;
         mediaPaths.push(path);
       }
 
@@ -219,13 +254,42 @@ function ReportPage() {
         <Label>Localisation</Label>
         <button
           type="button"
-          onClick={getLocation}
-          className="mt-2 flex w-full items-center justify-center gap-2 rounded-xl border border-border bg-card p-3 text-sm font-medium"
+          onClick={gpsStatus === "denied" ? retryGps : undefined}
+          disabled={gpsStatus === "loading" || gpsStatus === "ok"}
+          className={`mt-2 flex w-full items-center justify-center gap-2 rounded-xl border p-3 text-sm font-medium transition ${
+            gpsStatus === "ok"
+              ? "border-success bg-success/10 text-success"
+              : gpsStatus === "denied"
+                ? "border-destructive bg-destructive/10 text-destructive"
+                : gpsStatus === "loading"
+                  ? "border-border bg-card text-muted-foreground"
+                  : "border-border bg-card text-foreground"
+          }`}
         >
-          <MapPin className="h-4 w-4" />
-          {coords
-            ? `Position : ${coords.lat.toFixed(4)}, ${coords.lng.toFixed(4)}`
-            : "Utiliser ma position GPS"}
+          {gpsStatus === "ok" && (
+            <>
+              <CheckCircle2 className="h-4 w-4" />
+              Position : {coords!.lat.toFixed(4)}, {coords!.lng.toFixed(4)}
+            </>
+          )}
+          {gpsStatus === "loading" && (
+            <>
+              <Loader2 className="h-4 w-4 animate-spin" />
+              Localisation en cours…
+            </>
+          )}
+          {gpsStatus === "denied" && (
+            <>
+              <XCircle className="h-4 w-4" />
+              GPS refusé — appuyer pour réessayer
+            </>
+          )}
+          {gpsStatus === "idle" && (
+            <>
+              <Clock className="h-4 w-4" />
+              En attente du GPS…
+            </>
+          )}
         </button>
         <input
           value={address}
@@ -250,8 +314,8 @@ function ReportPage() {
           />
         </label>
         <p className="mt-1 text-xs text-muted-foreground">
-          Pour respecter la vie privée : évitez les visages et plaques d'immatriculation
-          identifiables.
+          ⚠️ RGPD : évitez les visages et plaques d'immatriculation identifiables. Les médias sont
+          chiffrés et accessibles uniquement aux agents de votre commune.
         </p>
       </section>
 
@@ -283,6 +347,13 @@ function ReportPage() {
         )}
         Envoyer le signalement
       </button>
+
+      <p className="pb-2 text-center text-xs text-muted-foreground">
+        Données transmises chiffrées · Conformité RGPD · Voir notre{" "}
+        <Link to="/confidentialite" className="underline">
+          politique de confidentialité
+        </Link>
+      </p>
     </form>
   );
 }
