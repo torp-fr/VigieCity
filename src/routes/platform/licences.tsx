@@ -22,8 +22,8 @@ type License = {
   notes: string | null;
 };
 
-const PLANS = ["free", "starter", "pro", "enterprise"] as const;
-const PLAN_LABELS: Record<string, string> = { free: "Gratuit", starter: "Starter", pro: "Pro", enterprise: "Enterprise" };
+const PLANS = ["trial", "decouverte", "essentiel", "standard", "pro", "intercommunal"] as const;
+const PLAN_LABELS: Record<string, string> = { trial: "Trial 30j", decouverte: "Découverte — 29 €/mois", essentiel: "Essentiel — 49 €/mois", standard: "Standard — 129 €/mois", pro: "Pro — 249 €/mois", intercommunal: "Intercommunal — sur devis" };
 const STATUS_LABELS: Record<string, { label: string; color: string }> = {
   active:    { label: "Actif",     color: "bg-green-500/10 text-green-700 dark:text-green-400 border border-green-500/30" },
   suspended: { label: "Suspendu", color: "bg-warning/10 text-warning-foreground border border-warning/30" },

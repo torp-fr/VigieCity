@@ -11,28 +11,41 @@ type Action = {
 
 export function ActionMenu({ actions }: { actions: Action[] }) {
   const [open, setOpen] = useState(false);
-  const ref = useRef<HTMLDivElement>(null);
+  const [pos, setPos] = useState({ top: 0, right: 0 });
+  const btnRef = useRef<HTMLButtonElement>(null);
 
   useEffect(() => {
-    function h(e: MouseEvent) {
-      if (ref.current && !ref.current.contains(e.target as Node)) setOpen(false);
-    }
-    document.addEventListener('mousedown', h);
-    return () => document.removeEventListener('mousedown', h);
-  }, []);
+    if (!open) return;
+    function close() { setOpen(false); }
+    const t = setTimeout(() => document.addEventListener('mousedown', close), 0);
+    return () => { clearTimeout(t); document.removeEventListener('mousedown', close); };
+  }, [open]);
+
+  function handleOpen(e: React.MouseEvent) {
+    e.stopPropagation();
+    if (!btnRef.current) return;
+    const r = btnRef.current.getBoundingClientRect();
+    setPos({ top: r.bottom + 4, right: window.innerWidth - r.right });
+    setOpen((o) => !o);
+  }
 
   return (
-    <div ref={ref} className="relative shrink-0">
+    <>
       <button
+        ref={btnRef}
         type="button"
-        onClick={(e) => { e.stopPropagation(); setOpen((o) => !o); }}
-        className="flex h-8 w-8 items-center justify-center rounded-lg text-muted-foreground hover:bg-muted transition-colors"
+        onClick={handleOpen}
+        className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg text-muted-foreground hover:bg-muted transition-colors"
         aria-label="Actions"
       >
         <MoreVertical className="h-4 w-4" />
       </button>
       {open && (
-        <div className="absolute right-0 top-9 z-50 min-w-44 rounded-xl border border-border bg-card shadow-xl py-1 animate-in fade-in slide-in-from-top-1 duration-100">
+        <div
+          style={{ position: 'fixed', top: pos.top, right: pos.right, zIndex: 9999 }}
+          className="min-w-44 rounded-xl border border-border bg-card shadow-2xl py-1"
+          onMouseDown={(e) => e.stopPropagation()}
+        >
           {actions.map((a, i) => {
             const Icon = a.icon;
             return (
@@ -54,6 +67,6 @@ export function ActionMenu({ actions }: { actions: Action[] }) {
           })}
         </div>
       )}
-    </div>
+    </>
   );
 }
