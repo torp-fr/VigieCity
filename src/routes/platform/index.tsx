@@ -8,7 +8,7 @@ import {
 import { subDays, formatDistanceToNow } from "date-fns";
 import { fr } from "date-fns/locale";
 
-export const Route = createFileRoute("/platform")({
+export const Route = createFileRoute("/platform/")({
   head: () => ({
     meta: [
       { title: "Platform Admin — VigieCity" },

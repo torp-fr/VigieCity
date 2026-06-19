@@ -15,7 +15,7 @@ const CY              = SIZE / 2;
 const TICK_MS         = 40;    // fréquence de mise à jour de la barre (ms)
 
 // ─── Composant ─────────────────────────────────────────────────────────────────
-export function SosButton() {
+export default function SosButton() {
   const [open, setOpen]               = useState(false);
   const [holdProgress, setHoldProgress] = useState(0);
   const [userId, setUserId]           = useState<string | null>(null);
@@ -83,8 +83,8 @@ export function SosButton() {
       await supabase.from("reports").insert({
         title:       "Alerte SOS",
         description: "Alerte déclenchée via le bouton SOS.",
-        category:    "autre",
-        severity:    "urgent",
+        category:    "urgence",
+        severity:    "critical",
         collectivity_id: collectivityId,
         user_id:     userId,
         is_anonymous: false,

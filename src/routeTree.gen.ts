@@ -1,4 +1,4 @@
-/* eslint-disable */
+﻿/* eslint-disable */
 
 // @ts-nocheck
 
@@ -306,6 +306,7 @@ export interface FileRoutesByFullPath {
   '/platform/facturation': typeof PlatformFacturationRoute
   '/platform/modules': typeof PlatformModulesRoute
   '/platform/retention': typeof PlatformRetentionRoute
+  '/platform/plans': typeof PlatformPlansRoute
   '/platform/knowledge': typeof PlatformKnowledgeRoute
 }
 export interface FileRoutesByTo {
@@ -348,6 +349,7 @@ export interface FileRoutesByTo {
   '/platform/facturation': typeof PlatformFacturationRoute
   '/platform/modules': typeof PlatformModulesRoute
   '/platform/retention': typeof PlatformRetentionRoute
+  '/platform/plans': typeof PlatformPlansRoute
   '/platform/knowledge': typeof PlatformKnowledgeRoute
 }
 export interface FileRoutesById {
@@ -391,6 +393,7 @@ export interface FileRoutesById {
   '/platform/facturation': typeof PlatformFacturationRoute
   '/platform/modules': typeof PlatformModulesRoute
   '/platform/retention': typeof PlatformRetentionRoute
+  '/platform/plans': typeof PlatformPlansRoute
   '/platform/knowledge': typeof PlatformKnowledgeRoute
 }
 export interface FileRouteTypes {
@@ -435,6 +438,7 @@ export interface FileRouteTypes {
     | '/platform/facturation'
     | '/platform/modules'
     | '/platform/retention'
+    | '/platform/plans'
     | '/platform/knowledge'
   fileRoutesByTo: FileRoutesByTo
   to:
@@ -477,6 +481,7 @@ export interface FileRouteTypes {
     | '/platform/facturation'
     | '/platform/modules'
     | '/platform/retention'
+    | '/platform/plans'
     | '/platform/knowledge'
   id:
     | '__root__'
@@ -519,6 +524,7 @@ export interface FileRouteTypes {
     | '/platform/facturation'
     | '/platform/modules'
     | '/platform/retention'
+    | '/platform/plans'
     | '/platform/knowledge'
   fileRoutesById: FileRoutesById
 }
@@ -840,6 +846,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof PlatformRetentionRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '\/platform\/plans': {
+      id: '/platform/plans'
+      path: '/platform/plans'
+      fullPath: '/platform/plans'
+      preLoaderRoute: typeof PlatformPlansRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/platform/knowledge': {
       id: '/platform/knowledge'
       path: '/platform/knowledge'
@@ -906,3 +919,4 @@ declare module '@tanstack/react-start' {
     config: Awaited<ReturnType<typeof startInstance.getOptions>>
   }
 }
+

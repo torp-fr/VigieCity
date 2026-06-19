@@ -98,7 +98,7 @@ function ActualitesPage() {
         .order("published_at", { ascending: false })
         .limit(40);
       if (error) throw error;
-      return data as unknown as Publication[];
+      return data as Publication[];
     },
   });
 

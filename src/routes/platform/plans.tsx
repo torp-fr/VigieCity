@@ -30,7 +30,7 @@ function PlansPage() {
   const { data: plans } = useQuery({
     queryKey: ['plans'],
     queryFn: async () => {
-      const { data } = await supabase.from('plans').select('*').order('display_order');
+      const { data } = await (supabase as any).from('plans').select('*').order('display_order');
       return data ?? [];
     },
   });
@@ -38,14 +38,14 @@ function PlansPage() {
   const { data: interco } = useQuery({
     queryKey: ['intercommunal_pricing'],
     queryFn: async () => {
-      const { data } = await supabase.from('intercommunal_pricing').select('*').order('display_order');
+      const { data } = await (supabase as any).from('intercommunal_pricing').select('*').order('display_order');
       return data ?? [];
     },
   });
 
   const updatePlan = useMutation({
     mutationFn: async ({ id, ...vals }: any) => {
-      await supabase.from('plans').update(vals).eq('id', id);
+      await (supabase as any).from('plans').update(vals).eq('id', id);
     },
     onSuccess: () => { qc.invalidateQueries({ queryKey: ['plans'] }); setEditing(null); },
   });
@@ -129,7 +129,7 @@ function PlansPage() {
             <div className="mt-4 flex flex-wrap gap-2">
               {Object.entries(plan.features ?? {}).map(([key, val]) => (
                 <span key={key} className={`flex items-center gap-1 rounded-full px-2.5 py-1 text-xs font-medium ${val ? 'bg-white border text-foreground' : 'bg-white/50 border border-dashed text-muted-foreground line-through'}`}>
-                  {val && <Check className="h-3 w-3 text-emerald-600" />}
+                  {Boolean(val) && <Check className="h-3 w-3 text-emerald-600" />}
                   {FEATURES_LABELS[key] ?? key}
                   {key === 'support' && typeof val === 'string' && ` (${val})`}
                 </span>
