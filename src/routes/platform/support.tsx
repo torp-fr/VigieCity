@@ -67,7 +67,7 @@ function PlatformSupportPage() {
     queryFn: async () => {
       let q = supabase
         .from("support_tickets")
-        .select("id, collectivity_id, subject, message, status, priority, created_by, resolution_notes, created_at, updated_at, collectivities(name), profiles!created_by(display_name)")
+        .select("id, collectivity_id, subject, message, status, priority, created_by, resolution_notes, created_at, updated_at, collectivities(name), profiles!support_tickets_created_by_fkey(display_name)")
         .order("created_at", { ascending: false })
         .limit(100);
       if (filterStatus !== "all") q = q.eq("status", filterStatus);
