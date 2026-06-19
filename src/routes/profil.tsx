@@ -66,9 +66,9 @@ function AddressSection({ userId, qc }: { userId: string; qc: ReturnType<typeof 
   const { data: addr } = useQuery({
     queryKey: ['profile-address', userId],
     queryFn: async () => {
-      const { data } = await (supabase as any).from('profiles')
+      const { data } = await supabase.from('profiles')
         .select('address, postal_code, city').eq('id', userId).single();
-      return data as { address: string | null; postal_code: string | null; city: string | null } | null;
+      return data;
     },
   });
 
@@ -86,7 +86,7 @@ function AddressSection({ userId, qc }: { userId: string; qc: ReturnType<typeof 
 
   const save = useMutation({
     mutationFn: async () => {
-      const { error } = await (supabase as any).from('profiles')
+      const { error } = await supabase.from('profiles')
         .update({ address: address.trim() || null, postal_code: postalCode.trim() || null, city: city.trim() || null })
         .eq('id', userId);
       if (error) throw error;
