@@ -295,4 +295,65 @@ function ReportPage() {
           value={address}
           onChange={(e) => setAddress(e.target.value)}
           placeholder="Adresse approximative (ex : angle rue X / rue Y)"
-       
+          className="mt-2 w-full rounded-xl border border-input bg-card p-3 text-sm outline-none ring-ring focus:ring-2"
+        />
+      </section>
+
+      {/* Médias */}
+      <section>
+        <Label>Photos / vidéos (preuves)</Label>
+        <label className="mt-2 flex w-full cursor-pointer items-center justify-center gap-2 rounded-xl border border-dashed border-border bg-card p-4 text-sm font-medium text-muted-foreground hover:bg-muted">
+          <Camera className="h-4 w-4" />
+          {files.length > 0 ? `${files.length} fichier(s) sélectionné(s)` : "Ajouter des photos"}
+          <input
+            type="file"
+            accept="image/*,video/*"
+            multiple
+            className="hidden"
+            onChange={(e) => setFiles(Array.from(e.target.files ?? []).slice(0, 4))}
+          />
+        </label>
+        <p className="mt-1 text-xs text-muted-foreground">
+          Pour respecter la vie privée : évitez les visages et plaques d'immatriculation identifiables.
+        </p>
+      </section>
+
+      {/* Anonyme */}
+      <label className="flex items-start gap-3 rounded-xl border border-border bg-card p-4">
+        <input
+          type="checkbox"
+          checked={isAnonymous}
+          onChange={(e) => setIsAnonymous(e.target.checked)}
+          className="mt-0.5 h-5 w-5 accent-[oklch(0.36_0.16_258)]"
+        />
+        <div className="text-sm">
+          <p className="font-medium">Envoi anonyme dans le fil de quartier</p>
+          <p className="text-xs text-muted-foreground">
+            Votre identité reste connue de la mairie pour les besoins légaux.
+          </p>
+        </div>
+      </label>
+
+      <button
+        type="submit"
+        disabled={submit.isPending || description.length < 10}
+        className="flex w-full items-center justify-center gap-2 rounded-2xl bg-primary p-4 text-base font-semibold text-primary-foreground shadow-card transition disabled:opacity-50"
+      >
+        {submit.isPending ? (
+          <Loader2 className="h-5 w-5 animate-spin" />
+        ) : (
+          <Send className="h-5 w-5" />
+        )}
+        Envoyer le signalement
+      </button>
+    </form>
+  );
+}
+
+function Label({ children }: { children: React.ReactNode }) {
+  return (
+    <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+      {children}
+    </p>
+  );
+}
