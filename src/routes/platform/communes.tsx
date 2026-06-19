@@ -33,6 +33,10 @@ function PlatformCommunesPage() {
   const navigate = useNavigate();
   const qc = useQueryClient();
   const [isAdmin, setIsAdmin] = useState<boolean | null>(null);
+  const [editId, setEditId] = useState<string | null>(null);
+  const [editName, setEditName] = useState('');
+  const [editPostal, setEditPostal] = useState('');
+  const [editDept, setEditDept] = useState('');
 
   useEffect(() => {
     supabase.auth.getUser().then(async ({ data }) => {
@@ -95,6 +99,17 @@ function PlatformCommunesPage() {
     },
     onSuccess: () => { qc.invalidateQueries({ queryKey: ["platform_communes"] }); toast.success("Commune supprimée."); },
     onError: () => toast.error("Erreur suppression."),
+  });
+
+  const updateCommune = useMutation({
+    mutationFn: async ({ id, name, postal_code, department_code }: { id: string; name: string; postal_code: string; department_code: string }) => {
+      const { error } = await supabase.from("collectivities")
+        .update({ name: name.trim(), postal_code: postal_code.trim() || null, department_code: department_code.trim() || null })
+        .eq("id", id);
+      if (error) throw error;
+    },
+    onSuccess: () => { qc.invalidateQueries({ queryKey: ["platform_communes"] }); setEditId(null); toast.success("Commune mise à jour."); },
+    onError: () => toast.error("Erreur mise à jour."),
   });
 
   if (isAdmin === null) return <div className="flex justify-center pt-20"><Loader2 className="h-6 w-6 animate-spin text-muted-foreground" /></div>;
@@ -165,11 +180,36 @@ function PlatformCommunesPage() {
                   </div>
                 </div>
                 <ActionMenu actions={[
-                  { label: "Modifier", icon: Pencil, onClick: () => toast.info("Modification à venir") },
+                  { label: "Modifier", icon: Pencil, onClick: () => { setEditId(c.id); setEditName(c.name); setEditPostal(c.postal_code ?? ""); setEditDept(c.department_code ?? ""); } },
                   { label: "Suspendre", icon: PauseCircle, onClick: () => suspendCommune.mutate(c.id) },
                   { label: "Supprimer", icon: Trash2, onClick: () => { if (confirm("Supprimer " + c.name + " ?")) deleteCommune.mutate(c.id); }, variant: "danger" },
                 ]} />
               </div>
+              {editId === c.id && (
+                <div className="mt-3 border-t border-border pt-3 space-y-2">
+                  <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Modifier la commune</p>
+                  <input value={editName} onChange={(e) => setEditName(e.target.value)} placeholder="Nom de la commune"
+                    className="w-full rounded-xl border border-input bg-background px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-primary/50" />
+                  <div className="flex gap-2">
+                    <input value={editPostal} onChange={(e) => setEditPostal(e.target.value)} placeholder="Code postal" maxLength={5}
+                      className="w-28 rounded-xl border border-input bg-background px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-primary/50" />
+                    <input value={editDept} onChange={(e) => setEditDept(e.target.value)} placeholder="Dép. (ex: 66)" maxLength={3}
+                      className="flex-1 rounded-xl border border-input bg-background px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-primary/50" />
+                  </div>
+                  <div className="flex gap-2">
+                    <button
+                      disabled={updateCommune.isPending || !editName.trim()}
+                      onClick={() => updateCommune.mutate({ id: c.id, name: editName, postal_code: editPostal, department_code: editDept })}
+                      className="rounded-xl bg-primary px-4 py-2 text-sm font-semibold text-primary-foreground disabled:opacity-50"
+                    >
+                      {updateCommune.isPending ? "Enregistrement…" : "Enregistrer"}
+                    </button>
+                    <button onClick={() => setEditId(null)} className="rounded-xl border border-border px-4 py-2 text-sm font-semibold text-muted-foreground">
+                      Annuler
+                    </button>
+                  </div>
+                </div>
+              )}
             </li>
           ))}
         </ul>

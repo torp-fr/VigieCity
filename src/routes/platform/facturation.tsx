@@ -2,7 +2,7 @@ import { createFileRoute } from "@tanstack/react-router";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useState } from "react";
-import { CreditCard, Plus, Printer, CheckCircle, Clock, XCircle, Euro, Trash2, Send } from "lucide-react";
+import { CreditCard, Plus, Printer, CheckCircle, Clock, XCircle, Euro, Trash2 } from "lucide-react";
 import { ActionMenu } from "@/components/ActionMenu";
 import { format } from "date-fns";
 import { fr } from "date-fns/locale";
@@ -313,7 +313,6 @@ function FacturationPage() {
                       </button>
                       <ActionMenu actions={[
                         { label: "Marquer payée", icon: CheckCircle, onClick: () => markPaid.mutate(inv.id), disabled: inv.status === "paid" || markPaid.isPending },
-                        { label: "Envoyer rappel", icon: Send, onClick: () => toast.info("Rappel envoyé.") },
                         { label: "Supprimer", icon: Trash2, onClick: () => { if (confirm("Supprimer cette facture ?")) deleteInvoice.mutate(inv.id); }, variant: "danger" },
                       ]} />
                     </div>
