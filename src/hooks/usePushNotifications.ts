@@ -27,10 +27,14 @@ export function usePushNotifications() {
       return;
     }
 
-    navigator.serviceWorker.ready.then(async (reg) => {
-      const sub = await reg.pushManager.getSubscription();
-      setState(sub ? "subscribed" : "unsubscribed");
-    }).catch(() => setState("unsubscribed"));
+    // Ne pas utiliser serviceWorker.ready (attend indéfiniment si aucun SW actif)
+    navigator.serviceWorker.getRegistration('/sw.js')
+      .then(async (reg) => {
+        if (!reg) { setState('unsubscribed'); return; }
+        const sub = await reg.pushManager.getSubscription();
+        setState(sub ? 'subscribed' : 'unsubscribed');
+      })
+      .catch(() => setState('unsubscribed'));
   }, []);
 
   const subscribe = useCallback(async () => {

@@ -87,21 +87,10 @@ function AuthPage() {
     toast.success("Déconnecté·e.");
   }
 
-  if (user) {
-    return (
-      <div className="space-y-4 px-4 pt-10 text-center">
-        <ShieldCheck className="mx-auto h-12 w-12 text-primary" />
-        <h1 className="text-xl font-semibold">Vous êtes connecté·e</h1>
-        <p className="text-sm text-muted-foreground">{user.email}</p>
-        <button
-          onClick={handleSignOut}
-          className="mx-auto inline-flex items-center gap-2 rounded-xl border border-border bg-card px-4 py-2 text-sm font-medium"
-        >
-          <LogOut className="h-4 w-4" /> Se déconnecter
-        </button>
-      </div>
-    );
-  }
+  // Déjà connecté → accueil
+  useEffect(() => {
+    if (user) navigate({ to: '/' });
+  }, [user]);
 
   return (
     <div className="space-y-5 px-4 pt-6">
