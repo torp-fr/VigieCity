@@ -59,7 +59,6 @@ function ServicesPage() {
           .eq("id", uid)
           .single();
         setCollectivityId(profile?.collectivity_id ?? null);
-        // @ts-expect-error joined relation
         setCommuneName(profile?.collectivities?.name ?? null);
       }
       setProfileReady(true);

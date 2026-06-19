@@ -85,6 +85,118 @@ export type Database = {
         }
         Relationships: []
       }
+      commune_licenses: {
+        Row: {
+          billing_email: string | null
+          collectivity_id: string
+          created_at: string
+          expires_at: string | null
+          features: Json | null
+          id: string
+          max_users: number | null
+          notes: string | null
+          plan: string
+          started_at: string
+          status: string
+          stripe_customer_id: string | null
+          updated_at: string
+        }
+        Insert: {
+          billing_email?: string | null
+          collectivity_id: string
+          created_at?: string
+          expires_at?: string | null
+          features?: Json | null
+          id?: string
+          max_users?: number | null
+          notes?: string | null
+          plan?: string
+          started_at?: string
+          status?: string
+          stripe_customer_id?: string | null
+          updated_at?: string
+        }
+        Update: {
+          billing_email?: string | null
+          collectivity_id?: string
+          created_at?: string
+          expires_at?: string | null
+          features?: Json | null
+          id?: string
+          max_users?: number | null
+          notes?: string | null
+          plan?: string
+          started_at?: string
+          status?: string
+          stripe_customer_id?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "commune_licenses_collectivity_id_fkey"
+            columns: ["collectivity_id"]
+            isOneToOne: true
+            referencedRelation: "collectivities"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      commune_services: {
+        Row: {
+          address: string | null
+          category: string
+          collectivity_id: string
+          created_at: string
+          description: string | null
+          email: string | null
+          id: string
+          is_active: boolean
+          name: string
+          opening_hours: string | null
+          phone: string | null
+          updated_at: string
+          website: string | null
+        }
+        Insert: {
+          address?: string | null
+          category?: string
+          collectivity_id: string
+          created_at?: string
+          description?: string | null
+          email?: string | null
+          id?: string
+          is_active?: boolean
+          name: string
+          opening_hours?: string | null
+          phone?: string | null
+          updated_at?: string
+          website?: string | null
+        }
+        Update: {
+          address?: string | null
+          category?: string
+          collectivity_id?: string
+          created_at?: string
+          description?: string | null
+          email?: string | null
+          id?: string
+          is_active?: boolean
+          name?: string
+          opening_hours?: string | null
+          phone?: string | null
+          updated_at?: string
+          website?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "commune_services_collectivity_id_fkey"
+            columns: ["collectivity_id"]
+            isOneToOne: false
+            referencedRelation: "collectivities"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       emergency_contacts: {
         Row: {
           category: string
@@ -135,6 +247,89 @@ export type Database = {
           },
         ]
       }
+      invoices: {
+        Row: {
+          amount: number
+          collectivity_id: string
+          created_at: string
+          description: string | null
+          due_at: string | null
+          id: string
+          issued_at: string
+          paid_at: string | null
+          status: string
+          stripe_payment_intent_id: string | null
+        }
+        Insert: {
+          amount: number
+          collectivity_id: string
+          created_at?: string
+          description?: string | null
+          due_at?: string | null
+          id?: string
+          issued_at?: string
+          paid_at?: string | null
+          status?: string
+          stripe_payment_intent_id?: string | null
+        }
+        Update: {
+          amount?: number
+          collectivity_id?: string
+          created_at?: string
+          description?: string | null
+          due_at?: string | null
+          id?: string
+          issued_at?: string
+          paid_at?: string | null
+          status?: string
+          stripe_payment_intent_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "invoices_collectivity_id_fkey"
+            columns: ["collectivity_id"]
+            isOneToOne: false
+            referencedRelation: "collectivities"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      knowledge_base: {
+        Row: {
+          author_id: string | null
+          category: string
+          content: string
+          created_at: string
+          id: string
+          is_published: boolean
+          tags: string[] | null
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          author_id?: string | null
+          category?: string
+          content: string
+          created_at?: string
+          id?: string
+          is_published?: boolean
+          tags?: string[] | null
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          author_id?: string | null
+          category?: string
+          content?: string
+          created_at?: string
+          id?: string
+          is_published?: boolean
+          tags?: string[] | null
+          title?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       profiles: {
         Row: {
           collectivity_id: string | null
@@ -172,6 +367,134 @@ export type Database = {
             columns: ["collectivity_id"]
             isOneToOne: false
             referencedRelation: "collectivities"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      publications: {
+        Row: {
+          category: string
+          collectivity_id: string
+          content: string
+          created_at: string
+          created_by: string | null
+          expires_at: string | null
+          id: string
+          is_published: boolean
+          published_at: string | null
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          category?: string
+          collectivity_id: string
+          content: string
+          created_at?: string
+          created_by?: string | null
+          expires_at?: string | null
+          id?: string
+          is_published?: boolean
+          published_at?: string | null
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          category?: string
+          collectivity_id?: string
+          content?: string
+          created_at?: string
+          created_by?: string | null
+          expires_at?: string | null
+          id?: string
+          is_published?: boolean
+          published_at?: string | null
+          title?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "publications_collectivity_id_fkey"
+            columns: ["collectivity_id"]
+            isOneToOne: false
+            referencedRelation: "collectivities"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      push_subscriptions: {
+        Row: {
+          auth: string
+          created_at: string
+          endpoint: string
+          id: string
+          p256dh: string
+          user_id: string
+        }
+        Insert: {
+          auth: string
+          created_at?: string
+          endpoint: string
+          id?: string
+          p256dh: string
+          user_id: string
+        }
+        Update: {
+          auth?: string
+          created_at?: string
+          endpoint?: string
+          id?: string
+          p256dh?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      report_routing: {
+        Row: {
+          category: Database["public"]["Enums"]["report_category"]
+          collectivity_id: string
+          contact_email: string | null
+          contact_name: string | null
+          created_at: string
+          id: string
+          is_active: boolean
+          notes: string | null
+          service_id: string | null
+        }
+        Insert: {
+          category: Database["public"]["Enums"]["report_category"]
+          collectivity_id: string
+          contact_email?: string | null
+          contact_name?: string | null
+          created_at?: string
+          id?: string
+          is_active?: boolean
+          notes?: string | null
+          service_id?: string | null
+        }
+        Update: {
+          category?: Database["public"]["Enums"]["report_category"]
+          collectivity_id?: string
+          contact_email?: string | null
+          contact_name?: string | null
+          created_at?: string
+          id?: string
+          is_active?: boolean
+          notes?: string | null
+          service_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "report_routing_collectivity_id_fkey"
+            columns: ["collectivity_id"]
+            isOneToOne: false
+            referencedRelation: "collectivities"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "report_routing_service_id_fkey"
+            columns: ["service_id"]
+            isOneToOne: false
+            referencedRelation: "commune_services"
             referencedColumns: ["id"]
           },
         ]
@@ -278,6 +601,56 @@ export type Database = {
         Relationships: [
           {
             foreignKeyName: "sos_events_collectivity_id_fkey"
+            columns: ["collectivity_id"]
+            isOneToOne: false
+            referencedRelation: "collectivities"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      support_tickets: {
+        Row: {
+          collectivity_id: string | null
+          created_at: string
+          created_by: string | null
+          id: string
+          message: string
+          priority: string
+          resolution_notes: string | null
+          resolved_by: string | null
+          status: string
+          subject: string
+          updated_at: string
+        }
+        Insert: {
+          collectivity_id?: string | null
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          message: string
+          priority?: string
+          resolution_notes?: string | null
+          resolved_by?: string | null
+          status?: string
+          subject: string
+          updated_at?: string
+        }
+        Update: {
+          collectivity_id?: string | null
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          message?: string
+          priority?: string
+          resolution_notes?: string | null
+          resolved_by?: string | null
+          status?: string
+          subject?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "support_tickets_collectivity_id_fkey"
             columns: ["collectivity_id"]
             isOneToOne: false
             referencedRelation: "collectivities"

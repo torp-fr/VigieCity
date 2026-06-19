@@ -46,7 +46,6 @@ function FeedPage() {
           .single();
         const cid = profile?.collectivity_id ?? null;
         setCollectivityId(cid);
-        // @ts-expect-error – joined relation
         setCommuneName(profile?.collectivities?.name ?? null);
       }
       setProfileReady(true);

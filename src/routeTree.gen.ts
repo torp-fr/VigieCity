@@ -17,10 +17,23 @@ import { Route as FilRouteImport } from './routes/fil'
 import { Route as CarteRouteImport } from './routes/carte'
 import { Route as AuthRouteImport } from './routes/auth'
 import { Route as ActualitesRouteImport } from './routes/actualites'
+import { Route as CguRouteImport } from './routes/cgu'
+import { Route as CgsRouteImport } from './routes/cgs'
+import { Route as MentionsLegalesRouteImport } from './routes/mentions-legales'
+import { Route as ConfidentialiteRouteImport } from './routes/confidentialite'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as AdminIndexRouteImport } from './routes/admin/index'
 import { Route as AdminSignalementsRouteImport } from './routes/admin/signalements'
 import { Route as AdminAlertesRouteImport } from './routes/admin/alertes'
+import { Route as AdminSosRouteImport } from './routes/admin/sos'
+import { Route as AdminVoisinsRouteImport } from './routes/admin/voisins'
+import { Route as AdminPublicationsRouteImport } from './routes/admin/publications'
+import { Route as AdminServicesRouteImport } from './routes/admin/services'
+import { Route as AdminRoutageRouteImport } from './routes/admin/routage'
+import { Route as AdminAgentsRouteImport } from './routes/admin/agents'
+import { Route as AdminStatsRouteImport } from './routes/admin/stats'
+import { Route as AdminParametresRouteImport } from './routes/admin/parametres'
+import { Route as AdminUrgencesRouteImport } from './routes/admin/urgences'
 import { Route as ServicesIndexRouteImport } from './routes/services/index'
 import { Route as ServicesSignalementIdRouteImport } from './routes/services/signalement.$id'
 import { Route as PlatformIndexRouteImport } from './routes/platform/index'
@@ -29,19 +42,15 @@ import { Route as PlatformUsersRouteImport } from './routes/platform/users'
 import { Route as PlatformLicencesRouteImport } from './routes/platform/licences'
 import { Route as PlatformStatsRouteImport } from './routes/platform/stats'
 import { Route as PlatformSupportRouteImport } from './routes/platform/support'
-import { Route as MentionsLegalesRouteImport } from './routes/mentions-legales'
-import { Route as ConfidentialiteRouteImport } from './routes/confidentialite'
+import { Route as PlatformOnboardingRouteImport } from './routes/platform/onboarding'
+import { Route as PlatformFeaturesRouteImport } from './routes/platform/features'
+import { Route as PlatformTrialsRouteImport } from './routes/platform/trials'
+import { Route as PlatformFacturationRouteImport } from './routes/platform/facturation'
+import { Route as PlatformModulesRouteImport } from './routes/platform/modules'
+import { Route as PlatformRetentionRouteImport } from './routes/platform/retention'
+import { Route as PlatformKnowledgeRouteImport } from './routes/platform/knowledge'
 
-const MentionsLegalesRoute = MentionsLegalesRouteImport.update({
-  id: '/mentions-legales',
-  path: '/mentions-legales',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const ConfidentialiteRoute = ConfidentialiteRouteImport.update({
-  id: '/confidentialite',
-  path: '/confidentialite',
-  getParentRoute: () => rootRouteImport,
-} as any)
+// ── Root-level routes ─────────────────────────────────────────────────────────
 
 const UrgencesRoute = UrgencesRouteImport.update({
   id: '/urgences',
@@ -78,11 +87,39 @@ const AuthRoute = AuthRouteImport.update({
   path: '/auth',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ActualitesRoute = ActualitesRouteImport.update({
+  id: '/actualites',
+  path: '/actualites',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const CguRoute = CguRouteImport.update({
+  id: '/cgu',
+  path: '/cgu',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const CgsRoute = CgsRouteImport.update({
+  id: '/cgs',
+  path: '/cgs',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const MentionsLegalesRoute = MentionsLegalesRouteImport.update({
+  id: '/mentions-legales',
+  path: '/mentions-legales',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ConfidentialiteRoute = ConfidentialiteRouteImport.update({
+  id: '/confidentialite',
+  path: '/confidentialite',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
+
+// ── Admin routes ──────────────────────────────────────────────────────────────
+
 const AdminIndexRoute = AdminIndexRouteImport.update({
   id: '/admin/',
   path: '/admin/',
@@ -98,11 +135,54 @@ const AdminAlertesRoute = AdminAlertesRouteImport.update({
   path: '/admin/alertes',
   getParentRoute: () => rootRouteImport,
 } as any)
-const ActualitesRoute = ActualitesRouteImport.update({
-  id: '/actualites',
-  path: '/actualites',
+const AdminSosRoute = AdminSosRouteImport.update({
+  id: '/admin/sos',
+  path: '/admin/sos',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AdminVoisinsRoute = AdminVoisinsRouteImport.update({
+  id: '/admin/voisins',
+  path: '/admin/voisins',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AdminPublicationsRoute = AdminPublicationsRouteImport.update({
+  id: '/admin/publications',
+  path: '/admin/publications',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AdminServicesRoute = AdminServicesRouteImport.update({
+  id: '/admin/services',
+  path: '/admin/services',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AdminRoutageRoute = AdminRoutageRouteImport.update({
+  id: '/admin/routage',
+  path: '/admin/routage',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AdminAgentsRoute = AdminAgentsRouteImport.update({
+  id: '/admin/agents',
+  path: '/admin/agents',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AdminStatsRoute = AdminStatsRouteImport.update({
+  id: '/admin/stats',
+  path: '/admin/stats',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AdminParametresRoute = AdminParametresRouteImport.update({
+  id: '/admin/parametres',
+  path: '/admin/parametres',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AdminUrgencesRoute = AdminUrgencesRouteImport.update({
+  id: '/admin/urgences',
+  path: '/admin/urgences',
+  getParentRoute: () => rootRouteImport,
+} as any)
+
+// ── Services routes ───────────────────────────────────────────────────────────
+
 const ServicesIndexRoute = ServicesIndexRouteImport.update({
   id: '/services/',
   path: '/services',
@@ -113,9 +193,12 @@ const ServicesSignalementIdRoute = ServicesSignalementIdRouteImport.update({
   path: '/services/signalement/$id',
   getParentRoute: () => rootRouteImport,
 } as any)
+
+// ── Platform routes ───────────────────────────────────────────────────────────
+
 const PlatformIndexRoute = PlatformIndexRouteImport.update({
   id: '/platform/',
-  path: '/platform',
+  path: '/platform/',
   getParentRoute: () => rootRouteImport,
 } as any)
 const PlatformCommunesRoute = PlatformCommunesRouteImport.update({
@@ -143,6 +226,43 @@ const PlatformSupportRoute = PlatformSupportRouteImport.update({
   path: '/platform/support',
   getParentRoute: () => rootRouteImport,
 } as any)
+const PlatformOnboardingRoute = PlatformOnboardingRouteImport.update({
+  id: '/platform/onboarding',
+  path: '/platform/onboarding',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const PlatformFeaturesRoute = PlatformFeaturesRouteImport.update({
+  id: '/platform/features',
+  path: '/platform/features',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const PlatformTrialsRoute = PlatformTrialsRouteImport.update({
+  id: '/platform/trials',
+  path: '/platform/trials',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const PlatformFacturationRoute = PlatformFacturationRouteImport.update({
+  id: '/platform/facturation',
+  path: '/platform/facturation',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const PlatformModulesRoute = PlatformModulesRouteImport.update({
+  id: '/platform/modules',
+  path: '/platform/modules',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const PlatformRetentionRoute = PlatformRetentionRouteImport.update({
+  id: '/platform/retention',
+  path: '/platform/retention',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const PlatformKnowledgeRoute = PlatformKnowledgeRouteImport.update({
+  id: '/platform/knowledge',
+  path: '/platform/knowledge',
+  getParentRoute: () => rootRouteImport,
+} as any)
+
+// ── Interfaces ────────────────────────────────────────────────────────────────
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -154,9 +274,22 @@ export interface FileRoutesByFullPath {
   '/signaler': typeof SignalerRoute
   '/urgences': typeof UrgencesRoute
   '/actualites': typeof ActualitesRoute
-  '/admin/alertes': typeof AdminAlertesRoute
-  '/admin/signalements': typeof AdminSignalementsRoute
+  '/cgu': typeof CguRoute
+  '/cgs': typeof CgsRoute
+  '/mentions-legales': typeof MentionsLegalesRoute
+  '/confidentialite': typeof ConfidentialiteRoute
   '/admin/': typeof AdminIndexRoute
+  '/admin/signalements': typeof AdminSignalementsRoute
+  '/admin/alertes': typeof AdminAlertesRoute
+  '/admin/sos': typeof AdminSosRoute
+  '/admin/voisins': typeof AdminVoisinsRoute
+  '/admin/publications': typeof AdminPublicationsRoute
+  '/admin/services': typeof AdminServicesRoute
+  '/admin/routage': typeof AdminRoutageRoute
+  '/admin/agents': typeof AdminAgentsRoute
+  '/admin/stats': typeof AdminStatsRoute
+  '/admin/parametres': typeof AdminParametresRoute
+  '/admin/urgences': typeof AdminUrgencesRoute
   '/services/': typeof ServicesIndexRoute
   '/services/signalement/$id': typeof ServicesSignalementIdRoute
   '/platform/': typeof PlatformIndexRoute
@@ -165,8 +298,13 @@ export interface FileRoutesByFullPath {
   '/platform/licences': typeof PlatformLicencesRoute
   '/platform/stats': typeof PlatformStatsRoute
   '/platform/support': typeof PlatformSupportRoute
-  '/mentions-legales': typeof MentionsLegalesRoute
-  '/confidentialite': typeof ConfidentialiteRoute
+  '/platform/onboarding': typeof PlatformOnboardingRoute
+  '/platform/features': typeof PlatformFeaturesRoute
+  '/platform/trials': typeof PlatformTrialsRoute
+  '/platform/facturation': typeof PlatformFacturationRoute
+  '/platform/modules': typeof PlatformModulesRoute
+  '/platform/retention': typeof PlatformRetentionRoute
+  '/platform/knowledge': typeof PlatformKnowledgeRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -178,9 +316,22 @@ export interface FileRoutesByTo {
   '/signaler': typeof SignalerRoute
   '/urgences': typeof UrgencesRoute
   '/actualites': typeof ActualitesRoute
-  '/admin/alertes': typeof AdminAlertesRoute
-  '/admin/signalements': typeof AdminSignalementsRoute
+  '/cgu': typeof CguRoute
+  '/cgs': typeof CgsRoute
+  '/mentions-legales': typeof MentionsLegalesRoute
+  '/confidentialite': typeof ConfidentialiteRoute
   '/admin': typeof AdminIndexRoute
+  '/admin/signalements': typeof AdminSignalementsRoute
+  '/admin/alertes': typeof AdminAlertesRoute
+  '/admin/sos': typeof AdminSosRoute
+  '/admin/voisins': typeof AdminVoisinsRoute
+  '/admin/publications': typeof AdminPublicationsRoute
+  '/admin/services': typeof AdminServicesRoute
+  '/admin/routage': typeof AdminRoutageRoute
+  '/admin/agents': typeof AdminAgentsRoute
+  '/admin/stats': typeof AdminStatsRoute
+  '/admin/parametres': typeof AdminParametresRoute
+  '/admin/urgences': typeof AdminUrgencesRoute
   '/services': typeof ServicesIndexRoute
   '/services/signalement/$id': typeof ServicesSignalementIdRoute
   '/platform': typeof PlatformIndexRoute
@@ -189,8 +340,13 @@ export interface FileRoutesByTo {
   '/platform/licences': typeof PlatformLicencesRoute
   '/platform/stats': typeof PlatformStatsRoute
   '/platform/support': typeof PlatformSupportRoute
-  '/mentions-legales': typeof MentionsLegalesRoute
-  '/confidentialite': typeof ConfidentialiteRoute
+  '/platform/onboarding': typeof PlatformOnboardingRoute
+  '/platform/features': typeof PlatformFeaturesRoute
+  '/platform/trials': typeof PlatformTrialsRoute
+  '/platform/facturation': typeof PlatformFacturationRoute
+  '/platform/modules': typeof PlatformModulesRoute
+  '/platform/retention': typeof PlatformRetentionRoute
+  '/platform/knowledge': typeof PlatformKnowledgeRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -203,9 +359,22 @@ export interface FileRoutesById {
   '/signaler': typeof SignalerRoute
   '/urgences': typeof UrgencesRoute
   '/actualites': typeof ActualitesRoute
-  '/admin/alertes': typeof AdminAlertesRoute
-  '/admin/signalements': typeof AdminSignalementsRoute
+  '/cgu': typeof CguRoute
+  '/cgs': typeof CgsRoute
+  '/mentions-legales': typeof MentionsLegalesRoute
+  '/confidentialite': typeof ConfidentialiteRoute
   '/admin/': typeof AdminIndexRoute
+  '/admin/signalements': typeof AdminSignalementsRoute
+  '/admin/alertes': typeof AdminAlertesRoute
+  '/admin/sos': typeof AdminSosRoute
+  '/admin/voisins': typeof AdminVoisinsRoute
+  '/admin/publications': typeof AdminPublicationsRoute
+  '/admin/services': typeof AdminServicesRoute
+  '/admin/routage': typeof AdminRoutageRoute
+  '/admin/agents': typeof AdminAgentsRoute
+  '/admin/stats': typeof AdminStatsRoute
+  '/admin/parametres': typeof AdminParametresRoute
+  '/admin/urgences': typeof AdminUrgencesRoute
   '/services/': typeof ServicesIndexRoute
   '/services/signalement/$id': typeof ServicesSignalementIdRoute
   '/platform/': typeof PlatformIndexRoute
@@ -214,8 +383,13 @@ export interface FileRoutesById {
   '/platform/licences': typeof PlatformLicencesRoute
   '/platform/stats': typeof PlatformStatsRoute
   '/platform/support': typeof PlatformSupportRoute
-  '/mentions-legales': typeof MentionsLegalesRoute
-  '/confidentialite': typeof ConfidentialiteRoute
+  '/platform/onboarding': typeof PlatformOnboardingRoute
+  '/platform/features': typeof PlatformFeaturesRoute
+  '/platform/trials': typeof PlatformTrialsRoute
+  '/platform/facturation': typeof PlatformFacturationRoute
+  '/platform/modules': typeof PlatformModulesRoute
+  '/platform/retention': typeof PlatformRetentionRoute
+  '/platform/knowledge': typeof PlatformKnowledgeRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -229,9 +403,22 @@ export interface FileRouteTypes {
     | '/signaler'
     | '/urgences'
     | '/actualites'
-    | '/admin/alertes'
-    | '/admin/signalements'
+    | '/cgu'
+    | '/cgs'
+    | '/mentions-legales'
+    | '/confidentialite'
     | '/admin/'
+    | '/admin/signalements'
+    | '/admin/alertes'
+    | '/admin/sos'
+    | '/admin/voisins'
+    | '/admin/publications'
+    | '/admin/services'
+    | '/admin/routage'
+    | '/admin/agents'
+    | '/admin/stats'
+    | '/admin/parametres'
+    | '/admin/urgences'
     | '/services/'
     | '/services/signalement/$id'
     | '/platform/'
@@ -240,8 +427,13 @@ export interface FileRouteTypes {
     | '/platform/licences'
     | '/platform/stats'
     | '/platform/support'
-    | '/mentions-legales'
-    | '/confidentialite'
+    | '/platform/onboarding'
+    | '/platform/features'
+    | '/platform/trials'
+    | '/platform/facturation'
+    | '/platform/modules'
+    | '/platform/retention'
+    | '/platform/knowledge'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -253,9 +445,22 @@ export interface FileRouteTypes {
     | '/signaler'
     | '/urgences'
     | '/actualites'
-    | '/admin/alertes'
-    | '/admin/signalements'
+    | '/cgu'
+    | '/cgs'
+    | '/mentions-legales'
+    | '/confidentialite'
     | '/admin'
+    | '/admin/signalements'
+    | '/admin/alertes'
+    | '/admin/sos'
+    | '/admin/voisins'
+    | '/admin/publications'
+    | '/admin/services'
+    | '/admin/routage'
+    | '/admin/agents'
+    | '/admin/stats'
+    | '/admin/parametres'
+    | '/admin/urgences'
     | '/services'
     | '/services/signalement/$id'
     | '/platform'
@@ -264,8 +469,13 @@ export interface FileRouteTypes {
     | '/platform/licences'
     | '/platform/stats'
     | '/platform/support'
-    | '/mentions-legales'
-    | '/confidentialite'
+    | '/platform/onboarding'
+    | '/platform/features'
+    | '/platform/trials'
+    | '/platform/facturation'
+    | '/platform/modules'
+    | '/platform/retention'
+    | '/platform/knowledge'
   id:
     | '__root__'
     | '/'
@@ -277,9 +487,22 @@ export interface FileRouteTypes {
     | '/signaler'
     | '/urgences'
     | '/actualites'
-    | '/admin/alertes'
-    | '/admin/signalements'
+    | '/cgu'
+    | '/cgs'
+    | '/mentions-legales'
+    | '/confidentialite'
     | '/admin/'
+    | '/admin/signalements'
+    | '/admin/alertes'
+    | '/admin/sos'
+    | '/admin/voisins'
+    | '/admin/publications'
+    | '/admin/services'
+    | '/admin/routage'
+    | '/admin/agents'
+    | '/admin/stats'
+    | '/admin/parametres'
+    | '/admin/urgences'
     | '/services/'
     | '/services/signalement/$id'
     | '/platform/'
@@ -288,8 +511,13 @@ export interface FileRouteTypes {
     | '/platform/licences'
     | '/platform/stats'
     | '/platform/support'
-    | '/mentions-legales'
-    | '/confidentialite'
+    | '/platform/onboarding'
+    | '/platform/features'
+    | '/platform/trials'
+    | '/platform/facturation'
+    | '/platform/modules'
+    | '/platform/retention'
+    | '/platform/knowledge'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -302,9 +530,22 @@ export interface RootRouteChildren {
   SignalerRoute: typeof SignalerRoute
   UrgencesRoute: typeof UrgencesRoute
   ActualitesRoute: typeof ActualitesRoute
-  AdminAlertesRoute: typeof AdminAlertesRoute
-  AdminSignalementsRoute: typeof AdminSignalementsRoute
+  CguRoute: typeof CguRoute
+  CgsRoute: typeof CgsRoute
+  MentionsLegalesRoute: typeof MentionsLegalesRoute
+  ConfidentialiteRoute: typeof ConfidentialiteRoute
   AdminIndexRoute: typeof AdminIndexRoute
+  AdminSignalementsRoute: typeof AdminSignalementsRoute
+  AdminAlertesRoute: typeof AdminAlertesRoute
+  AdminSosRoute: typeof AdminSosRoute
+  AdminVoisinsRoute: typeof AdminVoisinsRoute
+  AdminPublicationsRoute: typeof AdminPublicationsRoute
+  AdminServicesRoute: typeof AdminServicesRoute
+  AdminRoutageRoute: typeof AdminRoutageRoute
+  AdminAgentsRoute: typeof AdminAgentsRoute
+  AdminStatsRoute: typeof AdminStatsRoute
+  AdminParametresRoute: typeof AdminParametresRoute
+  AdminUrgencesRoute: typeof AdminUrgencesRoute
   ServicesIndexRoute: typeof ServicesIndexRoute
   ServicesSignalementIdRoute: typeof ServicesSignalementIdRoute
   PlatformIndexRoute: typeof PlatformIndexRoute
@@ -313,52 +554,22 @@ export interface RootRouteChildren {
   PlatformLicencesRoute: typeof PlatformLicencesRoute
   PlatformStatsRoute: typeof PlatformStatsRoute
   PlatformSupportRoute: typeof PlatformSupportRoute
-  MentionsLegalesRoute: typeof MentionsLegalesRoute
-  ConfidentialiteRoute: typeof ConfidentialiteRoute
+  PlatformOnboardingRoute: typeof PlatformOnboardingRoute
+  PlatformFeaturesRoute: typeof PlatformFeaturesRoute
+  PlatformTrialsRoute: typeof PlatformTrialsRoute
+  PlatformFacturationRoute: typeof PlatformFacturationRoute
+  PlatformModulesRoute: typeof PlatformModulesRoute
+  PlatformRetentionRoute: typeof PlatformRetentionRoute
+  PlatformKnowledgeRoute: typeof PlatformKnowledgeRoute
 }
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
-    '/urgences': {
-      id: '/urgences'
-      path: '/urgences'
-      fullPath: '/urgences'
-      preLoaderRoute: typeof UrgencesRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/signaler': {
-      id: '/signaler'
-      path: '/signaler'
-      fullPath: '/signaler'
-      preLoaderRoute: typeof SignalerRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/profil': {
-      id: '/profil'
-      path: '/profil'
-      fullPath: '/profil'
-      preLoaderRoute: typeof ProfilRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/onboarding': {
-      id: '/onboarding'
-      path: '/onboarding'
-      fullPath: '/onboarding'
-      preLoaderRoute: typeof OnboardingRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/fil': {
-      id: '/fil'
-      path: '/fil'
-      fullPath: '/fil'
-      preLoaderRoute: typeof FilRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/carte': {
-      id: '/carte'
-      path: '/carte'
-      fullPath: '/carte'
-      preLoaderRoute: typeof CarteRouteImport
+    '/': {
+      id: '/'
+      path: '/'
+      fullPath: '/'
+      preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/auth': {
@@ -368,11 +579,81 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/': {
-      id: '/'
-      path: '/'
-      fullPath: '/'
-      preLoaderRoute: typeof IndexRouteImport
+    '/carte': {
+      id: '/carte'
+      path: '/carte'
+      fullPath: '/carte'
+      preLoaderRoute: typeof CarteRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/fil': {
+      id: '/fil'
+      path: '/fil'
+      fullPath: '/fil'
+      preLoaderRoute: typeof FilRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/onboarding': {
+      id: '/onboarding'
+      path: '/onboarding'
+      fullPath: '/onboarding'
+      preLoaderRoute: typeof OnboardingRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/profil': {
+      id: '/profil'
+      path: '/profil'
+      fullPath: '/profil'
+      preLoaderRoute: typeof ProfilRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/signaler': {
+      id: '/signaler'
+      path: '/signaler'
+      fullPath: '/signaler'
+      preLoaderRoute: typeof SignalerRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/urgences': {
+      id: '/urgences'
+      path: '/urgences'
+      fullPath: '/urgences'
+      preLoaderRoute: typeof UrgencesRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/actualites': {
+      id: '/actualites'
+      path: '/actualites'
+      fullPath: '/actualites'
+      preLoaderRoute: typeof ActualitesRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/cgu': {
+      id: '/cgu'
+      path: '/cgu'
+      fullPath: '/cgu'
+      preLoaderRoute: typeof CguRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/cgs': {
+      id: '/cgs'
+      path: '/cgs'
+      fullPath: '/cgs'
+      preLoaderRoute: typeof CgsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/mentions-legales': {
+      id: '/mentions-legales'
+      path: '/mentions-legales'
+      fullPath: '/mentions-legales'
+      preLoaderRoute: typeof MentionsLegalesRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/confidentialite': {
+      id: '/confidentialite'
+      path: '/confidentialite'
+      fullPath: '/confidentialite'
+      preLoaderRoute: typeof ConfidentialiteRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/admin/': {
@@ -396,11 +677,67 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminAlertesRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/actualites': {
-      id: '/actualites'
-      path: '/actualites'
-      fullPath: '/actualites'
-      preLoaderRoute: typeof ActualitesRouteImport
+    '/admin/sos': {
+      id: '/admin/sos'
+      path: '/admin/sos'
+      fullPath: '/admin/sos'
+      preLoaderRoute: typeof AdminSosRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/admin/voisins': {
+      id: '/admin/voisins'
+      path: '/admin/voisins'
+      fullPath: '/admin/voisins'
+      preLoaderRoute: typeof AdminVoisinsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/admin/publications': {
+      id: '/admin/publications'
+      path: '/admin/publications'
+      fullPath: '/admin/publications'
+      preLoaderRoute: typeof AdminPublicationsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/admin/services': {
+      id: '/admin/services'
+      path: '/admin/services'
+      fullPath: '/admin/services'
+      preLoaderRoute: typeof AdminServicesRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/admin/routage': {
+      id: '/admin/routage'
+      path: '/admin/routage'
+      fullPath: '/admin/routage'
+      preLoaderRoute: typeof AdminRoutageRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/admin/agents': {
+      id: '/admin/agents'
+      path: '/admin/agents'
+      fullPath: '/admin/agents'
+      preLoaderRoute: typeof AdminAgentsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/admin/stats': {
+      id: '/admin/stats'
+      path: '/admin/stats'
+      fullPath: '/admin/stats'
+      preLoaderRoute: typeof AdminStatsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/admin/parametres': {
+      id: '/admin/parametres'
+      path: '/admin/parametres'
+      fullPath: '/admin/parametres'
+      preLoaderRoute: typeof AdminParametresRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/admin/urgences': {
+      id: '/admin/urgences'
+      path: '/admin/urgences'
+      fullPath: '/admin/urgences'
+      preLoaderRoute: typeof AdminUrgencesRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/services/': {
@@ -459,18 +796,53 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof PlatformSupportRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/mentions-legales': {
-      id: '/mentions-legales'
-      path: '/mentions-legales'
-      fullPath: '/mentions-legales'
-      preLoaderRoute: typeof MentionsLegalesRouteImport
+    '/platform/onboarding': {
+      id: '/platform/onboarding'
+      path: '/platform/onboarding'
+      fullPath: '/platform/onboarding'
+      preLoaderRoute: typeof PlatformOnboardingRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/confidentialite': {
-      id: '/confidentialite'
-      path: '/confidentialite'
-      fullPath: '/confidentialite'
-      preLoaderRoute: typeof ConfidentialiteRouteImport
+    '/platform/features': {
+      id: '/platform/features'
+      path: '/platform/features'
+      fullPath: '/platform/features'
+      preLoaderRoute: typeof PlatformFeaturesRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/platform/trials': {
+      id: '/platform/trials'
+      path: '/platform/trials'
+      fullPath: '/platform/trials'
+      preLoaderRoute: typeof PlatformTrialsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/platform/facturation': {
+      id: '/platform/facturation'
+      path: '/platform/facturation'
+      fullPath: '/platform/facturation'
+      preLoaderRoute: typeof PlatformFacturationRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/platform/modules': {
+      id: '/platform/modules'
+      path: '/platform/modules'
+      fullPath: '/platform/modules'
+      preLoaderRoute: typeof PlatformModulesRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/platform/retention': {
+      id: '/platform/retention'
+      path: '/platform/retention'
+      fullPath: '/platform/retention'
+      preLoaderRoute: typeof PlatformRetentionRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/platform/knowledge': {
+      id: '/platform/knowledge'
+      path: '/platform/knowledge'
+      fullPath: '/platform/knowledge'
+      preLoaderRoute: typeof PlatformKnowledgeRouteImport
       parentRoute: typeof rootRouteImport
     }
   }
@@ -486,9 +858,22 @@ const rootRouteChildren: RootRouteChildren = {
   SignalerRoute: SignalerRoute,
   UrgencesRoute: UrgencesRoute,
   ActualitesRoute: ActualitesRoute,
-  AdminAlertesRoute: AdminAlertesRoute,
-  AdminSignalementsRoute: AdminSignalementsRoute,
+  CguRoute: CguRoute,
+  CgsRoute: CgsRoute,
+  MentionsLegalesRoute: MentionsLegalesRoute,
+  ConfidentialiteRoute: ConfidentialiteRoute,
   AdminIndexRoute: AdminIndexRoute,
+  AdminSignalementsRoute: AdminSignalementsRoute,
+  AdminAlertesRoute: AdminAlertesRoute,
+  AdminSosRoute: AdminSosRoute,
+  AdminVoisinsRoute: AdminVoisinsRoute,
+  AdminPublicationsRoute: AdminPublicationsRoute,
+  AdminServicesRoute: AdminServicesRoute,
+  AdminRoutageRoute: AdminRoutageRoute,
+  AdminAgentsRoute: AdminAgentsRoute,
+  AdminStatsRoute: AdminStatsRoute,
+  AdminParametresRoute: AdminParametresRoute,
+  AdminUrgencesRoute: AdminUrgencesRoute,
   ServicesIndexRoute: ServicesIndexRoute,
   ServicesSignalementIdRoute: ServicesSignalementIdRoute,
   PlatformIndexRoute: PlatformIndexRoute,
@@ -497,8 +882,13 @@ const rootRouteChildren: RootRouteChildren = {
   PlatformLicencesRoute: PlatformLicencesRoute,
   PlatformStatsRoute: PlatformStatsRoute,
   PlatformSupportRoute: PlatformSupportRoute,
-  MentionsLegalesRoute: MentionsLegalesRoute,
-  ConfidentialiteRoute: ConfidentialiteRoute,
+  PlatformOnboardingRoute: PlatformOnboardingRoute,
+  PlatformFeaturesRoute: PlatformFeaturesRoute,
+  PlatformTrialsRoute: PlatformTrialsRoute,
+  PlatformFacturationRoute: PlatformFacturationRoute,
+  PlatformModulesRoute: PlatformModulesRoute,
+  PlatformRetentionRoute: PlatformRetentionRoute,
+  PlatformKnowledgeRoute: PlatformKnowledgeRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

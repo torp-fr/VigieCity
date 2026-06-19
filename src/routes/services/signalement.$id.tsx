@@ -113,7 +113,7 @@ function ReportDetailPage() {
         .from("report_routing")
         .select("contact_name, contact_email, notes, service:service_id(name, phone, email)")
         .eq("collectivity_id", report!.collectivity_id!)
-        .eq("category", report!.category)
+        .eq("category", report!.category as any)
         .eq("is_active", true)
         .maybeSingle();
       if (!data) return null;
@@ -121,7 +121,6 @@ function ReportDetailPage() {
         contact_name: data.contact_name,
         contact_email: data.contact_email,
         notes: data.notes,
-        // @ts-expect-error joined
         service: data.service ?? null,
       } as Routing;
     },
@@ -131,7 +130,7 @@ function ReportDetailPage() {
     mutationFn: async (status: string) => {
       const { error } = await supabase
         .from("reports")
-        .update({ status, updated_at: new Date().toISOString() })
+        .update({ status: status as any, updated_at: new Date().toISOString() })
         .eq("id", id);
       if (error) throw error;
     },
@@ -244,7 +243,7 @@ function ReportDetailPage() {
           ) : (
             <p className="text-sm text-muted-foreground">
               Aucune règle de routage définie pour cette catégorie.{" "}
-              <Link to="/services/" className="text-primary underline">Configurer les services</Link>
+              <Link to="/services" className="text-primary underline">Configurer les services</Link>
             </p>
           )}
         </div>
