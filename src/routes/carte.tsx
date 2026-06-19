@@ -171,4 +171,93 @@ function LeafletMap({ reports, allReports }: { reports: Report[]; allReports: Re
       if (!container || mapRef.current) return;
 
       const map = L.map(container, { center: [46.6, 2.3] as [number, number], zoom: 6 });
-      mapRef.current = ma
+      mapRef.current = map;
+
+      L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
+        attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>',
+        maxZoom: 19,
+      }).addTo(map);
+
+      layerRef.current = L.layerGroup().addTo(map);
+    }
+
+    initMap();
+
+    return () => {
+      if (mapRef.current) {
+        mapRef.current.remove();
+        mapRef.current = null;
+        layerRef.current = null;
+        centeredRef.current = false;
+      }
+    };
+  }, []);
+
+  // Update markers when reports change (without resetting pan/zoom)
+  useEffect(() => {
+    async function updateMarkers() {
+      if (!mapRef.current || !layerRef.current) return;
+      const L = LRef.current ?? (await import("leaflet")).default;
+
+      layerRef.current.clearLayers();
+
+      for (const r of reports) {
+        const color = SEVERITY_COLORS[r.severity] ?? SEVERITY_COLORS.info;
+        const icon = L.divIcon({
+          className: "",
+          html: `<div style="
+            width:36px;height:36px;border-radius:50% 50% 50% 0;
+            background:${color};border:2px solid white;
+            transform:rotate(-45deg);
+            box-shadow:0 2px 6px rgba(0,0,0,.35);
+            display:flex;align-items:center;justify-content:center;
+          "><span style="transform:rotate(45deg);font-size:16px;line-height:1;">${categoryIcon(r.category)}</span></div>`,
+          iconSize: [36, 36],
+          iconAnchor: [18, 36],
+          popupAnchor: [0, -38],
+        });
+
+        const ago = timeAgo(r.created_at);
+        const addr = r.approximate_address
+          ? `<p style="font-size:11px;color:#666;margin:2px 0">📍 ${r.approximate_address}</p>` : "";
+        const desc = r.description.length > 120 ? r.description.slice(0, 120) + "…" : r.description;
+
+        L.marker([r.lat, r.lng], { icon })
+          .bindPopup(`
+            <div style="min-width:180px;max-width:240px">
+              <b style="font-size:13px">${categoryLabel(r.category)}</b>
+              <span style="display:inline-block;margin-left:6px;padding:1px 6px;border-radius:999px;font-size:10px;font-weight:600;background:${color}22;color:${color};border:1px solid ${color}44">${r.severity}</span>
+              ${addr}
+              <p style="font-size:12px;margin:4px 0;color:#333">${desc}</p>
+              <p style="font-size:11px;color:#999;margin:0">${ago}</p>
+            </div>
+          `)
+          .addTo(layerRef.current);
+      }
+
+      // Auto-center only on first data load (using allReports for initial bounds)
+      if (!centeredRef.current && allReports.length > 0) {
+        centeredRef.current = true;
+        const lats = allReports.map((r) => r.lat);
+        const lngs = allReports.map((r) => r.lng);
+        const center: [number, number] = [
+          (Math.min(...lats) + Math.max(...lats)) / 2,
+          (Math.min(...lngs) + Math.max(...lngs)) / 2,
+        ];
+        mapRef.current.setView(center, 13);
+      }
+    }
+
+    updateMarkers();
+  }, [reports, allReports]);
+
+  return <div id={mapId} className="flex-1" style={{ minHeight: 0, height: "100%" }} />;
+}
+
+function timeAgo(iso: string) {
+  const diff = (Date.now() - new Date(iso).getTime()) / 1000;
+  if (diff < 60) return "à l'instant";
+  if (diff < 3600) return `il y a ${Math.floor(diff / 60)} min`;
+  if (diff < 86400) return `il y a ${Math.floor(diff / 3600)} h`;
+  return `il y a ${Math.floor(diff / 86400)} j`;
+}

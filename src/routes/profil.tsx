@@ -336,4 +336,142 @@ function TrustedContactsSection({ userId }: { userId: string }) {
   const { data: contacts } = useQuery({
     queryKey: ["trusted-contacts", userId],
     queryFn: async () => {
-      const { data }
+      const { data } = await supabase
+        .from("trusted_contacts")
+        .select("id, name, phone")
+        .eq("user_id", userId)
+        .order("created_at");
+      return (data ?? []) as TrustedContact[];
+    },
+  });
+
+  const add = useMutation({
+    mutationFn: async () => {
+      if (!newName.trim() || !newPhone.trim()) throw new Error("Nom et téléphone requis.");
+      const { error } = await supabase.from("trusted_contacts").insert({
+        user_id: userId,
+        name: newName.trim(),
+        phone: newPhone.trim(),
+      });
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ["trusted-contacts", userId] });
+      setNewName(""); setNewPhone(""); setShowAdd(false);
+      toast.success("Contact ajouté.");
+    },
+    onError: (e: Error) => toast.error(e.message),
+  });
+
+  const remove = useMutation({
+    mutationFn: async (id: string) => {
+      const { error } = await supabase.from("trusted_contacts").delete().eq("id", id).eq("user_id", userId);
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ["trusted-contacts", userId] });
+      toast.success("Contact supprimé.");
+    },
+    onError: (e: Error) => toast.error(e.message),
+  });
+
+  return (
+    <section className="rounded-2xl border border-border bg-card p-4 shadow-card space-y-3">
+      <div className="flex items-center justify-between">
+        <h2 className="flex items-center gap-2 text-sm font-semibold uppercase tracking-wider text-muted-foreground">
+          <Phone className="h-4 w-4" /> Contacts de confiance
+        </h2>
+        <button
+          type="button"
+          onClick={() => setShowAdd(!showAdd)}
+          className="flex items-center gap-1 rounded-lg bg-primary/10 px-2 py-1 text-xs font-medium text-primary"
+        >
+          <Plus className="h-3.5 w-3.5" /> Ajouter
+        </button>
+      </div>
+
+      {showAdd && (
+        <div className="space-y-2 rounded-xl border border-border p-3">
+          <input
+            value={newName}
+            onChange={(e) => setNewName(e.target.value)}
+            placeholder="Nom (ex : Maman)"
+            className="w-full rounded-lg border border-input bg-background p-2 text-sm outline-none ring-ring focus:ring-2"
+          />
+          <input
+            value={newPhone}
+            onChange={(e) => setNewPhone(e.target.value)}
+            placeholder="Téléphone (ex : 06 12 34 56 78)"
+            type="tel"
+            className="w-full rounded-lg border border-input bg-background p-2 text-sm outline-none ring-ring focus:ring-2"
+          />
+          <div className="flex gap-2">
+            <button
+              type="button"
+              onClick={() => add.mutate()}
+              disabled={add.isPending}
+              className="flex flex-1 items-center justify-center gap-1 rounded-lg bg-primary py-2 text-sm font-medium text-primary-foreground disabled:opacity-50"
+            >
+              {add.isPending ? <Loader2 className="h-4 w-4 animate-spin" /> : "Enregistrer"}
+            </button>
+            <button type="button" onClick={() => setShowAdd(false)} className="rounded-lg border border-border px-3 py-2 text-sm">
+              Annuler
+            </button>
+          </div>
+        </div>
+      )}
+
+      {contacts?.length === 0 && !showAdd && (
+        <p className="text-sm text-muted-foreground">Aucun contact de confiance enregistré.</p>
+      )}
+
+      <ul className="space-y-2">
+        {contacts?.map((c) => (
+          <li key={c.id} className="flex items-center justify-between rounded-xl border border-border bg-background p-3">
+            <div>
+              <p className="text-sm font-medium">{c.name}</p>
+              <p className="text-xs text-muted-foreground">{c.phone}</p>
+            </div>
+            <div className="flex gap-2">
+              <a href={`tel:${c.phone.replace(/\s/g, "")}`} className="rounded-lg bg-primary/10 p-2 text-primary">
+                <Phone className="h-4 w-4" />
+              </a>
+              <button
+                type="button"
+                onClick={() => remove.mutate(c.id)}
+                disabled={remove.isPending}
+                className="rounded-lg bg-sos/10 p-2 text-sos disabled:opacity-50"
+              >
+                <Trash2 className="h-4 w-4" />
+              </button>
+            </div>
+          </li>
+        ))}
+      </ul>
+    </section>
+  );
+}
+
+// ── Sign Out ──────────────────────────────────────────────────────────────────
+function SignOutSection({ navigate }: { navigate: ReturnType<typeof useNavigate> }) {
+  const signOut = useMutation({
+    mutationFn: async () => {
+      const { error } = await supabase.auth.signOut();
+      if (error) throw error;
+    },
+    onSuccess: () => navigate({ to: "/" }),
+    onError: (e: Error) => toast.error(e.message),
+  });
+
+  return (
+    <button
+      type="button"
+      onClick={() => signOut.mutate()}
+      disabled={signOut.isPending}
+      className="flex w-full items-center justify-center gap-2 rounded-2xl border border-sos/30 bg-sos/5 p-4 text-sm font-medium text-sos disabled:opacity-50"
+    >
+      {signOut.isPending ? <Loader2 className="h-4 w-4 animate-spin" /> : <LogOut className="h-4 w-4" />}
+      Se déconnecter
+    </button>
+  );
+}
