@@ -229,4 +229,244 @@ export interface FileRouteTypes {
     | '/fil'
     | '/onboarding'
     | '/profil'
-   
+    | '/signaler'
+    | '/urgences'
+    | '/actualites'
+    | '/admin/alertes'
+    | '/admin/signalements'
+    | '/admin'
+    | '/services'
+    | '/services/signalement/$id'
+    | '/platform'
+    | '/platform/communes'
+    | '/platform/users'
+    | '/platform/licences'
+    | '/platform/stats'
+    | '/platform/support'
+  id:
+    | '__root__'
+    | '/'
+    | '/auth'
+    | '/carte'
+    | '/fil'
+    | '/onboarding'
+    | '/profil'
+    | '/signaler'
+    | '/urgences'
+    | '/actualites'
+    | '/admin/alertes'
+    | '/admin/signalements'
+    | '/admin/'
+    | '/services/'
+    | '/services/signalement/$id'
+    | '/platform/'
+    | '/platform/communes'
+    | '/platform/users'
+    | '/platform/licences'
+    | '/platform/stats'
+    | '/platform/support'
+  fileRoutesById: FileRoutesById
+}
+export interface RootRouteChildren {
+  IndexRoute: typeof IndexRoute
+  AuthRoute: typeof AuthRoute
+  CarteRoute: typeof CarteRoute
+  FilRoute: typeof FilRoute
+  OnboardingRoute: typeof OnboardingRoute
+  ProfilRoute: typeof ProfilRoute
+  SignalerRoute: typeof SignalerRoute
+  UrgencesRoute: typeof UrgencesRoute
+  ActualitesRoute: typeof ActualitesRoute
+  AdminAlertesRoute: typeof AdminAlertesRoute
+  AdminSignalementsRoute: typeof AdminSignalementsRoute
+  AdminIndexRoute: typeof AdminIndexRoute
+  ServicesIndexRoute: typeof ServicesIndexRoute
+  ServicesSignalementIdRoute: typeof ServicesSignalementIdRoute
+  PlatformIndexRoute: typeof PlatformIndexRoute
+  PlatformCommunesRoute: typeof PlatformCommunesRoute
+  PlatformUsersRoute: typeof PlatformUsersRoute
+  PlatformLicencesRoute: typeof PlatformLicencesRoute
+  PlatformStatsRoute: typeof PlatformStatsRoute
+  PlatformSupportRoute: typeof PlatformSupportRoute
+}
+
+declare module '@tanstack/react-router' {
+  interface FileRoutesByPath {
+    '/urgences': {
+      id: '/urgences'
+      path: '/urgences'
+      fullPath: '/urgences'
+      preLoaderRoute: typeof UrgencesRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/signaler': {
+      id: '/signaler'
+      path: '/signaler'
+      fullPath: '/signaler'
+      preLoaderRoute: typeof SignalerRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/profil': {
+      id: '/profil'
+      path: '/profil'
+      fullPath: '/profil'
+      preLoaderRoute: typeof ProfilRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/onboarding': {
+      id: '/onboarding'
+      path: '/onboarding'
+      fullPath: '/onboarding'
+      preLoaderRoute: typeof OnboardingRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/fil': {
+      id: '/fil'
+      path: '/fil'
+      fullPath: '/fil'
+      preLoaderRoute: typeof FilRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/carte': {
+      id: '/carte'
+      path: '/carte'
+      fullPath: '/carte'
+      preLoaderRoute: typeof CarteRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/auth': {
+      id: '/auth'
+      path: '/auth'
+      fullPath: '/auth'
+      preLoaderRoute: typeof AuthRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/': {
+      id: '/'
+      path: '/'
+      fullPath: '/'
+      preLoaderRoute: typeof IndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/admin/': {
+      id: '/admin/'
+      path: '/admin'
+      fullPath: '/admin/'
+      preLoaderRoute: typeof AdminIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/admin/signalements': {
+      id: '/admin/signalements'
+      path: '/admin/signalements'
+      fullPath: '/admin/signalements'
+      preLoaderRoute: typeof AdminSignalementsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/admin/alertes': {
+      id: '/admin/alertes'
+      path: '/admin/alertes'
+      fullPath: '/admin/alertes'
+      preLoaderRoute: typeof AdminAlertesRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/actualites': {
+      id: '/actualites'
+      path: '/actualites'
+      fullPath: '/actualites'
+      preLoaderRoute: typeof ActualitesRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/services/': {
+      id: '/services/'
+      path: '/services'
+      fullPath: '/services/'
+      preLoaderRoute: typeof ServicesIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/services/signalement/$id': {
+      id: '/services/signalement/$id'
+      path: '/services/signalement/$id'
+      fullPath: '/services/signalement/$id'
+      preLoaderRoute: typeof ServicesSignalementIdRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/platform/': {
+      id: '/platform/'
+      path: '/platform'
+      fullPath: '/platform/'
+      preLoaderRoute: typeof PlatformIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/platform/communes': {
+      id: '/platform/communes'
+      path: '/platform/communes'
+      fullPath: '/platform/communes'
+      preLoaderRoute: typeof PlatformCommunesRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/platform/users': {
+      id: '/platform/users'
+      path: '/platform/users'
+      fullPath: '/platform/users'
+      preLoaderRoute: typeof PlatformUsersRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/platform/licences': {
+      id: '/platform/licences'
+      path: '/platform/licences'
+      fullPath: '/platform/licences'
+      preLoaderRoute: typeof PlatformLicencesRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/platform/stats': {
+      id: '/platform/stats'
+      path: '/platform/stats'
+      fullPath: '/platform/stats'
+      preLoaderRoute: typeof PlatformStatsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/platform/support': {
+      id: '/platform/support'
+      path: '/platform/support'
+      fullPath: '/platform/support'
+      preLoaderRoute: typeof PlatformSupportRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+  }
+}
+
+const rootRouteChildren: RootRouteChildren = {
+  IndexRoute: IndexRoute,
+  AuthRoute: AuthRoute,
+  CarteRoute: CarteRoute,
+  FilRoute: FilRoute,
+  OnboardingRoute: OnboardingRoute,
+  ProfilRoute: ProfilRoute,
+  SignalerRoute: SignalerRoute,
+  UrgencesRoute: UrgencesRoute,
+  ActualitesRoute: ActualitesRoute,
+  AdminAlertesRoute: AdminAlertesRoute,
+  AdminSignalementsRoute: AdminSignalementsRoute,
+  AdminIndexRoute: AdminIndexRoute,
+  ServicesIndexRoute: ServicesIndexRoute,
+  ServicesSignalementIdRoute: ServicesSignalementIdRoute,
+  PlatformIndexRoute: PlatformIndexRoute,
+  PlatformCommunesRoute: PlatformCommunesRoute,
+  PlatformUsersRoute: PlatformUsersRoute,
+  PlatformLicencesRoute: PlatformLicencesRoute,
+  PlatformStatsRoute: PlatformStatsRoute,
+  PlatformSupportRoute: PlatformSupportRoute,
+}
+export const routeTree = rootRouteImport
+  ._addFileChildren(rootRouteChildren)
+  ._addFileTypes<FileRouteTypes>()
+
+import type { getRouter } from './router.tsx'
+import type { startInstance } from './start.ts'
+declare module '@tanstack/react-start' {
+  interface Register {
+    ssr: true
+    router: Awaited<ReturnType<typeof getRouter>>
+    config: Awaited<ReturnType<typeof startInstance.getOptions>>
+  }
+}

@@ -19,7 +19,7 @@ import { Toaster } from "../components/ui/sonner";
 import { supabase } from "@/integrations/supabase/client";
 
 // Routes that don't require onboarding check
-const SKIP_ONBOARDING_ROUTES = ["/auth", "/onboarding"];
+const SKIP_ONBOARDING_ROUTES = ["/auth", "/onboarding", "/profil", "/mentions-legales", "/confidentialite"];
 
 function NotFoundComponent() {
   return (
@@ -136,6 +136,8 @@ function RootComponent() {
       // After sign-in, check if user needs onboarding
       if (event === "SIGNED_IN" && session?.user) {
         if (SKIP_ONBOARDING_ROUTES.includes(pathname)) return;
+        // Délai court : laisse la DB propager le profil auto-créé par le trigger
+        await new Promise((r) => setTimeout(r, 500));
         const { data: profile } = await supabase
           .from("profiles")
           .select("collectivity_id")
@@ -154,14 +156,22 @@ function RootComponent() {
     if (SKIP_ONBOARDING_ROUTES.includes(pathname)) return;
     supabase.auth.getSession().then(async ({ data: { session } }) => {
       if (!session?.user) return;
-      const { data: profile } = await supabase
-        .from("profiles")
-        .select("collectivity_id")
-        .eq("id", session.user.id)
-        .single();
-      if (!profile?.collectivity_id) {
-        navigate({ to: "/onboarding" });
-      }
+      // Retry once after 600ms to avoid a write-after-signup race (DB propagation delay)
+      const checkOnboarding = async (isRetry = false): Promise<void> => {
+        const { data: profile } = await supabase
+          .from("profiles")
+          .select("collectivity_id")
+          .eq("id", session.user.id)
+          .single();
+        if (!profile?.collectivity_id) {
+          if (!isRetry) {
+            await new Promise((r) => setTimeout(r, 600));
+            return checkOnboarding(true);
+          }
+          navigate({ to: "/onboarding" });
+        }
+      };
+      await checkOnboarding();
     });
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
