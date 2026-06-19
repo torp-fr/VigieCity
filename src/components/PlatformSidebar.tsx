@@ -4,6 +4,7 @@ import {
   Building2,
   PlusCircle,
   CreditCard,
+  Receipt,
   FlaskConical,
   ToggleLeft,
   Package,
@@ -48,6 +49,7 @@ const NAV_SECTIONS: NavSection[] = [
   {
     heading: "Commercial",
     items: [
+      { label: "Grille tarifaire", to: "/platform/plans", icon: Receipt },
       { label: "Licences", to: "/platform/licences", icon: CreditCard },
       { label: "Facturation", to: "/platform/facturation", icon: CreditCard },
       { label: "Périodes d'essai", to: "/platform/trials", icon: FlaskConical },
