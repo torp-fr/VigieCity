@@ -1,6 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
-import { Phone } from "lucide-react";
+import { Phone, ShieldCheck, Flame, HeartPulse, PhoneCall, HandHeart } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 
 export const Route = createFileRoute("/urgences")({
@@ -86,7 +86,27 @@ type Contact = {
   phone: string;
   description: string | null;
   hours: string | null;
+  category?: string | null;
 };
+
+const CATEGORY_ICON: Record<string, { icon: React.ElementType; color: string; bg: string }> = {
+  police:   { icon: ShieldCheck, color: "text-blue-700",    bg: "bg-blue-100"    },
+  pompiers: { icon: Flame,       color: "text-red-600",     bg: "bg-red-100"     },
+  medical:  { icon: HeartPulse,  color: "text-emerald-600", bg: "bg-emerald-100" },
+  urgence:  { icon: PhoneCall,   color: "text-sos",         bg: "bg-sos/10"      },
+  social:   { icon: HandHeart,   color: "text-violet-600",  bg: "bg-violet-100"  },
+  mairie:   { icon: ShieldCheck, color: "text-primary",     bg: "bg-primary/10"  },
+};
+
+function CategoryIcon({ category, highlight }: { category: string; highlight?: boolean }) {
+  const cfg = CATEGORY_ICON[category] ?? CATEGORY_ICON.urgence;
+  const Icon = cfg.icon;
+  return (
+    <div className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-full ${highlight ? "bg-white/20" : cfg.bg}`}>
+      <Icon className={`h-5 w-5 ${highlight ? "text-white" : cfg.color}`} />
+    </div>
+  );
+}
 
 function ContactCard({ contact, highlight }: { contact: Contact; highlight?: boolean }) {
   return (
@@ -99,6 +119,7 @@ function ContactCard({ contact, highlight }: { contact: Contact; highlight?: boo
             : "border-border bg-card"
         }`}
       >
+        <CategoryIcon category={contact.category ?? "urgence"} highlight={highlight} />
         <div className="min-w-0">
           <p className="truncate font-semibold">{contact.label}</p>
           {contact.description && (
