@@ -3,7 +3,6 @@ import { useEffect, useState } from "react";
 import { toast } from "sonner";
 import { Loader2, LogOut, ShieldCheck } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
-import { lovable } from "@/integrations/lovable";
 
 export const Route = createFileRoute("/auth")({
   head: () => ({
@@ -56,16 +55,15 @@ function AuthPage() {
 
   async function handleGoogle() {
     setLoading(true);
-    const result = await lovable.auth.signInWithOAuth("google", {
-      redirect_uri: window.location.origin,
+    const result = await supabase.auth.signInWithOAuth({
+      provider: 'google',
+      options: { redirectTo: window.location.origin + '/auth' },
     });
     if (result.error) {
-      toast.error(result.error.message ?? "Connexion Google impossible");
+      toast.error(result.error.message ?? 'Connexion Google impossible');
       setLoading(false);
       return;
     }
-    if (result.redirected) return;
-    navigate({ to: "/" });
   }
 
   async function handleSignOut() {
