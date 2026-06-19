@@ -2,7 +2,7 @@ import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { z } from "zod";
-import { Camera, MapPin, Send, Loader2, ShieldOff, CheckCircle2, XCircle, Clock } from "lucide-react";
+import { Camera, ImageIcon, Video, MapPin, Send, Loader2, ShieldOff, CheckCircle2, XCircle, Clock } from "lucide-react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { REPORT_CATEGORIES, SEVERITY_OPTIONS, type ReportCategoryValue } from "@/lib/categories";
@@ -302,17 +302,47 @@ function ReportPage() {
       {/* Médias */}
       <section>
         <Label>Photos / vidéos (preuves)</Label>
-        <label className="mt-2 flex w-full cursor-pointer items-center justify-center gap-2 rounded-xl border border-dashed border-border bg-card p-4 text-sm font-medium text-muted-foreground hover:bg-muted">
-          <Camera className="h-4 w-4" />
-          {files.length > 0 ? `${files.length} fichier(s) sélectionné(s)` : "Ajouter des photos"}
-          <input
-            type="file"
-            accept="image/*,video/*"
-            multiple
-            className="hidden"
-            onChange={(e) => setFiles(Array.from(e.target.files ?? []).slice(0, 4))}
-          />
-        </label>
+        <div className="mt-2 grid grid-cols-3 gap-2">
+          {/* Caméra */}
+          <label className="flex cursor-pointer flex-col items-center justify-center gap-1.5 rounded-xl border border-dashed border-border bg-card p-3 text-xs font-medium text-muted-foreground hover:bg-muted">
+            <Camera className="h-5 w-5" />
+            Caméra
+            <input
+              type="file"
+              accept="image/*"
+              capture="environment"
+              className="hidden"
+              onChange={(e) => setFiles((prev) => [...prev, ...Array.from(e.target.files ?? [])].slice(0, 4))}
+            />
+          </label>
+          {/* Galerie */}
+          <label className="flex cursor-pointer flex-col items-center justify-center gap-1.5 rounded-xl border border-dashed border-border bg-card p-3 text-xs font-medium text-muted-foreground hover:bg-muted">
+            <ImageIcon className="h-5 w-5" />
+            Galerie
+            <input
+              type="file"
+              accept="image/*"
+              multiple
+              className="hidden"
+              onChange={(e) => setFiles((prev) => [...prev, ...Array.from(e.target.files ?? [])].slice(0, 4))}
+            />
+          </label>
+          {/* Vidéo */}
+          <label className="flex cursor-pointer flex-col items-center justify-center gap-1.5 rounded-xl border border-dashed border-border bg-card p-3 text-xs font-medium text-muted-foreground hover:bg-muted">
+            <Video className="h-5 w-5" />
+            Vidéo
+            <input
+              type="file"
+              accept="video/*"
+              capture="environment"
+              className="hidden"
+              onChange={(e) => setFiles((prev) => [...prev, ...Array.from(e.target.files ?? [])].slice(0, 4))}
+            />
+          </label>
+        </div>
+        {files.length > 0 && (
+          <p className="mt-1.5 text-xs text-muted-foreground">{files.length} fichier(s) sélectionné(s)</p>
+        )}
         <p className="mt-1 text-xs text-muted-foreground">
           Pour respecter la vie privée : évitez les visages et plaques d'immatriculation identifiables.
         </p>
