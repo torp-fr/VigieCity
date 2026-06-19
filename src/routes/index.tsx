@@ -191,4 +191,11 @@ function QuickAction({
   return (
     <Link
       to={to}
-      className={`flex flex-col items-center justify-center gap-2 rounded-2xl p-4 shadow-card transition-transform active:scale-[
+      className={`flex flex-col items-center justify-center gap-2 rounded-2xl p-4 shadow-card transition-transform active:scale-[0.97] ${toneCls}`}
+    >
+      <Icon className="h-6 w-6" />
+      <span className="text-sm font-semibold">{label}</span>
+      <ChevronRight className="h-3 w-3 opacity-50" />
+    </Link>
+  );
+}
