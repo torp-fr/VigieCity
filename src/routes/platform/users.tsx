@@ -42,17 +42,22 @@ function PlatformUsersPage() {
     queryKey: ["platform_users"],
     enabled: isAdmin === true,
     queryFn: async () => {
-      const { data, error } = await supabase
-        .from("profiles")
-        .select("id, display_name, created_at, collectivities(name), user_roles(role, collectivity_id)")
-        .order("created_at", { ascending: false })
-        .limit(200);
-      if (error) throw error;
-      return (data ?? []).map((p: any) => ({
+      // 2 requêtes séparées — pas de FK profiles→user_roles pour join PostgREST
+      const [{ data: profiles, error: e1 }, { data: roles, error: e2 }] = await Promise.all([
+        supabase.from('profiles')
+          .select('id, display_name, created_at, collectivities(name)')
+          .order('created_at', { ascending: false }).limit(200),
+        supabase.from('user_roles').select('user_id, role, collectivity_id'),
+      ]);
+      if (e1) throw e1;
+      if (e2) throw e2;
+      const rolesByUser: Record<string, string[]> = {};
+      for (const r of roles ?? []) rolesByUser[r.user_id] = [...(rolesByUser[r.user_id] ?? []), r.role];
+      return (profiles ?? []).map((p: any) => ({
         id: p.id,
         display_name: p.display_name,
-        commune_name: p.collectivities?.name ?? null,
-        roles: (p.user_roles ?? []).map((r: any) => r.role),
+        commune_name: (p.collectivities as any)?.name ?? null,
+        roles: rolesByUser[p.id] ?? [],
         created_at: p.created_at,
       })) as UserRow[];
     },

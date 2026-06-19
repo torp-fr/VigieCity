@@ -19,7 +19,8 @@ type Commune = {
 };
 
 const PLAN_LABELS: Record<string, string> = {
-  free: "Gratuit", starter: "Starter", pro: "Pro", enterprise: "Enterprise",
+  trial: "Trial", decouverte: "Découverte", essentiel: "Essentiel",
+  standard: "Standard", pro: "Pro", intercommunal: "Intercommunal",
 };
 const STATUS_COLOR: Record<string, string> = {
   active: "text-green-600 dark:text-green-400",
@@ -131,11 +132,11 @@ function PlatformCommunesPage() {
                     {/* Assign free license quickly */}
                     {!c.license && (
                       <button
-                        onClick={() => upsertLicense.mutate({ collectivityId: c.id, plan: "free" })}
+                        onClick={() => upsertLicense.mutate({ collectivityId: c.id, plan: "trial" })}
                         disabled={upsertLicense.isPending}
                         className="rounded-lg bg-primary px-2 py-0.5 text-xs font-semibold text-primary-foreground disabled:opacity-50"
                       >
-                        Activer Gratuit
+                        Activer Trial
                       </button>
                     )}
                   </div>
