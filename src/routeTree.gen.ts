@@ -48,6 +48,7 @@ import { Route as PlatformTrialsRouteImport } from './routes/platform/trials'
 import { Route as PlatformFacturationRouteImport } from './routes/platform/facturation'
 import { Route as PlatformModulesRouteImport } from './routes/platform/modules'
 import { Route as PlatformRetentionRouteImport } from './routes/platform/retention'
+import { Route as PlatformPlansRouteImport } from './routes/platform/plans'
 import { Route as PlatformKnowledgeRouteImport } from './routes/platform/knowledge'
 
 // ── Root-level routes ─────────────────────────────────────────────────────────
@@ -256,6 +257,7 @@ const PlatformRetentionRoute = PlatformRetentionRouteImport.update({
   path: '/platform/retention',
   getParentRoute: () => rootRouteImport,
 } as any)
+const PlatformPlansRoute = PlatformPlansRouteImport.update({ id: '/platform/plans', path: '/platform/plans', getParentRoute: () => rootRouteImport } as any)
 const PlatformKnowledgeRoute = PlatformKnowledgeRouteImport.update({
   id: '/platform/knowledge',
   path: '/platform/knowledge',
@@ -888,6 +890,7 @@ const rootRouteChildren: RootRouteChildren = {
   PlatformFacturationRoute: PlatformFacturationRoute,
   PlatformModulesRoute: PlatformModulesRoute,
   PlatformRetentionRoute: PlatformRetentionRoute,
+  PlatformPlansRoute: PlatformPlansRoute,
   PlatformKnowledgeRoute: PlatformKnowledgeRoute,
 }
 export const routeTree = rootRouteImport
