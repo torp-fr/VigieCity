@@ -28,6 +28,21 @@ function AuthPage() {
     );
   }, []);
 
+  // Echanger le code PKCE après redirect Google OAuth
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    const code = params.get('code');
+    if (!code) return;
+    supabase.auth.exchangeCodeForSession(code).then(({ data, error }) => {
+      if (error) { toast.error('Erreur connexion Google : ' + error.message); return; }
+      if (data.session) {
+        setUser({ email: data.session.user.email });
+        window.history.replaceState({}, '', window.location.pathname);
+        navigate({ to: '/' });
+      }
+    });
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
+
   async function handleEmail(e: React.FormEvent) {
     e.preventDefault();
     setLoading(true);
