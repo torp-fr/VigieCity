@@ -10,9 +10,10 @@ import { PlatformLayout } from "../components/PlatformLayout";
 import { Toaster } from "../components/ui/sonner";
 import { supabase } from "@/integrations/supabase/client";
 
-const SKIP_ONBOARDING_ROUTES = ["/auth", "/onboarding", "/profil", "/mentions-legales", "/confidentialite", "/cgu", "/cgs"];
+const SKIP_ONBOARDING_ROUTES = ["/login", "/auth", "/onboarding", "/profil", "/mentions-legales", "/confidentialite", "/cgu", "/cgs"];
 const ADMIN_PREFIXES = ["/admin"];
 const PLATFORM_PREFIXES = ["/platform"];
+const LOGIN_ROUTES = ["/login"];
 
 function NotFoundComponent() {
   return (<div className="flex min-h-screen items-center justify-center bg-background px-4"><div className="max-w-md text-center"><h1 className="text-7xl font-bold text-foreground">404</h1><h2 className="mt-4 text-xl font-semibold">Page introuvable</h2><p className="mt-2 text-sm text-muted-foreground">Cette page n'existe pas ou a été déplacée.</p><div className="mt-6"><Link to="/" className="inline-flex items-center justify-center rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground hover:bg-primary/90">Retour à l'accueil</Link></div></div></div>);
@@ -68,9 +69,10 @@ function RootComponent() {
   const navigate = useNavigate();
   const pathname = useRouterState({ select: (s) => s.location.pathname });
 
+  const isLoginRoute = LOGIN_ROUTES.includes(pathname);
   const isAdminRoute = ADMIN_PREFIXES.some((p) => pathname.startsWith(p));
   const isPlatformRoute = PLATFORM_PREFIXES.some((p) => pathname.startsWith(p));
-  const isDesktopRoute = isAdminRoute || isPlatformRoute;
+  const isDesktopRoute = isAdminRoute || isPlatformRoute || isLoginRoute;
   const skipOnboarding = isDesktopRoute || SKIP_ONBOARDING_ROUTES.some((r) => pathname.startsWith(r));
 
   useEffect(() => {
@@ -102,6 +104,7 @@ function RootComponent() {
     });
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
+  if (isLoginRoute) return (<QueryClientProvider client={queryClient}><Outlet /></QueryClientProvider>);
   if (isPlatformRoute) return (<QueryClientProvider client={queryClient}><PlatformLayout /></QueryClientProvider>);
   if (isAdminRoute) return (<QueryClientProvider client={queryClient}><AdminLayout /></QueryClientProvider>);
 

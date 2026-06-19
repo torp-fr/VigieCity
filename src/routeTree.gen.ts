@@ -15,6 +15,7 @@ import { Route as ProfilRouteImport } from './routes/profil'
 import { Route as OnboardingRouteImport } from './routes/onboarding'
 import { Route as FilRouteImport } from './routes/fil'
 import { Route as CarteRouteImport } from './routes/carte'
+import { Route as LoginRouteImport } from './routes/login'
 import { Route as AuthRouteImport } from './routes/auth'
 import { Route as ActualitesRouteImport } from './routes/actualites'
 import { Route as CguRouteImport } from './routes/cgu'
@@ -81,6 +82,11 @@ const FilRoute = FilRouteImport.update({
 const CarteRoute = CarteRouteImport.update({
   id: '/carte',
   path: '/carte',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const LoginRoute = LoginRouteImport.update({
+  id: '/login',
+  path: '/login',
   getParentRoute: () => rootRouteImport,
 } as any)
 const AuthRoute = AuthRouteImport.update({
@@ -268,6 +274,7 @@ const PlatformKnowledgeRoute = PlatformKnowledgeRouteImport.update({
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/login': typeof LoginRoute
   '/auth': typeof AuthRoute
   '/carte': typeof CarteRoute
   '/fil': typeof FilRoute
@@ -311,6 +318,7 @@ export interface FileRoutesByFullPath {
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/login': typeof LoginRoute
   '/auth': typeof AuthRoute
   '/carte': typeof CarteRoute
   '/fil': typeof FilRoute
@@ -355,6 +363,7 @@ export interface FileRoutesByTo {
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/login': typeof LoginRoute
   '/auth': typeof AuthRoute
   '/carte': typeof CarteRoute
   '/fil': typeof FilRoute
@@ -400,6 +409,7 @@ export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
     | '/'
+    | '/login'
     | '/auth'
     | '/carte'
     | '/fil'
@@ -443,6 +453,7 @@ export interface FileRouteTypes {
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
+    | '/login'
     | '/auth'
     | '/carte'
     | '/fil'
@@ -486,6 +497,7 @@ export interface FileRouteTypes {
   id:
     | '__root__'
     | '/'
+    | '/login'
     | '/auth'
     | '/carte'
     | '/fil'
@@ -530,6 +542,7 @@ export interface FileRouteTypes {
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  LoginRoute: typeof LoginRoute
   AuthRoute: typeof AuthRoute
   CarteRoute: typeof CarteRoute
   FilRoute: typeof FilRoute
@@ -578,6 +591,13 @@ declare module '@tanstack/react-router' {
       path: '/'
       fullPath: '/'
       preLoaderRoute: typeof IndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/login': {
+      id: '/login'
+      path: '/login'
+      fullPath: '/login'
+      preLoaderRoute: typeof LoginRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/auth': {
@@ -865,6 +885,7 @@ declare module '@tanstack/react-router' {
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  LoginRoute: LoginRoute,
   AuthRoute: AuthRoute,
   CarteRoute: CarteRoute,
   FilRoute: FilRoute,
