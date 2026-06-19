@@ -49,14 +49,18 @@ function PlatformCommunesPage() {
     queryKey: ["platform_communes"],
     enabled: isAdmin === true,
     queryFn: async () => {
-      const { data, error } = await supabase
-        .from("collectivities")
-        .select("id, name, department_code, postal_code, commune_licenses(plan, status, expires_at)")
-        .order("name");
-      if (error) throw error;
-      return (data ?? []).map((c: any) => ({
+      // 2 requêtes séparées — join embedded bloque sur RLS de commune_licenses
+      const [colRes, licRes] = await Promise.all([
+        supabase.from("collectivities").select("id, name, department_code, postal_code").order("name"),
+        supabase.from("commune_licenses").select("collectivity_id, plan, status, expires_at"),
+      ]);
+      if (colRes.error) throw colRes.error;
+      if (licRes.error) throw licRes.error;
+      const licByCommune: Record<string, { plan: string; status: string; expires_at: string | null }> = {};
+      for (const l of licRes.data ?? []) licByCommune[l.collectivity_id] = l;
+      return (colRes.data ?? []).map((c: any) => ({
         ...c,
-        license: c.commune_licenses?.[0] ?? null,
+        license: licByCommune[c.id] ?? null,
       })) as Commune[];
     },
   });
