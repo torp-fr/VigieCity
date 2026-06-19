@@ -1,7 +1,22 @@
 import { useEffect, useRef, useState } from "react";
 import { Link } from "@tanstack/react-router";
-import { Phone, X, AlertTriangle } from "lucide-react";
+import { X, AlertTriangle, ShieldCheck, Flame, HeartPulse, PhoneCall } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
+
+// ─── Données ───────────────────────────────────────────────────────────────────
+const PHONE_ICONS: Record<string, React.ElementType> = {
+  '17':  ShieldCheck,
+  '18':  Flame,
+  '112': PhoneCall,
+  '15':  HeartPulse,
+};
+
+const PHONES = [
+  { number: '112', label: "Urgence européen",     highlight: true },
+  { number: '17',  label: "Police / Gendarmerie", highlight: false },
+  { number: '18',  label: "Pompiers",             highlight: false },
+  { number: '15',  label: "SAMU",                 highlight: false },
+];
 
 // ─── Constantes ────────────────────────────────────────────────────────────────
 const HOLD_DURATION   = 2000;  // ms pour déclencher le SOS
@@ -209,44 +224,30 @@ export function SosButton() {
 
             {/* Boutons d'appel */}
             <div className="space-y-3">
-              <a
-                href="tel:112"
-                className="flex items-center gap-4 rounded-2xl bg-sos px-5 py-4 text-white"
-              >
-                <div className="flex h-10 w-10 items-center justify-center rounded-full bg-white/20">
-                  <Phone className="h-5 w-5" />
-                </div>
-                <div>
-                  <div className="font-bold text-lg leading-none">112</div>
-                  <div className="text-xs text-white/80 mt-0.5">Numéro d'urgence européen</div>
-                </div>
-              </a>
-
-              <a
-                href="tel:17"
-                className="flex items-center gap-4 rounded-2xl bg-muted px-5 py-4"
-              >
-                <div className="flex h-10 w-10 items-center justify-center rounded-full bg-primary/10">
-                  <Phone className="h-5 w-5 text-primary" />
-                </div>
-                <div>
-                  <div className="font-bold text-lg leading-none">17</div>
-                  <div className="text-xs text-muted-foreground mt-0.5">Police / Gendarmerie</div>
-                </div>
-              </a>
-
-              <a
-                href="tel:18"
-                className="flex items-center gap-4 rounded-2xl bg-muted px-5 py-4"
-              >
-                <div className="flex h-10 w-10 items-center justify-center rounded-full bg-orange-500/10">
-                  <Phone className="h-5 w-5 text-orange-600" />
-                </div>
-                <div>
-                  <div className="font-bold text-lg leading-none">18</div>
-                  <div className="text-xs text-muted-foreground mt-0.5">Pompiers</div>
-                </div>
-              </a>
+              {PHONES.map((p) => {
+                const Icon = PHONE_ICONS[p.number] ?? PhoneCall;
+                return (
+                  <a
+                    key={p.number}
+                    href={`tel:${p.number}`}
+                    className={`flex items-center gap-4 rounded-2xl px-5 py-4 ${
+                      p.highlight ? "bg-sos text-white" : "bg-muted"
+                    }`}
+                  >
+                    <div className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-full ${
+                      p.highlight ? "bg-white/20" : "bg-primary/10"
+                    }`}>
+                      <Icon className={`h-5 w-5 ${p.highlight ? "text-white" : "text-primary"}`} />
+                    </div>
+                    <div>
+                      <div className="font-bold text-lg leading-none">{p.number}</div>
+                      <div className={`text-xs mt-0.5 ${p.highlight ? "text-white/80" : "text-muted-foreground"}`}>
+                        {p.label}
+                      </div>
+                    </div>
+                  </a>
+                );
+              })}
             </div>
 
             {/* Lien signalement */}
