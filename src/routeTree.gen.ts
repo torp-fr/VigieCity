@@ -198,7 +198,7 @@ const ServicesSignalementIdRoute = ServicesSignalementIdRouteImport.update({
 
 const PlatformIndexRoute = PlatformIndexRouteImport.update({
   id: '/platform/',
-  path: '/platform/',
+  path: '/platform',
   getParentRoute: () => rootRouteImport,
 } as any)
 const PlatformCommunesRoute = PlatformCommunesRouteImport.update({
