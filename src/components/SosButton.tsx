@@ -19,7 +19,7 @@ const PHONES = [
 ];
 
 // ─── Constantes ────────────────────────────────────────────────────────────────
-const HOLD_DURATION   = 2000;  // ms pour déclencher le SOS
+const HOLD_DURATION   = 1000;  // ms pour déclencher le SOS
 const SOS_QUOTA       = 2;     // nb d'envois max par session
 const SIZE            = 160;   // px — taille du conteneur SVG
 const RADIUS          = 70;    // px — rayon du cercle de progression
@@ -219,7 +219,7 @@ export function SosButton() {
             </div>
 
             <p className="mb-5 text-sm text-muted-foreground">
-              Votre alerte a été envoyée. Appelez les secours si nécessaire :
+              Choisissez le numéro d'urgence à appeler :
             </p>
 
             {/* Boutons d'appel */}

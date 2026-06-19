@@ -14,9 +14,9 @@ function AdminIndex() {
   const [authed, setAuthed] = useState<boolean | null>(null);
 
   useEffect(() => {
-    supabase.auth.getUser().then(({ data }) => {
-      setAuthed(!!data.user);
-      setUserId(data.user?.id ?? null);
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      setAuthed(!!session?.user);
+      setUserId(session?.user?.id ?? null);
     });
   }, []);
 

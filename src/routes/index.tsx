@@ -118,7 +118,7 @@ function Home() {
         <QuickAction to="/signaler" icon={AlertCircle} label="Signaler" tone="warning" />
         <QuickAction to="/fil" icon={Newspaper} label="Quartier" tone="muted" />
         <QuickAction to="/actualites" icon={Bell} label="Actualités" tone="muted" />
-        <QuickAction to="/services/" icon={Building2} label="Services" tone="muted" />
+        <QuickAction to="/urgences" icon={Building2} label="Services" tone="muted" />
       </section>
 
       {/* Alertes mairie */}

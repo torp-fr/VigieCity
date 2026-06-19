@@ -11,7 +11,7 @@ import { Toaster } from "../components/ui/sonner";
 import { supabase } from "@/integrations/supabase/client";
 
 const SKIP_ONBOARDING_ROUTES = ["/auth", "/onboarding", "/profil", "/mentions-legales", "/confidentialite", "/cgu", "/cgs"];
-const ADMIN_PREFIXES = ["/admin", "/services"];
+const ADMIN_PREFIXES = ["/admin"];
 const PLATFORM_PREFIXES = ["/platform"];
 
 function NotFoundComponent() {
