@@ -1,6 +1,6 @@
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { Outlet, Link, createRootRouteWithContext, useRouter, useNavigate, useRouterState, HeadContent, Scripts } from "@tanstack/react-router";
-import { useEffect, type ReactNode } from "react";
+import React, { useEffect, type ReactNode } from "react";
 import appCss from "../styles.css?url";
 import { reportLovableError } from "../lib/lovable-error-reporting";
 import { AppHeader } from "../components/AppHeader";
@@ -32,6 +32,31 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
   notFoundComponent: NotFoundComponent,
   errorComponent: ErrorComponent,
 });
+
+function CookieBanner() {
+  const [visible, setVisible] = React.useState(() => {
+    if (typeof window === 'undefined') return false;
+    return !localStorage.getItem('cookie_consent');
+  });
+  if (!visible) return null;
+  const accept = () => { localStorage.setItem('cookie_consent', '1'); setVisible(false); };
+  return (
+    <div className="fixed bottom-0 left-0 right-0 z-50 border-t border-border bg-background/95 backdrop-blur p-4 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between max-w-2xl mx-auto">
+      <p className="text-sm text-muted-foreground">
+        Ce site utilise des cookies fonctionnels uniquement.{' '}
+        <a href="/confidentialite" className="underline hover:text-foreground">Politique de confidentialité</a>
+      </p>
+      <div className="flex gap-2 shrink-0">
+        <button onClick={accept} className="rounded-lg bg-primary px-4 py-2 text-sm font-semibold text-primary-foreground hover:bg-primary/90">
+          Accepter
+        </button>
+        <a href="/confidentialite" className="rounded-lg border border-border px-4 py-2 text-sm text-muted-foreground hover:text-foreground">
+          En savoir plus
+        </a>
+      </div>
+    </div>
+  );
+}
 
 function RootShell({ children }: { children: ReactNode }) {
   return (<html lang="fr"><head><HeadContent /></head><body>{children}<Scripts /></body></html>);
@@ -87,6 +112,7 @@ function RootComponent() {
         <main className="flex-1 pb-4"><Outlet /></main>
         <BottomNav />
       </div>
+      <CookieBanner />
       <Toaster richColors position="top-center" />
     </QueryClientProvider>
   );
