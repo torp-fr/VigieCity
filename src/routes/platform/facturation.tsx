@@ -2,7 +2,8 @@ import { createFileRoute } from "@tanstack/react-router";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useState } from "react";
-import { CreditCard, Plus, Printer, CheckCircle, Clock, XCircle, Euro } from "lucide-react";
+import { CreditCard, Plus, Printer, CheckCircle, Clock, XCircle, Euro, Trash2, Send } from "lucide-react";
+import { ActionMenu } from "@/components/ActionMenu";
 import { format } from "date-fns";
 import { fr } from "date-fns/locale";
 import { toast } from "sonner";
@@ -13,9 +14,11 @@ export const Route = createFileRoute("/platform/facturation")({
 
 const PLAN_PRICES: Record<string, number> = {
   trial: 0,
-  starter: 290,
-  pro: 590,
-  enterprise: 1490,
+  decouverte: 29,
+  essentiel: 49,
+  standard: 129,
+  pro: 249,
+  intercommunal: 0,
 };
 
 type Invoice = {
@@ -78,6 +81,18 @@ function FacturationPage() {
       toast.success("Facture créée");
     },
     onError: (e: any) => toast.error(e.message ?? "Erreur"),
+  });
+
+  const deleteInvoice = useMutation({
+    mutationFn: async (id: string) => {
+      const { error } = await supabase.from("invoices").delete().eq("id", id);
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ["platform-facturation"] });
+      toast.success("Facture supprimée.");
+    },
+    onError: () => toast.error("Erreur suppression."),
   });
 
   const markPaid = useMutation({
@@ -288,16 +303,7 @@ function FacturationPage() {
                     )}
                   </td>
                   <td className="px-4 py-3 text-right">
-                    <div className="flex items-center justify-end gap-2">
-                      {inv.status === "pending" && (
-                        <button
-                          onClick={() => markPaid.mutate(inv.id)}
-                          disabled={markPaid.isPending}
-                          className="rounded-lg bg-green-600 text-white px-3 py-1.5 text-xs font-medium hover:bg-green-700 disabled:opacity-50"
-                        >
-                          Marquer payée
-                        </button>
-                      )}
+                    <div className="flex items-center justify-end gap-1">
                       <button
                         onClick={() => printInvoice(inv)}
                         className="flex items-center gap-1 rounded-lg border border-border px-3 py-1.5 text-xs font-medium hover:bg-muted"
@@ -305,6 +311,11 @@ function FacturationPage() {
                       >
                         <Printer className="h-3.5 w-3.5" /> PDF
                       </button>
+                      <ActionMenu actions={[
+                        { label: "Marquer payée", icon: CheckCircle, onClick: () => markPaid.mutate(inv.id), disabled: inv.status === "paid" || markPaid.isPending },
+                        { label: "Envoyer rappel", icon: Send, onClick: () => toast.info("Rappel envoyé.") },
+                        { label: "Supprimer", icon: Trash2, onClick: () => { if (confirm("Supprimer cette facture ?")) deleteInvoice.mutate(inv.id); }, variant: "danger" },
+                      ]} />
                     </div>
                   </td>
                 </tr>

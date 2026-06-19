@@ -1,7 +1,8 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useEffect, useState } from "react";
-import { ArrowLeft, Loader2, Shield, CheckCircle2, XCircle, Building2 } from "lucide-react";
+import { ArrowLeft, Loader2, Shield, CheckCircle2, XCircle, Building2, Pencil, Trash2, PauseCircle } from "lucide-react";
+import { ActionMenu } from "@/components/ActionMenu";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 
@@ -74,6 +75,24 @@ function PlatformCommunesPage() {
     onError: () => toast.error("Erreur lors de la mise à jour."),
   });
 
+  const suspendCommune = useMutation({
+    mutationFn: async (id: string) => {
+      const { error } = await supabase.from("commune_licenses").update({ status: "suspended" }).eq("collectivity_id", id);
+      if (error) throw error;
+    },
+    onSuccess: () => { qc.invalidateQueries({ queryKey: ["platform_communes"] }); toast.success("Commune suspendue."); },
+    onError: () => toast.error("Erreur."),
+  });
+
+  const deleteCommune = useMutation({
+    mutationFn: async (id: string) => {
+      const { error } = await supabase.from("collectivities").delete().eq("id", id);
+      if (error) throw error;
+    },
+    onSuccess: () => { qc.invalidateQueries({ queryKey: ["platform_communes"] }); toast.success("Commune supprimée."); },
+    onError: () => toast.error("Erreur suppression."),
+  });
+
   if (isAdmin === null) return <div className="flex justify-center pt-20"><Loader2 className="h-6 w-6 animate-spin text-muted-foreground" /></div>;
   if (!isAdmin) return (
     <div className="px-4 pt-10 text-center">
@@ -141,6 +160,11 @@ function PlatformCommunesPage() {
                     )}
                   </div>
                 </div>
+                <ActionMenu actions={[
+                  { label: "Modifier", icon: Pencil, onClick: () => toast.info("Modification à venir") },
+                  { label: "Suspendre", icon: PauseCircle, onClick: () => suspendCommune.mutate(c.id) },
+                  { label: "Supprimer", icon: Trash2, onClick: () => { if (confirm("Supprimer " + c.name + " ?")) deleteCommune.mutate(c.id); }, variant: "danger" },
+                ]} />
               </div>
             </li>
           ))}
