@@ -1,7 +1,8 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { User, MapPin, Shield, Phone, Plus, Trash2, Loader2, LogOut, Save } from "lucide-react";
+import { User, MapPin, Shield, Phone, Plus, Trash2, Loader2, LogOut, Save, Bell, BellOff } from "lucide-react";
+import { usePushNotifications } from "@/hooks/usePushNotifications";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 
@@ -52,6 +53,7 @@ function ProfilPage() {
       <IdentitySection userId={userId} email={email} qc={qc} />
       <CommuneSection userId={userId} qc={qc} navigate={navigate} />
       <VoisinVigilantSection userId={userId} qc={qc} />
+      <PushNotificationsSection />
       <TrustedContactsSection userId={userId} />
       <SignOutSection navigate={navigate} />
     </div>
@@ -164,8 +166,23 @@ function VoisinVigilantSection({ userId, qc }: { userId: string; qc: ReturnType<
   const { data: profile } = useQuery({
     queryKey: ["profile-vv", userId],
     queryFn: async () => {
-      const { data } = await supabase.from("profiles").select("is_voisin_vigilant").eq("id", userId).single();
+      const { data } = await supabase
+        .from("profiles")
+        .select("is_voisin_vigilant, created_at")
+        .eq("id", userId)
+        .single();
       return data;
+    },
+  });
+
+  const { data: stats } = useQuery({
+    queryKey: ["vv-stats", userId],
+    queryFn: async () => {
+      const [reps, sos] = await Promise.all([
+        supabase.from("reports").select("id", { count: "exact", head: true }).eq("user_id", userId),
+        supabase.from("sos_events").select("id", { count: "exact", head: true }).eq("user_id", userId),
+      ]);
+      return { reports: reps.count ?? 0, sos: sos.count ?? 0 };
     },
   });
 
@@ -182,9 +199,46 @@ function VoisinVigilantSection({ userId, qc }: { userId: string; qc: ReturnType<
   });
 
   const active = profile?.is_voisin_vigilant ?? false;
+  const daysSince = profile?.created_at
+    ? Math.floor((Date.now() - new Date(profile.created_at).getTime()) / 86_400_000)
+    : null;
 
   return (
-    <section className="rounded-2xl border border-border bg-card p-4 shadow-card">
+    <section className="rounded-2xl border border-border bg-card p-4 shadow-card space-y-4">
+      {/* Badge visible uniquement quand actif */}
+      {active && (
+        <div className="flex items-center gap-4 rounded-xl border border-primary/30 bg-primary/5 p-3">
+          <div className="relative flex h-14 w-14 shrink-0 items-center justify-center rounded-full bg-primary/10 ring-2 ring-primary/30">
+            <Shield className="h-7 w-7 text-primary" />
+            <span className="absolute -right-1 -top-1 flex h-5 w-5 items-center justify-center rounded-full bg-primary text-[10px] font-bold text-primary-foreground">
+              ✓
+            </span>
+          </div>
+          <div className="flex-1 min-w-0">
+            <p className="font-bold leading-tight text-primary">Voisin Vigilant</p>
+            {daysSince !== null && (
+              <p className="text-xs text-muted-foreground">
+                Membre depuis {daysSince === 0 ? "aujourd'hui" : `${daysSince} jour${daysSince > 1 ? "s" : ""}`}
+              </p>
+            )}
+            <div className="mt-2 flex items-center gap-4">
+              <div className="text-center">
+                <p className="text-lg font-bold leading-none tabular-nums">{stats?.reports ?? "—"}</p>
+                <p className="text-[10px] text-muted-foreground">
+                  signalement{(stats?.reports ?? 0) !== 1 ? "s" : ""}
+                </p>
+              </div>
+              <div className="h-8 w-px bg-border" />
+              <div className="text-center">
+                <p className="text-lg font-bold leading-none tabular-nums text-sos">{stats?.sos ?? "—"}</p>
+                <p className="text-[10px] text-muted-foreground">SOS</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Ligne toggle */}
       <div className="flex items-start gap-4">
         <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-primary/10">
           <Shield className="h-5 w-5 text-primary" />
@@ -194,6 +248,11 @@ function VoisinVigilantSection({ userId, qc }: { userId: string; qc: ReturnType<
           <p className="mt-0.5 text-xs text-muted-foreground">
             Participez activement à la sécurité de votre quartier. Votre badge apparaît sur le fil.
           </p>
+          {!active && stats && (stats.reports > 0 || stats.sos > 0) && (
+            <p className="mt-1 text-xs text-muted-foreground">
+              {stats.reports} signalement{stats.reports !== 1 ? "s" : ""} · {stats.sos} SOS
+            </p>
+          )}
         </div>
         <button
           type="button"
@@ -203,8 +262,65 @@ function VoisinVigilantSection({ userId, qc }: { userId: string; qc: ReturnType<
           aria-checked={active}
           role="switch"
         >
-          <span className={`absolute top-0.5 h-6 w-6 rounded-full bg-white shadow transition-transform ${active ? "translate-x-5" : "translate-x-0.5"}`} />
+          <span
+            className={`absolute top-0.5 h-6 w-6 rounded-full bg-white shadow transition-transform ${active ? "translate-x-5" : "translate-x-0.5"}`}
+          />
         </button>
+      </div>
+    </section>
+  );
+}
+
+// ── Push Notifications ────────────────────────────────────────────────────────
+function PushNotificationsSection() {
+  const { state, error, subscribe, unsubscribe } = usePushNotifications();
+
+  const label: Record<typeof state, string> = {
+    loading:      "Chargement…",
+    unsupported:  "Non supporté",
+    denied:       "Bloquées",
+    subscribed:   "Activées",
+    unsubscribed: "Désactivées",
+  };
+
+  return (
+    <section className="rounded-2xl border border-border bg-card p-4 shadow-card space-y-3">
+      <h2 className="flex items-center gap-2 text-sm font-semibold uppercase tracking-wider text-muted-foreground">
+        <Bell className="h-4 w-4" /> Notifications push
+      </h2>
+
+      <div className="flex items-start gap-4">
+        <div className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-full ${state === "subscribed" ? "bg-primary/10" : "bg-muted"}`}>
+          {state === "subscribed"
+            ? <Bell className="h-5 w-5 text-primary" />
+            : <BellOff className="h-5 w-5 text-muted-foreground" />}
+        </div>
+        <div className="flex-1 min-w-0">
+          <p className="font-semibold">
+            {label[state]}
+            {state === "loading" && <Loader2 className="ml-2 inline h-4 w-4 animate-spin" />}
+          </p>
+          <p className="mt-0.5 text-xs text-muted-foreground">
+            {state === "unsupported" && "Votre navigateur ne supporte pas les notifications push."}
+            {state === "denied" && "Débloquées dans les paramètres de votre navigateur."}
+            {state === "subscribed" && "Vous recevrez les alertes importantes de votre commune."}
+            {state === "unsubscribed" && "Recevez les alertes de votre commune en temps réel."}
+          </p>
+          {error && <p className="mt-1 text-xs text-sos">{error}</p>}
+        </div>
+        {(state === "subscribed" || state === "unsubscribed") && (
+          <button
+            type="button"
+            onClick={state === "subscribed" ? unsubscribe : subscribe}
+            className={`relative h-7 w-12 rounded-full transition-colors ${state === "subscribed" ? "bg-primary" : "bg-muted"}`}
+            role="switch"
+            aria-checked={state === "subscribed"}
+          >
+            <span
+              className={`absolute top-0.5 h-6 w-6 rounded-full bg-white shadow transition-transform ${state === "subscribed" ? "translate-x-5" : "translate-x-0.5"}`}
+            />
+          </button>
+        )}
       </div>
     </section>
   );
@@ -220,142 +336,4 @@ function TrustedContactsSection({ userId }: { userId: string }) {
   const { data: contacts } = useQuery({
     queryKey: ["trusted-contacts", userId],
     queryFn: async () => {
-      const { data } = await supabase
-        .from("trusted_contacts")
-        .select("id, name, phone")
-        .eq("user_id", userId)
-        .order("created_at");
-      return (data ?? []) as TrustedContact[];
-    },
-  });
-
-  const add = useMutation({
-    mutationFn: async () => {
-      if (!newName.trim() || !newPhone.trim()) throw new Error("Nom et téléphone requis.");
-      const { error } = await supabase.from("trusted_contacts").insert({
-        user_id: userId,
-        name: newName.trim(),
-        phone: newPhone.trim(),
-      });
-      if (error) throw error;
-    },
-    onSuccess: () => {
-      qc.invalidateQueries({ queryKey: ["trusted-contacts", userId] });
-      setNewName(""); setNewPhone(""); setShowAdd(false);
-      toast.success("Contact ajouté.");
-    },
-    onError: (e: Error) => toast.error(e.message),
-  });
-
-  const remove = useMutation({
-    mutationFn: async (id: string) => {
-      const { error } = await supabase.from("trusted_contacts").delete().eq("id", id).eq("user_id", userId);
-      if (error) throw error;
-    },
-    onSuccess: () => {
-      qc.invalidateQueries({ queryKey: ["trusted-contacts", userId] });
-      toast.success("Contact supprimé.");
-    },
-    onError: (e: Error) => toast.error(e.message),
-  });
-
-  return (
-    <section className="rounded-2xl border border-border bg-card p-4 shadow-card space-y-3">
-      <div className="flex items-center justify-between">
-        <h2 className="flex items-center gap-2 text-sm font-semibold uppercase tracking-wider text-muted-foreground">
-          <Phone className="h-4 w-4" /> Contacts de confiance
-        </h2>
-        <button
-          type="button"
-          onClick={() => setShowAdd(!showAdd)}
-          className="flex items-center gap-1 rounded-lg bg-primary/10 px-2 py-1 text-xs font-medium text-primary"
-        >
-          <Plus className="h-3.5 w-3.5" /> Ajouter
-        </button>
-      </div>
-
-      {showAdd && (
-        <div className="space-y-2 rounded-xl border border-border p-3">
-          <input
-            value={newName}
-            onChange={(e) => setNewName(e.target.value)}
-            placeholder="Nom (ex : Maman)"
-            className="w-full rounded-lg border border-input bg-background p-2 text-sm outline-none ring-ring focus:ring-2"
-          />
-          <input
-            value={newPhone}
-            onChange={(e) => setNewPhone(e.target.value)}
-            placeholder="Téléphone (ex : 06 12 34 56 78)"
-            type="tel"
-            className="w-full rounded-lg border border-input bg-background p-2 text-sm outline-none ring-ring focus:ring-2"
-          />
-          <div className="flex gap-2">
-            <button
-              type="button"
-              onClick={() => add.mutate()}
-              disabled={add.isPending}
-              className="flex flex-1 items-center justify-center gap-1 rounded-lg bg-primary py-2 text-sm font-medium text-primary-foreground disabled:opacity-50"
-            >
-              {add.isPending ? <Loader2 className="h-4 w-4 animate-spin" /> : "Enregistrer"}
-            </button>
-            <button type="button" onClick={() => setShowAdd(false)} className="rounded-lg border border-border px-3 py-2 text-sm">
-              Annuler
-            </button>
-          </div>
-        </div>
-      )}
-
-      {contacts?.length === 0 && !showAdd && (
-        <p className="text-sm text-muted-foreground">Aucun contact de confiance enregistré.</p>
-      )}
-
-      <ul className="space-y-2">
-        {contacts?.map((c) => (
-          <li key={c.id} className="flex items-center justify-between rounded-xl border border-border bg-background p-3">
-            <div>
-              <p className="text-sm font-medium">{c.name}</p>
-              <p className="text-xs text-muted-foreground">{c.phone}</p>
-            </div>
-            <div className="flex gap-2">
-              <a href={`tel:${c.phone.replace(/\s/g, "")}`} className="rounded-lg bg-primary/10 p-2 text-primary">
-                <Phone className="h-4 w-4" />
-              </a>
-              <button
-                type="button"
-                onClick={() => remove.mutate(c.id)}
-                disabled={remove.isPending}
-                className="rounded-lg bg-sos/10 p-2 text-sos disabled:opacity-50"
-              >
-                <Trash2 className="h-4 w-4" />
-              </button>
-            </div>
-          </li>
-        ))}
-      </ul>
-    </section>
-  );
-}
-
-// ── Sign Out ──────────────────────────────────────────────────────────────────
-function SignOutSection({ navigate }: { navigate: ReturnType<typeof useNavigate> }) {
-  const signOut = useMutation({
-    mutationFn: async () => {
-      const { error } = await supabase.auth.signOut();
-      if (error) throw error;
-    },
-    onSuccess: () => navigate({ to: "/" }),
-    onError: (e: Error) => toast.error(e.message),
-  });
-
-  return (
-    <button
-      type="button"
-      onClick={() => signOut.mutate()}
-      disabled={signOut.isPending}
-      className="flex w-full items-center justify-center gap-2 rounded-2xl border border-sos/30 bg-sos/5 p-4 text-sm font-medium text-sos disabled:opacity-50"
-    >
-      {signOut.isPending ? <Loader2 className="h-4 w-4 animate-spin" /> : <LogOut className="h-4 w-4" />}
-      Se déconnecter
-    </button>
-  );
-}
+      const { data }

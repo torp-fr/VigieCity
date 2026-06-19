@@ -1,9 +1,9 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { Loader2, Map as MapIcon } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
-import { categoryLabel, categoryIcon } from "@/lib/categories";
+import { categoryLabel, categoryIcon, REPORT_CATEGORIES, SEVERITY_OPTIONS } from "@/lib/categories";
 
 export const Route = createFileRoute("/carte")({
   head: () => ({
@@ -33,12 +33,8 @@ const SEVERITY_COLORS: Record<string, string> = {
 };
 
 function CartePage() {
-  const [userId, setUserId] = useState<string | null>(null);
-  const [mapReady, setMapReady] = useState(false);
-
-  useEffect(() => {
-    supabase.auth.getUser().then(({ data }) => setUserId(data.user?.id ?? null));
-  }, []);
+  const [filterSeverity, setFilterSeverity] = useState<string | null>(null);
+  const [filterCategory, setFilterCategory] = useState<string | null>(null);
 
   const { data: reports, isLoading } = useQuery({
     queryKey: ["reports", "carte"],
@@ -56,41 +52,113 @@ function CartePage() {
     },
   });
 
-  useEffect(() => {
-    setMapReady(true);
-  }, []);
+  const filteredReports = (reports ?? []).filter((r) => {
+    if (filterSeverity && r.severity !== filterSeverity) return false;
+    if (filterCategory && r.category !== filterCategory) return false;
+    return true;
+  });
+
+  // Determine which categories are present in the data
+  const activeCategories = [...new Set((reports ?? []).map((r) => r.category))];
 
   return (
     <div className="flex flex-col" style={{ height: "calc(100vh - 120px)" }}>
-      <header className="flex items-center gap-2 px-4 py-3">
-        <MapIcon className="h-5 w-5 text-primary" />
-        <h1 className="text-lg font-bold">Carte du quartier</h1>
-        {reports && <span className="rounded-full bg-muted px-2 py-0.5 text-xs text-muted-foreground">{reports.length} signalement{reports.length !== 1 ? "s" : ""}</span>}
+      <header className="flex flex-col gap-2 px-4 py-3">
+        <div className="flex items-center gap-2">
+          <MapIcon className="h-5 w-5 text-primary" />
+          <h1 className="text-lg font-bold">Carte du quartier</h1>
+          {reports && (
+            <span className="rounded-full bg-muted px-2 py-0.5 text-xs text-muted-foreground">
+              {filteredReports.length}/{reports.length}
+            </span>
+          )}
+        </div>
+
+        {/* Severity filter chips */}
+        <div className="flex gap-1.5 overflow-x-auto pb-0.5 scrollbar-none">
+          <FilterChip
+            label="Tous"
+            active={!filterSeverity && !filterCategory}
+            onClick={() => { setFilterSeverity(null); setFilterCategory(null); }}
+          />
+          {SEVERITY_OPTIONS.map((s) => (
+            <FilterChip
+              key={s.value}
+              label={s.label}
+              active={filterSeverity === s.value}
+              onClick={() => setFilterSeverity(filterSeverity === s.value ? null : s.value)}
+              dot={SEVERITY_COLORS[s.value]}
+            />
+          ))}
+        </div>
+
+        {/* Category filter chips — only show present categories */}
+        {activeCategories.length > 0 && (
+          <div className="flex gap-1.5 overflow-x-auto pb-0.5 scrollbar-none">
+            {REPORT_CATEGORIES.filter((c) => activeCategories.includes(c.value)).map((c) => (
+              <FilterChip
+                key={c.value}
+                label={`${c.icon} ${c.label}`}
+                active={filterCategory === c.value}
+                onClick={() => setFilterCategory(filterCategory === c.value ? null : c.value)}
+              />
+            ))}
+          </div>
+        )}
       </header>
 
       {isLoading ? (
         <div className="flex flex-1 items-center justify-center">
           <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
         </div>
-      ) : mapReady ? (
-        <LeafletMap reports={reports ?? []} />
-      ) : null}
+      ) : (
+        <LeafletMap reports={filteredReports} allReports={reports ?? []} />
+      )}
     </div>
   );
 }
 
-// Lazy-load Leaflet to avoid SSR issues
-function LeafletMap({ reports }: { reports: Report[] }) {
+function FilterChip({
+  label, active, onClick, dot,
+}: {
+  label: string;
+  active: boolean;
+  onClick: () => void;
+  dot?: string;
+}) {
+  return (
+    <button
+      onClick={onClick}
+      className={`inline-flex shrink-0 items-center gap-1 rounded-full border px-2.5 py-1 text-xs font-semibold transition-colors ${
+        active
+          ? "border-primary bg-primary text-primary-foreground"
+          : "border-border bg-card text-muted-foreground hover:bg-muted"
+      }`}
+    >
+      {dot && (
+        <span className="h-2 w-2 rounded-full shrink-0" style={{ backgroundColor: dot }} />
+      )}
+      {label}
+    </button>
+  );
+}
+
+// ── Leaflet Map ────────────────────────────────────────────────────────────────
+// Stable mount: tiles loaded once, markers updated without re-centering.
+function LeafletMap({ reports, allReports }: { reports: Report[]; allReports: Report[] }) {
   const mapId = "vigie-leaflet-map";
+  const mapRef = useRef<any>(null);          // L.Map
+  const layerRef = useRef<any>(null);        // L.LayerGroup
+  const centeredRef = useRef(false);
+  const LRef = useRef<any>(null);
 
+  // Mount: init map tile layer
   useEffect(() => {
-    let map: L.Map | null = null;
-
     async function initMap() {
       const L = (await import("leaflet")).default;
       await import("leaflet/dist/leaflet.css");
+      LRef.current = L;
 
-      // Fix default icon paths for bundlers
       // @ts-ignore
       delete L.Icon.Default.prototype._getIconUrl;
       L.Icon.Default.mergeOptions({
@@ -100,77 +168,7 @@ function LeafletMap({ reports }: { reports: Report[] }) {
       });
 
       const container = document.getElementById(mapId);
-      if (!container) return;
+      if (!container || mapRef.current) return;
 
-      // Center on France if no reports, else on reports centroid
-      let center: [number, number] = [46.6, 2.3];
-      let zoom = 6;
-      if (reports.length > 0) {
-        const lats = reports.map((r) => r.lat);
-        const lngs = reports.map((r) => r.lng);
-        center = [
-          (Math.min(...lats) + Math.max(...lats)) / 2,
-          (Math.min(...lngs) + Math.max(...lngs)) / 2,
-        ];
-        zoom = 13;
-      }
-
-      map = L.map(container, { center, zoom });
-
-      L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
-        attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>',
-        maxZoom: 19,
-      }).addTo(map);
-
-      // Add markers
-      for (const r of reports) {
-        const color = SEVERITY_COLORS[r.severity] ?? SEVERITY_COLORS.info;
-        const icon = L.divIcon({
-          className: "",
-          html: `<div style="
-            width: 36px; height: 36px; border-radius: 50% 50% 50% 0;
-            background: ${color}; border: 2px solid white;
-            transform: rotate(-45deg);
-            box-shadow: 0 2px 6px rgba(0,0,0,.35);
-            display: flex; align-items: center; justify-content: center;
-          "><span style="transform: rotate(45deg); font-size: 16px; line-height: 1;">${categoryIcon(r.category)}</span></div>`,
-          iconSize: [36, 36],
-          iconAnchor: [18, 36],
-          popupAnchor: [0, -38],
-        });
-
-        const ago = timeAgo(r.created_at);
-        const addr = r.approximate_address ? `<p style="font-size:11px;color:#666;margin:2px 0">📍 ${r.approximate_address}</p>` : "";
-        const desc = r.description.length > 120 ? r.description.slice(0, 120) + "…" : r.description;
-
-        L.marker([r.lat, r.lng], { icon })
-          .bindPopup(`
-            <div style="min-width:180px;max-width:240px">
-              <b style="font-size:13px">${categoryLabel(r.category)}</b>
-              <span style="display:inline-block;margin-left:6px;padding:1px 6px;border-radius:999px;font-size:10px;font-weight:600;background:${color}22;color:${color};border:1px solid ${color}44">${r.severity}</span>
-              ${addr}
-              <p style="font-size:12px;margin:4px 0;color:#333">${desc}</p>
-              <p style="font-size:11px;color:#999;margin:0">${ago}</p>
-            </div>
-          `)
-          .addTo(map!);
-      }
-    }
-
-    initMap();
-
-    return () => {
-      if (map) map.remove();
-    };
-  }, [reports]);
-
-  return <div id={mapId} className="flex-1" style={{ minHeight: 0, height: "100%" }} />;
-}
-
-function timeAgo(iso: string) {
-  const diff = (Date.now() - new Date(iso).getTime()) / 1000;
-  if (diff < 60) return "à l'instant";
-  if (diff < 3600) return `il y a ${Math.floor(diff / 60)} min`;
-  if (diff < 86400) return `il y a ${Math.floor(diff / 3600)} h`;
-  return `il y a ${Math.floor(diff / 86400)} j`;
-}
+      const map = L.map(container, { center: [46.6, 2.3] as [number, number], zoom: 6 });
+      mapRef.current = ma
