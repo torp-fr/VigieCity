@@ -35,6 +35,32 @@ const SEVERITY_COLORS: Record<string, string> = {
 function CartePage() {
   const [filterSeverity, setFilterSeverity] = useState<string | null>(null);
   const [filterCategory, setFilterCategory] = useState<string | null>(null);
+  const [userPos, setUserPos] = useState<[number, number] | null>(null);
+  const [tracking, setTracking] = useState(false);
+  const watchIdRef = useRef<number | null>(null);
+
+  // Geoloc tracking
+  useEffect(() => {
+    if (!('geolocation' in navigator)) return;
+    navigator.geolocation.getCurrentPosition(
+      (pos) => setUserPos([pos.coords.latitude, pos.coords.longitude]),
+      () => {}
+    );
+  }, []);
+
+  const startTracking = () => {
+    if (!('geolocation' in navigator)) return;
+    setTracking(true);
+    watchIdRef.current = navigator.geolocation.watchPosition(
+      (pos) => setUserPos([pos.coords.latitude, pos.coords.longitude]),
+      () => setTracking(false),
+      { enableHighAccuracy: true, maximumAge: 5000 }
+    );
+  };
+  const stopTracking = () => {
+    if (watchIdRef.current !== null) navigator.geolocation.clearWatch(watchIdRef.current);
+    setTracking(false);
+  };
 
   const { data: reports, isLoading } = useQuery({
     queryKey: ["reports", "carte"],
