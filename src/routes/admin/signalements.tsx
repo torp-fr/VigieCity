@@ -12,6 +12,7 @@ import {
   MessageSquare,
   X,
 } from "lucide-react";
+// Note: Lock import removed — AdminShell gère l'auth guard
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { categoryIcon, categoryLabel } from "@/lib/categories";
@@ -174,16 +175,6 @@ function SignalementsAdmin() {
       newStatus: modal.action,
       comment: modal.comment,
     });
-  }
-
-  // ── Gate ────────────────────────────────────────────────────────────────────
-  if (authed === false || isMod === false) {
-    return (
-      <div className="flex flex-col items-center justify-center px-4 pt-20 text-center">
-        <Lock className="mx-auto h-10 w-10 text-muted-foreground" />
-        <h1 className="mt-3 text-xl font-semibold">Accès réservé</h1>
-      </div>
-    );
   }
 
   return (

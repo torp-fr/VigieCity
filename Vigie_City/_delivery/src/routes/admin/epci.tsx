@@ -1,4 +1,4 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, Link } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import {
@@ -8,6 +8,7 @@ import {
   XCircle,
   ChevronRight,
   Loader2,
+  Lock,
   Plus,
   Trash2,
   Mail,
@@ -76,11 +77,13 @@ const TABS: { id: TabId; label: string; icon: React.ComponentType<{ className?: 
 
 function EpciAdminPage() {
   const [userId, setUserId] = useState<string | null>(null);
+  const [authed, setAuthed] = useState<boolean | null>(null);
   const [activeTab, setActiveTab] = useState<TabId>("communes");
   const qc = useQueryClient();
 
   useEffect(() => {
     supabase.auth.getUser().then(({ data }) => {
+      setAuthed(!!data.user);
       setUserId(data.user?.id ?? null);
     });
   }, []);
@@ -198,6 +201,32 @@ function EpciAdminPage() {
   });
 
   // ── Gates ────────────────────────────────────────────────────────────────────
+
+  if (authed === false || (authed && myRole === null && userId)) {
+    return (
+      <div className="flex flex-col items-center justify-center px-4 pt-20 text-center">
+        <Lock className="mx-auto h-10 w-10 text-muted-foreground" />
+        <h1 className="mt-3 text-xl font-semibold">Accès réservé EPCI</h1>
+        <p className="mt-2 text-sm text-muted-foreground">
+          Ce tableau de bord est réservé aux administrateurs d'intercommunalité.
+        </p>
+        <Link
+          to="/"
+          className="mt-5 inline-flex items-center gap-2 rounded-xl bg-primary px-5 py-3 text-sm font-semibold text-primary-foreground"
+        >
+          Retour à l'accueil
+        </Link>
+      </div>
+    );
+  }
+
+  if (authed === null || myRole === undefined) {
+    return (
+      <div className="flex justify-center pt-20">
+        <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
+      </div>
+    );
+  }
 
   const activeCount = communes.filter((c) => c.is_active).length;
   const maxCommunes = interco?.max_communes ?? 0;
@@ -441,4 +470,328 @@ function StatsTab({
                 {c.is_active ? "Active" : "Inactive"}
               </span>
               <span
-                className={`shrink-0 rounded-fu
+                className={`shrink-0 rounded-full px-2 py-0.5 text-[10px] font-semibold ${
+                  c.admins.length > 0
+                    ? "bg-primary/10 text-primary"
+                    : "bg-destructive/10 text-destructive"
+                }`}
+              >
+                {c.admins.length} admin{c.admins.length !== 1 ? "s" : ""}
+              </span>
+            </li>
+          ))}
+        </ul>
+      </div>
+    </div>
+  );
+}
+
+// ─── Tab Facturation ──────────────────────────────────────────────────────────
+
+function FacturationTab({
+  pricingTiers,
+  activeCount,
+  intercoName,
+}: {
+  pricingTiers: PricingTier[];
+  activeCount: number;
+  intercoName?: string;
+}) {
+  const currentTier = pricingTiers.find(
+    (t) =>
+      activeCount >= t.nb_communes_min &&
+      (t.nb_communes_max === null || activeCount <= t.nb_communes_max),
+  );
+
+  const tierRange = (t: PricingTier) =>
+    t.nb_communes_max
+      ? `${t.nb_communes_min}–${t.nb_communes_max} communes`
+      : `>${t.nb_communes_min - 1} communes`;
+
+  const mailto = [
+    `mailto:contact@vigiecity.fr`,
+    `?subject=${encodeURIComponent("Changement de forfait EPCI")}`,
+    `&body=${encodeURIComponent(
+      `Bonjour,\n\nNous souhaitons modifier notre forfait EPCI.\n\nIntercommunalité : ${intercoName ?? "[NOM]"}\nForfait souhaité : [FORFAIT]\n\nMerci`,
+    )}`,
+  ].join("");
+
+  return (
+    <div className="space-y-5">
+      {/* Forfait en cours */}
+      {currentTier ? (
+        <div className="rounded-2xl bg-gradient-to-br from-primary to-blue-700 p-5 text-white shadow-card">
+          <p className="text-xs font-medium uppercase tracking-wider opacity-70">
+            Forfait en cours
+          </p>
+          <div className="mt-2 flex items-end gap-1.5">
+            <span className="text-3xl font-bold">{currentTier.price_monthly}€</span>
+            <span className="mb-0.5 text-sm opacity-70">/mois HT</span>
+          </div>
+          <p className="mt-1 font-semibold">{currentTier.label}</p>
+          {currentTier.notes && (
+            <p className="mt-0.5 text-xs opacity-65">{currentTier.notes}</p>
+          )}
+          <div className="mt-3 rounded-xl bg-white/15 px-3 py-2 text-xs">
+            {tierRange(currentTier)} · {activeCount} actives actuellement
+          </div>
+        </div>
+      ) : (
+        <div className="rounded-xl border border-border bg-muted/40 p-4 text-sm text-muted-foreground">
+          Aucun forfait standard détecté pour {activeCount} communes actives.{" "}
+          <a href={mailto} className="underline hover:text-foreground">
+            Contactez VigieCity
+          </a>{" "}
+          pour préciser votre contrat.
+        </div>
+      )}
+
+      {/* Grille tarifaire */}
+      <div>
+        <p className="mb-3 text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+          Grille tarifaire EPCI
+        </p>
+
+        {pricingTiers.length === 0 ? (
+          <div className="flex justify-center py-6">
+            <Loader2 className="h-5 w-5 animate-spin text-muted-foreground" />
+          </div>
+        ) : (
+          <ul className="space-y-2">
+            {pricingTiers.map((tier) => {
+              const isCurrent = tier.id === currentTier?.id;
+              return (
+                <li
+                  key={tier.id}
+                  className={`flex items-center gap-3 rounded-xl border p-4 transition ${
+                    isCurrent
+                      ? "border-primary bg-primary/5"
+                      : "border-border bg-card"
+                  }`}
+                >
+                  <div className="min-w-0 flex-1">
+                    <div className="flex flex-wrap items-center gap-2">
+                      <span
+                        className={`text-sm font-semibold ${isCurrent ? "text-primary" : ""}`}
+                      >
+                        {tier.label}
+                      </span>
+                      {isCurrent && (
+                        <span className="rounded-full bg-primary/15 px-2 py-0.5 text-[10px] font-semibold text-primary">
+                          Actuel
+                        </span>
+                      )}
+                    </div>
+                    <p className="mt-0.5 text-xs text-muted-foreground">
+                      {tierRange(tier)}
+                    </p>
+                    {tier.notes && (
+                      <p className="mt-0.5 text-xs italic text-muted-foreground/70">
+                        {tier.notes}
+                      </p>
+                    )}
+                  </div>
+                  <div className="shrink-0 text-right">
+                    <p
+                      className={`text-lg font-bold ${isCurrent ? "text-primary" : ""}`}
+                    >
+                      {tier.price_monthly}€
+                    </p>
+                    <p className="text-[10px] text-muted-foreground">/mois</p>
+                  </div>
+                </li>
+              );
+            })}
+          </ul>
+        )}
+      </div>
+
+      {/* CTA upgrade */}
+      <a
+        href={mailto}
+        className="flex items-center gap-2 rounded-xl border border-primary/25 bg-primary/5 p-4 text-sm font-medium text-primary transition hover:bg-primary/10"
+      >
+        <Mail className="h-4 w-4 shrink-0" />
+        <span className="flex-1">Changer de forfait ou ajouter des communes</span>
+        <ArrowRight className="h-4 w-4 shrink-0 opacity-50" />
+      </a>
+
+      <p className="text-center text-xs text-muted-foreground">
+        contact@vigiecity.fr · Tarifs HT · Engagement annuel
+      </p>
+    </div>
+  );
+}
+
+// ─── StatCard ─────────────────────────────────────────────────────────────────
+
+function StatCard({
+  label,
+  value,
+  sub,
+  icon: Icon,
+  color = "default",
+}: {
+  label: string;
+  value: string | number;
+  sub?: string;
+  icon: React.ComponentType<{ className?: string }>;
+  color?: "primary" | "destructive" | "muted" | "default";
+}) {
+  const valueCls = {
+    primary: "text-primary",
+    destructive: "text-destructive",
+    muted: "text-muted-foreground",
+    default: "text-foreground",
+  }[color];
+
+  const iconCls = {
+    primary: "text-primary",
+    destructive: "text-destructive",
+    muted: "text-muted-foreground",
+    default: "text-muted-foreground",
+  }[color];
+
+  return (
+    <div className="rounded-xl border border-border bg-card p-4">
+      <Icon className={`h-5 w-5 ${iconCls}`} />
+      <p className={`mt-2 text-2xl font-bold leading-none ${valueCls}`}>{value}</p>
+      <p className="mt-1 text-xs font-medium text-foreground">{label}</p>
+      {sub && <p className="mt-0.5 text-xs text-muted-foreground">{sub}</p>}
+    </div>
+  );
+}
+
+// ─── CommuneCard ──────────────────────────────────────────────────────────────
+
+function CommuneCard({
+  commune,
+  quotaFull,
+  onToggle,
+  onRemoveAdmin,
+}: {
+  commune: Commune;
+  quotaFull: boolean;
+  onToggle: (active: boolean) => void;
+  onRemoveAdmin: (userId: string) => void;
+}) {
+  const [expanded, setExpanded] = useState(false);
+
+  return (
+    <li className="overflow-hidden rounded-2xl border border-border bg-card shadow-card">
+      {/* Header commune */}
+      <button
+        type="button"
+        onClick={() => setExpanded((v) => !v)}
+        className="flex w-full items-center gap-3 p-4 text-left"
+      >
+        <div
+          className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-xl ${
+            commune.is_active
+              ? "bg-emerald-100 text-emerald-600"
+              : "bg-muted text-muted-foreground"
+          }`}
+        >
+          {commune.is_active ? (
+            <CheckCircle2 className="h-5 w-5" />
+          ) : (
+            <XCircle className="h-5 w-5" />
+          )}
+        </div>
+
+        <div className="min-w-0 flex-1">
+          <p className="truncate font-semibold leading-tight">{commune.name}</p>
+          <p className="mt-0.5 text-xs text-muted-foreground">
+            {commune.admins.length} admin{commune.admins.length !== 1 ? "s" : ""} ·{" "}
+            {commune.is_active ? "Active" : "Inactive"}
+          </p>
+        </div>
+
+        <ChevronRight
+          className={`h-4 w-4 shrink-0 text-muted-foreground transition-transform ${
+            expanded ? "rotate-90" : ""
+          }`}
+        />
+      </button>
+
+      {/* Panneau expandable */}
+      {expanded && (
+        <div className="space-y-4 border-t border-border px-4 pb-4 pt-3">
+          {/* Toggle activation */}
+          <div className="flex items-center justify-between">
+            <span className="text-sm font-medium">
+              {commune.is_active ? "Commune active" : "Commune inactive"}
+            </span>
+            <button
+              type="button"
+              onClick={() => onToggle(!commune.is_active)}
+              disabled={!commune.is_active && quotaFull}
+              title={!commune.is_active && quotaFull ? "Quota contractuel atteint" : undefined}
+              className={`relative inline-flex h-6 w-11 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors ${
+                commune.is_active
+                  ? "bg-primary"
+                  : quotaFull
+                    ? "cursor-not-allowed bg-muted"
+                    : "bg-muted"
+              }`}
+            >
+              <span
+                className={`inline-block h-5 w-5 rounded-full bg-white shadow ring-0 transition-transform ${
+                  commune.is_active ? "translate-x-5" : "translate-x-0"
+                }`}
+              />
+            </button>
+          </div>
+
+          {/* Admins */}
+          <div>
+            <p className="mb-2 text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+              Administrateurs
+            </p>
+
+            {commune.admins.length === 0 ? (
+              <p className="text-xs italic text-muted-foreground">
+                Aucun administrateur assigné à cette commune.
+              </p>
+            ) : (
+              <ul className="space-y-2">
+                {commune.admins.map((admin) => (
+                  <li
+                    key={admin.user_id}
+                    className="flex items-center gap-2 rounded-xl bg-muted/50 px-3 py-2"
+                  >
+                    <Crown className="h-3.5 w-3.5 shrink-0 text-amber-500" />
+                    <span className="flex-1 truncate font-mono text-xs text-muted-foreground">
+                      {admin.user_id.slice(0, 8)}…
+                    </span>
+                    <span className="rounded-full bg-primary/10 px-2 py-0.5 text-[10px] font-medium capitalize text-primary">
+                      {admin.role}
+                    </span>
+                    <button
+                      type="button"
+                      onClick={() => onRemoveAdmin(admin.user_id)}
+                      className="ml-1 rounded-lg p-1 text-muted-foreground hover:bg-destructive/10 hover:text-destructive"
+                      title="Révoquer l'accès"
+                    >
+                      <Trash2 className="h-3.5 w-3.5" />
+                    </button>
+                  </li>
+                ))}
+              </ul>
+            )}
+
+            {/* Inviter un admin */}
+            <a
+              href={`mailto:contact@vigiecity.fr?subject=Invitation%20admin%20-%20${encodeURIComponent(commune.name)}&body=Bonjour%2C%0A%0AJe%20souhaite%20inviter%20un%20administrateur%20pour%20la%20commune%20de%20${encodeURIComponent(commune.name)}.%0A%0AEmail%20:%20[EMAIL]%0AR%C3%B4le%20:%20admin%0A%0AMerci`}
+              className="mt-2 flex items-center gap-2 rounded-xl border border-dashed border-border px-3 py-2 text-xs text-muted-foreground transition hover:bg-muted"
+            >
+              <Plus className="h-3.5 w-3.5" />
+              Inviter un administrateur
+              <Mail className="ml-auto h-3.5 w-3.5 opacity-50" />
+            </a>
+          </div>
+        </div>
+      )}
+    </li>
+  );
+}

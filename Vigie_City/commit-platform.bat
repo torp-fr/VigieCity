@@ -1,20 +1,17 @@
 @echo off
 cd /d "%~dp0"
-git add -A
-git commit -m "feat(admin): M24 — AdminShell desktop + dashboard stats + wrapping toutes les pages /admin/*
 
-- AdminShell.tsx : sidebar emerald fixe + auth guard profiles.role + commune name
-- admin/index.tsx : dashboard stats (4 cartes + tableau signalements recents)
-- admin/alertes.tsx : nouvelle page diffusion alertes push (creer, historique)
-- admin/signalements.tsx : suppression gate auth (AdminShell gere), profiles.collectivity_id
-- admin/epci.tsx : suppression gates auth, wrap AdminShell
-- admin/messagerie.tsx : profiles.collectivity_id (remplace user_roles), 2 vues wrappees
-- admin/publications.tsx : AdminShell wrapper
-- admin/evenements.tsx : AdminShell wrapper
-- admin/services.tsx : AdminShell wrapper
-- admin/urgences.tsx : AdminShell wrapper
-- admin/radio.tsx : AdminShell wrapper"
+echo [1/3] Copie _delivery ^-^> racine...
+cd ..
+powershell -NoProfile -Command "Copy-Item -Recurse -Force '.\Vigie_City\_delivery\*' '.'"
+cd Vigie_City
+echo OK
+
+echo [2/3] Git add + commit...
+git add -A
+git commit -m "feat: session 6 — push_notifications_log, types regen, M23 terrain mobile"
 git push
+
 echo.
 echo Done! Press any key to close.
 pause

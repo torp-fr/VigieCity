@@ -67,7 +67,9 @@ import { Route as AdminEvenementsRouteImport } from './routes/admin/evenements'
 import { Route as AdminEpciRouteImport } from './routes/admin/epci'
 import { Route as AdminAlertesRouteImport } from './routes/admin/alertes'
 import { Route as AdminAgentsRouteImport } from './routes/admin/agents'
+import { Route as AdminTerrainIndexRouteImport } from './routes/admin/terrain/index'
 import { Route as ServicesSignalementIdRouteImport } from './routes/services/signalement.$id'
+import { Route as AdminTerrainTraitesRouteImport } from './routes/admin/terrain/traites'
 
 const UrgencesRoute = UrgencesRouteImport.update({
   id: '/urgences',
@@ -359,10 +361,20 @@ const AdminAgentsRoute = AdminAgentsRouteImport.update({
   path: '/admin/agents',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AdminTerrainIndexRoute = AdminTerrainIndexRouteImport.update({
+  id: '/admin/terrain/',
+  path: '/admin/terrain/',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ServicesSignalementIdRoute = ServicesSignalementIdRouteImport.update({
   id: '/signalement/$id',
   path: '/signalement/$id',
   getParentRoute: () => ServicesRoute,
+} as any)
+const AdminTerrainTraitesRoute = AdminTerrainTraitesRouteImport.update({
+  id: '/admin/terrain/traites',
+  path: '/admin/terrain/traites',
+  getParentRoute: () => rootRouteImport,
 } as any)
 
 export interface FileRoutesByFullPath {
@@ -424,7 +436,9 @@ export interface FileRoutesByFullPath {
   '/admin/': typeof AdminIndexRoute
   '/platform/': typeof PlatformIndexRoute
   '/services/': typeof ServicesIndexRoute
+  '/admin/terrain/traites': typeof AdminTerrainTraitesRoute
   '/services/signalement/$id': typeof ServicesSignalementIdRoute
+  '/admin/terrain/': typeof AdminTerrainIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -484,7 +498,9 @@ export interface FileRoutesByTo {
   '/admin': typeof AdminIndexRoute
   '/platform': typeof PlatformIndexRoute
   '/services': typeof ServicesIndexRoute
+  '/admin/terrain/traites': typeof AdminTerrainTraitesRoute
   '/services/signalement/$id': typeof ServicesSignalementIdRoute
+  '/admin/terrain': typeof AdminTerrainIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -546,7 +562,9 @@ export interface FileRoutesById {
   '/admin/': typeof AdminIndexRoute
   '/platform/': typeof PlatformIndexRoute
   '/services/': typeof ServicesIndexRoute
+  '/admin/terrain/traites': typeof AdminTerrainTraitesRoute
   '/services/signalement/$id': typeof ServicesSignalementIdRoute
+  '/admin/terrain/': typeof AdminTerrainIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -609,7 +627,9 @@ export interface FileRouteTypes {
     | '/admin/'
     | '/platform/'
     | '/services/'
+    | '/admin/terrain/traites'
     | '/services/signalement/$id'
+    | '/admin/terrain/'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -669,7 +689,9 @@ export interface FileRouteTypes {
     | '/admin'
     | '/platform'
     | '/services'
+    | '/admin/terrain/traites'
     | '/services/signalement/$id'
+    | '/admin/terrain'
   id:
     | '__root__'
     | '/'
@@ -730,7 +752,9 @@ export interface FileRouteTypes {
     | '/admin/'
     | '/platform/'
     | '/services/'
+    | '/admin/terrain/traites'
     | '/services/signalement/$id'
+    | '/admin/terrain/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -791,6 +815,8 @@ export interface RootRouteChildren {
   PlatformUsersRoute: typeof PlatformUsersRoute
   AdminIndexRoute: typeof AdminIndexRoute
   PlatformIndexRoute: typeof PlatformIndexRoute
+  AdminTerrainTraitesRoute: typeof AdminTerrainTraitesRoute
+  AdminTerrainIndexRoute: typeof AdminTerrainIndexRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -1201,12 +1227,26 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminAgentsRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/admin/terrain/': {
+      id: '/admin/terrain/'
+      path: '/admin/terrain'
+      fullPath: '/admin/terrain/'
+      preLoaderRoute: typeof AdminTerrainIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/services/signalement/$id': {
       id: '/services/signalement/$id'
       path: '/signalement/$id'
       fullPath: '/services/signalement/$id'
       preLoaderRoute: typeof ServicesSignalementIdRouteImport
       parentRoute: typeof ServicesRoute
+    }
+    '/admin/terrain/traites': {
+      id: '/admin/terrain/traites'
+      path: '/admin/terrain/traites'
+      fullPath: '/admin/terrain/traites'
+      preLoaderRoute: typeof AdminTerrainTraitesRouteImport
+      parentRoute: typeof rootRouteImport
     }
   }
 }
@@ -1283,6 +1323,8 @@ const rootRouteChildren: RootRouteChildren = {
   PlatformUsersRoute: PlatformUsersRoute,
   AdminIndexRoute: AdminIndexRoute,
   PlatformIndexRoute: PlatformIndexRoute,
+  AdminTerrainTraitesRoute: AdminTerrainTraitesRoute,
+  AdminTerrainIndexRoute: AdminTerrainIndexRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

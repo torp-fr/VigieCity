@@ -339,6 +339,7 @@ function AdminRadioPage() {
         </div>
       )}
     </div>
+    </AdminShell>
   );
 }
 
@@ -386,6 +387,5 @@ function Field({ label, children }: { label: string; children: React.ReactNode }
       <label className="mb-1.5 block text-xs font-semibold text-muted-foreground uppercase tracking-wide">{label}</label>
       {children}
     </div>
-    </AdminShell>
   );
 }
