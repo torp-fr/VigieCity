@@ -1,5 +1,12 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { CheckCircle2, ArrowRight, ChevronDown } from "lucide-react";
+import { useState } from "react";
+import {
+  CheckCircle2, ArrowRight, ChevronDown,
+  BellRing, MapPin, CalendarDays, Newspaper, MessageSquare,
+  Home, Network, Building2,
+  LayoutDashboard, CheckSquare, BarChart3, Map as MapIcon, Users,
+  X, Sparkles, ToggleLeft, ToggleRight,
+} from "lucide-react";
 
 export const Route = createFileRoute("/landing")({
   head: () => ({
@@ -648,31 +655,31 @@ function PhoneMockup() {
 
 const MODULES = [
   {
-    icon: "🔔",
+    Icon: BellRing,
     title: "Alertes & urgences",
     desc: "Diffusez instantanément des alertes à vos habitants : météo, coupures, incidents, avis de sécurité. Notifications push en temps réel.",
     color: "#f59e0b",
   },
   {
-    icon: "📍",
+    Icon: MapPin,
     title: "Signalements citoyens",
     desc: "Les habitants signalent un problème en quelques secondes, avec photo et localisation GPS. Suivi en temps réel de l'avancement.",
     color: "#f43f5e",
   },
   {
-    icon: "📅",
+    Icon: CalendarDays,
     title: "Agenda & événements",
     desc: "Publiez et gérez les événements de votre commune. Les habitants restent informés et peuvent ajouter les dates à leur calendrier.",
     color: "#3b82f6",
   },
   {
-    icon: "📰",
+    Icon: Newspaper,
     title: "Actualités locales",
     desc: "Un fil d'information local, directement depuis votre mairie. Délibérations, travaux, vie associative, informations pratiques.",
     color: "#22c55e",
   },
   {
-    icon: "💬",
+    Icon: MessageSquare,
     title: "Messagerie citoyenne",
     desc: "Un canal de communication direct entre les habitants et les services municipaux. Moins d'appels, plus d'efficacité.",
     color: "#8b5cf6",
@@ -681,19 +688,19 @@ const MODULES = [
 
 const FOR_WHO = [
   {
-    icon: "🏘️",
+    Icon: Home,
     title: "Communes rurales",
     sub: "Petites communes, grands besoins",
     desc: "Une solution clé en main, sans équipe technique requise. Vos habitants connectés à la vie locale du village.",
   },
   {
-    icon: "🏙️",
+    Icon: Network,
     title: "Communautés de communes",
     sub: "Superviser à l'échelle intercommunale",
     desc: "Un tableau de bord unifié pour piloter plusieurs communes membres, avec vue consolidée et gestion décentralisée.",
   },
   {
-    icon: "🌆",
+    Icon: Building2,
     title: "Communes urbaines",
     sub: "Grandes villes, populations actives",
     desc: "Des fonctionnalités avancées pour gérer un volume élevé de signalements, événements et notifications push.",
@@ -719,13 +726,260 @@ const STEPS = [
 ];
 
 const ADMIN_FEATURES = [
-  { icon: "📊", t: "Tableau de bord temps réel" },
-  { icon: "✅", t: "Modération des signalements" },
-  { icon: "📲", t: "Envoi de notifications push" },
-  { icon: "📈", t: "Statistiques d'usage" },
-  { icon: "🗺️", t: "Carte des signalements" },
-  { icon: "👥", t: "Gestion des administrateurs" },
+  { Icon: LayoutDashboard, t: "Tableau de bord temps réel" },
+  { Icon: CheckSquare, t: "Modération des signalements" },
+  { Icon: BellRing, t: "Envoi de notifications push" },
+  { Icon: BarChart3, t: "Statistiques d'usage" },
+  { Icon: MapIcon, t: "Carte des signalements" },
+  { Icon: Users, t: "Gestion des administrateurs" },
 ];
+
+
+// ── Grille tarifaire ──────────────────────────────────────────────────────────
+
+const PRICING_TIERS = [
+  { name: "Nano", range: "< 1 000 hab.", monthly: 49, annual: 490 },
+  { name: "Micro", range: "1 000 – 2 500 hab.", monthly: 99, annual: 990 },
+  { name: "Commune", range: "2 500 – 10 000 hab.", monthly: 189, annual: 1890 },
+  { name: "Ville", range: "10 000 – 50 000 hab.", monthly: 490, annual: 4900 },
+  { name: "Métropole", range: "> 50 000 hab.", monthly: null, annual: null },
+] as const;
+
+const FEATURES_LIST = [
+  "Tous les modules inclus (alertes, signalements, agenda, infos, messagerie)",
+  "Application mobile iOS & Android pour vos habitants",
+  "Espace d'administration web pour vos agents",
+  "Support par email · Mises à jour incluses",
+];
+
+function PricingSection() {
+  const [selected, setSelected] = useState(2); // Commune par défaut
+  const [isInterco, setIsInterco] = useState(false);
+
+  const tier = PRICING_TIERS[selected];
+  const factor = isInterco ? 1.2 : 1;
+  const monthly = tier.monthly ? Math.round(tier.monthly * factor) : null;
+  const annual = tier.annual ? Math.round(tier.annual * factor) : null;
+
+  return (
+    <section id="tarifs" style={{ backgroundColor: "#f0f4ff" }} className="py-20">
+      <div className="mx-auto max-w-4xl px-6">
+        {/* Header */}
+        <div className="text-center">
+          <p className="text-sm font-semibold uppercase tracking-widest text-blue-600">
+            Tarifs
+          </p>
+          <h2 className="mt-2 text-3xl font-extrabold text-gray-900 md:text-4xl">
+            Un modèle transparent,{" "}
+            <span style={{ color: "#1e3a8a" }}>adapté à votre territoire</span>
+          </h2>
+          <p className="mx-auto mt-4 max-w-xl text-gray-500">
+            Sélectionnez la taille de votre collectivité.{" "}
+            <strong>Tous les modules sont inclus</strong> dans chaque offre.
+          </p>
+        </div>
+
+        {/* Tier pills */}
+        <div className="mt-10 flex flex-wrap justify-center gap-2">
+          {PRICING_TIERS.map((t, i) => (
+            <button
+              key={t.name}
+              onClick={() => setSelected(i)}
+              className="flex flex-col items-center rounded-xl px-5 py-3 text-sm font-bold transition-all"
+              style={
+                selected === i
+                  ? { background: "#1e3a8a", color: "white", boxShadow: "0 4px 14px rgba(30,58,138,0.35)" }
+                  : { background: "white", color: "#374151", border: "1.5px solid #e5e7eb" }
+              }
+            >
+              <span>{t.name}</span>
+              <span
+                className="mt-0.5 text-xs font-normal"
+                style={{ color: selected === i ? "#93c5fd" : "#9ca3af" }}
+              >
+                {t.range}
+              </span>
+            </button>
+          ))}
+        </div>
+
+        {/* Interco toggle */}
+        <div className="mt-6 flex items-center justify-center gap-4">
+          <span className={`text-sm font-medium ${!isInterco ? "text-gray-900" : "text-gray-400"}`}>
+            Commune seule
+          </span>
+          <button
+            onClick={() => setIsInterco(!isInterco)}
+            className="flex items-center transition-opacity hover:opacity-80"
+            aria-label="Basculer intercommunalité"
+          >
+            {isInterco ? (
+              <ToggleRight className="h-8 w-8" style={{ color: "#1e3a8a" }} />
+            ) : (
+              <ToggleLeft className="h-8 w-8 text-gray-300" />
+            )}
+          </button>
+          <span className={`flex items-center gap-1.5 text-sm font-medium ${isInterco ? "text-gray-900" : "text-gray-400"}`}>
+            Intercommunalité (CC, CA, CU)
+            {isInterco && (
+              <span className="rounded-full px-2 py-0.5 text-xs font-bold text-white" style={{ backgroundColor: "#1e3a8a" }}>
+                +20 %
+              </span>
+            )}
+          </span>
+        </div>
+
+        {/* Price card */}
+        <div className="mx-auto mt-8 max-w-lg">
+          {monthly === null ? (
+            // Métropole
+            <div
+              className="rounded-2xl p-8 text-center"
+              style={{ background: "linear-gradient(160deg, #1e3a8a, #1d4ed8)" }}
+            >
+              <p className="text-sm font-bold uppercase tracking-widest text-blue-300">Métropole</p>
+              <p className="mt-1 text-xs text-blue-400">{tier.range}</p>
+              <p className="mt-6 text-4xl font-extrabold text-white">Sur devis</p>
+              <p className="mt-2 text-sm text-blue-200">
+                Tarif personnalisé selon votre situation · SLA adaptable
+              </p>
+              <a
+                href="#contact"
+                className="mt-6 inline-flex items-center gap-2 rounded-xl bg-white px-6 py-3 text-sm font-bold text-blue-900 transition hover:bg-blue-50"
+              >
+                Nous contacter <ArrowRight className="h-4 w-4" />
+              </a>
+            </div>
+          ) : (
+            <div
+              className="rounded-2xl bg-white p-8"
+              style={{ boxShadow: "0 8px 40px rgba(30,58,138,0.12)", border: "1.5px solid #e0e7ff" }}
+            >
+              {/* Tier header */}
+              <div className="flex items-start justify-between">
+                <div>
+                  <p className="text-xs font-bold uppercase tracking-widest text-gray-400">
+                    {tier.name}
+                  </p>
+                  <p className="mt-0.5 text-sm text-gray-500">{tier.range}</p>
+                </div>
+                {isInterco && (
+                  <span
+                    className="rounded-full px-3 py-1 text-xs font-bold text-white"
+                    style={{ backgroundColor: "#1e3a8a" }}
+                  >
+                    Intercommunalité +20 %
+                  </span>
+                )}
+              </div>
+
+              {/* Price */}
+              <div className="mt-6 flex items-end gap-2">
+                <span className="text-5xl font-extrabold text-gray-900">{monthly} €</span>
+                <span className="mb-2 text-sm text-gray-400">/mois HT</span>
+              </div>
+              <p className="mt-1.5 text-sm font-semibold" style={{ color: "#1e3a8a" }}>
+                ou {annual?.toLocaleString("fr-FR")} €/an HT{" "}
+                <span className="font-normal text-gray-400">(2 mois offerts)</span>
+              </p>
+
+              {/* Features */}
+              <ul className="mt-6 space-y-2.5">
+                {FEATURES_LIST.map((f) => (
+                  <li key={f} className="flex items-start gap-2.5 text-sm text-gray-600">
+                    <CheckCircle2 className="mt-0.5 h-4 w-4 flex-shrink-0 text-green-500" />
+                    {f}
+                  </li>
+                ))}
+              </ul>
+
+              {/* Interco example */}
+              {isInterco && (
+                <div
+                  className="mt-5 rounded-xl px-4 py-3 text-xs text-blue-700"
+                  style={{ background: "#eff6ff" }}
+                >
+                  Ex. CC de 2 500 hab. → tranche{" "}
+                  <strong>Commune</strong> (189 €/mois) + 20 % interco ={" "}
+                  <strong>227 €/mois HT</strong> / 2 270 €/an HT
+                </div>
+              )}
+
+              {/* CTA */}
+              <a
+                href="#contact"
+                className="mt-6 flex w-full items-center justify-center gap-2 rounded-xl py-3.5 text-sm font-bold text-white transition hover:opacity-90"
+                style={{ backgroundColor: "#1e3a8a" }}
+              >
+                Demander une proposition
+                <ArrowRight className="h-4 w-4" />
+              </a>
+            </div>
+          )}
+        </div>
+
+        {/* Footer note */}
+        <p className="mt-6 text-center text-xs text-gray-400">
+          Tous prix HT · Paiement annuel recommandé (10 × mensuel = 2 mois offerts) ·
+          Remise −10 % sur 2 ans, −15 % sur 3 ans
+        </p>
+      </div>
+    </section>
+  );
+}
+
+// ── Banner promo flottante ────────────────────────────────────────────────────
+
+function PromoBanner() {
+  const [dismissed, setDismissed] = useState(false);
+  if (dismissed) return null;
+  return (
+    <>
+      <style>{`
+        @keyframes vcSlideUp {
+          from { transform: translateY(24px); opacity: 0; }
+          to   { transform: translateY(0);    opacity: 1; }
+        }
+        .vc-promo { animation: vcSlideUp 0.45s cubic-bezier(0.22,1,0.36,1) both; }
+      `}</style>
+      <div
+        className="vc-promo fixed bottom-6 right-6 z-50 w-72 rounded-2xl bg-white p-5"
+        style={{ boxShadow: "0 20px 60px rgba(0,0,0,0.18), 0 4px 16px rgba(0,0,0,0.10)", border: "1px solid #e0e7ff" }}
+      >
+        {/* Close */}
+        <button
+          onClick={() => setDismissed(true)}
+          className="absolute right-3 top-3 rounded-lg p-1 text-gray-400 transition hover:bg-gray-100 hover:text-gray-700"
+          aria-label="Fermer"
+        >
+          <X className="h-4 w-4" />
+        </button>
+
+        {/* Content */}
+        <div className="flex items-center gap-2">
+          <Sparkles className="h-5 w-5 flex-shrink-0" style={{ color: "#f59e0b" }} />
+          <p className="text-sm font-extrabold text-gray-900">Offre à ne pas manquer</p>
+        </div>
+        <p className="mt-2.5 text-sm leading-relaxed text-gray-600">
+          Les <strong>premières collectivités partenaires</strong> bénéficient de{" "}
+          <strong className="text-blue-700">2 mois offerts</strong> avant le début de l'abonnement.
+        </p>
+        <p className="mt-1.5 text-xs text-gray-400">
+          Places limitées · Accès prioritaire aux nouvelles fonctionnalités
+        </p>
+        <a
+          href="#contact"
+          onClick={() => setDismissed(true)}
+          className="mt-4 flex items-center justify-center gap-1.5 rounded-xl py-2.5 text-sm font-bold text-white transition hover:opacity-90"
+          style={{ backgroundColor: "#1e3a8a" }}
+        >
+          En savoir plus
+          <ArrowRight className="h-3.5 w-3.5" />
+        </a>
+      </div>
+    </>
+  );
+}
 
 // ── Page ──────────────────────────────────────────────────────────────────────
 
@@ -794,14 +1048,6 @@ function LandingPage() {
           <div className="flex flex-col items-center gap-10 lg:flex-row lg:items-center lg:gap-16">
             {/* Left copy */}
             <div className="flex-1 text-center lg:text-left">
-              <div
-                className="mb-5 inline-flex items-center gap-2 rounded-full px-4 py-1.5 text-sm font-medium"
-                style={{ backgroundColor: "#ffffff18", color: "#bfdbfe" }}
-              >
-                <span>🏡</span>
-                Pensée pour les collectivités locales françaises
-              </div>
-
               <h1 className="text-4xl font-extrabold leading-tight text-white md:text-5xl lg:text-[3.25rem]">
                 L'application qui connecte{" "}
                 <span style={{ color: "#93c5fd" }}>
@@ -868,7 +1114,7 @@ function LandingPage() {
                 key={c.title}
                 className="rounded-2xl border border-gray-100 bg-gray-50 p-8"
               >
-                <span className="text-4xl">{c.icon}</span>
+                <c.Icon className="h-10 w-10" style={{ color: "#1e3a8a" }} />
                 <h3 className="mt-4 text-lg font-bold text-gray-900">
                   {c.title}
                 </h3>
@@ -910,10 +1156,10 @@ function LandingPage() {
                 className="rounded-2xl border border-gray-100 bg-white p-7 transition hover:shadow-md"
               >
                 <div
-                  className="mb-4 flex h-12 w-12 items-center justify-center rounded-xl text-2xl"
+                  className="mb-4 flex h-12 w-12 items-center justify-center rounded-xl"
                   style={{ backgroundColor: m.color + "18" }}
                 >
-                  {m.icon}
+                  <m.Icon className="h-6 w-6" style={{ color: m.color }} />
                 </div>
                 <h3 className="mb-2 font-bold text-gray-900">{m.title}</h3>
                 <p className="text-sm leading-relaxed text-gray-500">{m.desc}</p>
@@ -927,8 +1173,8 @@ function LandingPage() {
                 background: "linear-gradient(135deg, #1e3a8a, #1d4ed8)",
               }}
             >
-              <div className="mb-4 flex h-12 w-12 items-center justify-center rounded-xl bg-white/20 text-2xl">
-                🖥️
+              <div className="mb-4 flex h-12 w-12 items-center justify-center rounded-xl bg-white/20">
+                <LayoutDashboard className="h-6 w-6 text-white" />
               </div>
               <h3 className="mb-2 font-bold text-white">
                 Espace d'administration
@@ -940,7 +1186,7 @@ function LandingPage() {
               <div className="grid grid-cols-2 gap-1.5">
                 {ADMIN_FEATURES.map((f) => (
                   <div key={f.t} className="flex items-center gap-1.5">
-                    <span className="text-sm">{f.icon}</span>
+                    <f.Icon className="h-3.5 w-3.5 flex-shrink-0 text-blue-300" />
                     <span className="text-xs text-blue-100">{f.t}</span>
                   </div>
                 ))}
@@ -990,211 +1236,7 @@ function LandingPage() {
         </div>
       </section>
 
-      {/* ── Pricing ────────────────────────────────────────────────────── */}
-      <section id="tarifs" style={{ backgroundColor: "#f0f4ff" }} className="py-20">
-        <div className="mx-auto max-w-6xl px-6">
-          {/* Header */}
-          <div className="text-center">
-            <p className="text-sm font-semibold uppercase tracking-widest text-blue-600">
-              Tarifs
-            </p>
-            <h2 className="mt-2 text-3xl font-extrabold text-gray-900 md:text-4xl">
-              Un modèle transparent,{" "}
-              <span style={{ color: "#1e3a8a" }}>adapté à votre territoire</span>
-            </h2>
-            <p className="mx-auto mt-4 max-w-xl text-lg text-gray-500">
-              Prix selon la taille de votre collectivité.{" "}
-              <strong>Tous les modules sont inclus</strong> dans chaque offre,
-              sans fonctionnalité réservée à un plan supérieur.
-            </p>
-            <div className="mt-4 inline-flex items-center gap-2 rounded-full bg-blue-50 px-4 py-2 text-sm font-semibold text-blue-700">
-              💡 Paiement annuel = 10 × le mensuel — 2 mois offerts systématiquement
-            </div>
-          </div>
-
-          {/* Pricing cards */}
-          <div className="mt-12 grid gap-4 sm:grid-cols-2 lg:grid-cols-5">
-            {/* Nano */}
-            <div className="rounded-2xl border border-gray-200 bg-white p-6 flex flex-col">
-              <p className="text-xs font-bold uppercase tracking-widest text-gray-400">Nano</p>
-              <p className="mt-1 text-xs text-gray-400">{"< 1 000 hab."}</p>
-              <div className="mt-4">
-                <span className="text-3xl font-extrabold text-gray-900">49 €</span>
-                <span className="ml-1 text-xs text-gray-400">/mois HT</span>
-              </div>
-              <p className="mt-1 text-sm font-semibold" style={{ color: "#1e3a8a" }}>
-                490 €/an HT
-              </p>
-              <hr className="my-4 border-gray-100" />
-              <ul className="space-y-1.5 text-xs text-gray-500 flex-1">
-                <li className="flex items-center gap-1.5"><span className="text-green-500">✓</span> Tous modules inclus</li>
-                <li className="flex items-center gap-1.5"><span className="text-green-500">✓</span> App iOS & Android</li>
-                <li className="flex items-center gap-1.5"><span className="text-green-500">✓</span> Admin web</li>
-                <li className="flex items-center gap-1.5"><span className="text-green-500">✓</span> Support email</li>
-              </ul>
-            </div>
-
-            {/* Micro */}
-            <div className="rounded-2xl border border-gray-200 bg-white p-6 flex flex-col">
-              <p className="text-xs font-bold uppercase tracking-widest text-gray-400">Micro</p>
-              <p className="mt-1 text-xs text-gray-400">1 000 – 2 500 hab.</p>
-              <div className="mt-4">
-                <span className="text-3xl font-extrabold text-gray-900">99 €</span>
-                <span className="ml-1 text-xs text-gray-400">/mois HT</span>
-              </div>
-              <p className="mt-1 text-sm font-semibold" style={{ color: "#1e3a8a" }}>
-                990 €/an HT
-              </p>
-              <hr className="my-4 border-gray-100" />
-              <ul className="space-y-1.5 text-xs text-gray-500 flex-1">
-                <li className="flex items-center gap-1.5"><span className="text-green-500">✓</span> Tous modules inclus</li>
-                <li className="flex items-center gap-1.5"><span className="text-green-500">✓</span> App iOS & Android</li>
-                <li className="flex items-center gap-1.5"><span className="text-green-500">✓</span> Admin web</li>
-                <li className="flex items-center gap-1.5"><span className="text-green-500">✓</span> Support email</li>
-              </ul>
-            </div>
-
-            {/* Commune — highlighted */}
-            <div
-              className="rounded-2xl bg-white p-6 flex flex-col relative"
-              style={{ border: "2px solid #1e3a8a" }}
-            >
-              <span
-                className="absolute -top-3 left-1/2 -translate-x-1/2 rounded-full px-3 py-1 text-xs font-bold text-white whitespace-nowrap"
-                style={{ backgroundColor: "#1e3a8a" }}
-              >
-                Le plus choisi
-              </span>
-              <p className="text-xs font-bold uppercase tracking-widest text-gray-400">Commune</p>
-              <p className="mt-1 text-xs text-gray-400">2 500 – 10 000 hab.</p>
-              <div className="mt-4">
-                <span className="text-3xl font-extrabold text-gray-900">189 €</span>
-                <span className="ml-1 text-xs text-gray-400">/mois HT</span>
-              </div>
-              <p className="mt-1 text-sm font-semibold" style={{ color: "#1e3a8a" }}>
-                1 890 €/an HT
-              </p>
-              <hr className="my-4 border-gray-100" />
-              <ul className="space-y-1.5 text-xs text-gray-500 flex-1">
-                <li className="flex items-center gap-1.5"><span className="text-green-500">✓</span> Tous modules inclus</li>
-                <li className="flex items-center gap-1.5"><span className="text-green-500">✓</span> App iOS & Android</li>
-                <li className="flex items-center gap-1.5"><span className="text-green-500">✓</span> Admin web</li>
-                <li className="flex items-center gap-1.5"><span className="text-green-500">✓</span> Support email</li>
-              </ul>
-            </div>
-
-            {/* Ville */}
-            <div className="rounded-2xl border border-gray-200 bg-white p-6 flex flex-col">
-              <p className="text-xs font-bold uppercase tracking-widest text-gray-400">Ville</p>
-              <p className="mt-1 text-xs text-gray-400">10 000 – 50 000 hab.</p>
-              <div className="mt-4">
-                <span className="text-3xl font-extrabold text-gray-900">490 €</span>
-                <span className="ml-1 text-xs text-gray-400">/mois HT</span>
-              </div>
-              <p className="mt-1 text-sm font-semibold" style={{ color: "#1e3a8a" }}>
-                4 900 €/an HT
-              </p>
-              <hr className="my-4 border-gray-100" />
-              <ul className="space-y-1.5 text-xs text-gray-500 flex-1">
-                <li className="flex items-center gap-1.5"><span className="text-green-500">✓</span> Tous modules inclus</li>
-                <li className="flex items-center gap-1.5"><span className="text-green-500">✓</span> App iOS & Android</li>
-                <li className="flex items-center gap-1.5"><span className="text-green-500">✓</span> Admin web</li>
-                <li className="flex items-center gap-1.5"><span className="text-green-500">✓</span> Support email</li>
-              </ul>
-            </div>
-
-            {/* Métropole */}
-            <div
-              className="rounded-2xl p-6 flex flex-col"
-              style={{ background: "linear-gradient(160deg, #1e3a8a 0%, #1d4ed8 100%)" }}
-            >
-              <p className="text-xs font-bold uppercase tracking-widest text-blue-300">Métropole</p>
-              <p className="mt-1 text-xs text-blue-300">{"> 50 000 hab."}</p>
-              <div className="mt-4">
-                <span className="text-2xl font-extrabold text-white">Sur devis</span>
-              </div>
-              <p className="mt-1 text-xs text-blue-300">tarif personnalisé</p>
-              <hr className="my-4 border-blue-700" />
-              <ul className="space-y-1.5 text-xs text-blue-200 flex-1">
-                <li className="flex items-center gap-1.5"><span className="text-blue-300">✓</span> Tous modules inclus</li>
-                <li className="flex items-center gap-1.5"><span className="text-blue-300">✓</span> App iOS & Android</li>
-                <li className="flex items-center gap-1.5"><span className="text-blue-300">✓</span> Admin web</li>
-                <li className="flex items-center gap-1.5"><span className="text-blue-300">✓</span> SLA personnalisable</li>
-              </ul>
-              <a
-                href="#contact"
-                className="mt-5 block rounded-xl bg-white/20 py-2 text-center text-xs font-bold text-white hover:bg-white/30 transition"
-              >
-                Nous contacter
-              </a>
-            </div>
-          </div>
-
-          {/* Notes interco + premiers clients */}
-          <div className="mt-8 grid gap-4 md:grid-cols-2">
-            {/* Intercommunalités */}
-            <div className="rounded-2xl border border-blue-100 bg-white p-6">
-              <div className="flex items-start gap-3">
-                <span className="text-2xl">🏛️</span>
-                <div>
-                  <h3 className="font-bold text-gray-900">Intercommunalités</h3>
-                  <p className="mt-1.5 text-sm leading-relaxed text-gray-500">
-                    Les EPCI, communautés de communes et d'agglomération sont
-                    tarifés sur la{" "}
-                    <strong>population totale du groupement</strong>, avec un
-                    supplément de{" "}
-                    <strong className="text-blue-700">+20 %</strong> pour
-                    l'accès au tableau de bord multi-communes (vue consolidée,
-                    gestion multi-admin, rapports croisés).
-                  </p>
-                  <p className="mt-2 rounded-lg bg-blue-50 px-3 py-2 text-xs text-blue-700">
-                    Ex. CC de 12 000 hab. → tranche{" "}
-                    <strong>Ville</strong> (490 €/mois) + 20 % interco ={" "}
-                    <strong>588 €/mois HT</strong>
-                  </p>
-                </div>
-              </div>
-            </div>
-
-            {/* Premiers clients */}
-            <div className="rounded-2xl border border-amber-100 bg-amber-50 p-6">
-              <div className="flex items-start gap-3">
-                <span className="text-2xl">🎁</span>
-                <div>
-                  <h3 className="font-bold text-gray-900">
-                    Offre premières collectivités
-                  </h3>
-                  <p className="mt-1.5 text-sm leading-relaxed text-gray-600">
-                    Les premières collectivités partenaires bénéficient de{" "}
-                    <strong>2 mois offerts avant le début de l'abonnement</strong>{" "}
-                    pour tester et configurer la plateforme avec nos équipes.
-                  </p>
-                  <p className="mt-2 text-xs text-amber-700 font-medium">
-                    Places limitées · Engagement 3 ans disponible (−15 % sur
-                    l'abonnement annuel)
-                  </p>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          {/* CTA */}
-          <div className="mt-8 text-center">
-            <a
-              href="#contact"
-              className="inline-flex items-center gap-2 rounded-xl px-8 py-4 text-base font-bold text-white shadow-lg transition hover:opacity-90"
-              style={{ backgroundColor: "#1e3a8a" }}
-            >
-              Demander une proposition
-              <ArrowRight className="h-4 w-4" />
-            </a>
-            <p className="mt-3 text-sm text-gray-400">
-              Tous les prix sont indiqués hors taxes · Facturation en euros
-            </p>
-          </div>
-        </div>
-      </section>
-
+      <PricingSection />
 
             {/* ── Contact ────────────────────────────────────────────────────── */}
       <section
@@ -1292,6 +1334,7 @@ function LandingPage() {
           </div>
         </div>
       </footer>
+      <PromoBanner />
     </div>
   );
 }
