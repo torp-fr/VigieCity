@@ -10,6 +10,9 @@ import {
 
 export const Route = createFileRoute("/landing")({
   head: () => ({
+    links: [
+      { rel: "icon", type: "image/svg+xml", href: "/icons/icon.svg" },
+    ],
     meta: [
       { title: "VigieCity — L'application citoyenne pour la vie de votre commune" },
       {
@@ -740,8 +743,8 @@ const ADMIN_FEATURES = [
 const PRICING_TIERS = [
   { name: "Nano", range: "< 1 000 hab.", monthly: 49, annual: 490 },
   { name: "Micro", range: "1 000 – 2 500 hab.", monthly: 99, annual: 990 },
-  { name: "Commune", range: "2 500 – 10 000 hab.", monthly: 189, annual: 1890 },
-  { name: "Ville", range: "10 000 – 50 000 hab.", monthly: 490, annual: 4900 },
+  { name: "Local",   range: "2 500 – 10 000 hab.", monthly: 189, annual: 1890 },
+  { name: "Urbain", range: "10 000 – 50 000 hab.", monthly: 490, annual: 4900 },
   { name: "Métropole", range: "> 50 000 hab.", monthly: null, annual: null },
 ] as const;
 
@@ -753,7 +756,7 @@ const FEATURES_LIST = [
 ];
 
 function PricingSection() {
-  const [selected, setSelected] = useState(2); // Commune par défaut
+  const [selected, setSelected] = useState(2); // Local par défaut
   const [isInterco, setIsInterco] = useState(false);
 
   const tier = PRICING_TIERS[selected];
@@ -899,9 +902,9 @@ function PricingSection() {
                   className="mt-5 rounded-xl px-4 py-3 text-xs text-blue-700"
                   style={{ background: "#eff6ff" }}
                 >
-                  Ex. CC de 2 500 hab. → tranche{" "}
-                  <strong>Commune</strong> (189 €/mois) + 20 % interco ={" "}
-                  <strong>227 €/mois HT</strong> / 2 270 €/an HT
+                  Ex. CC de 30 000 hab. → tranche{" "}
+                  <strong>Urbain</strong> (490 €/mois) + 20 % interco ={" "}
+                  <strong>588 €/mois HT</strong> / 5 880 €/an HT
                 </div>
               )}
 

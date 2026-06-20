@@ -20,8 +20,8 @@
 |-------|-----------|-------------|------------|---------|
 | **Nano** | < 1 000 hab. | 49 € | 490 € | 2 mois offerts |
 | **Micro** | 1 000 – 2 500 hab. | 99 € | 990 € | 2 mois offerts |
-| **Commune** | 2 500 – 10 000 hab. | 189 € | 1 890 € | 2 mois offerts |
-| **Ville** | 10 000 – 50 000 hab. | 490 € | 4 900 € | 2 mois offerts |
+| **Local**   | 2 500 – 10 000 hab. | 189 € | 1 890 € | 2 mois offerts |
+| **Urbain** | 10 000 – 50 000 hab. | 490 € | 4 900 € | 2 mois offerts |
 | **Métropole** | > 50 000 hab. | *Sur devis* | *Sur devis* | — |
 
 > Le prix annuel = 10 × le mensuel (2 mois offerts systématiquement).
@@ -47,8 +47,8 @@ Le prix par habitant diminue avec la taille (économies d'échelle) :
 |---------|--------------|---------|
 | Nano | ~0,05 – 0,10 € | Floor : minimum viable |
 | Micro | ~0,04 – 0,10 € | |
-| Commune | ~0,019 – 0,076 € | |
-| Ville | ~0,010 – 0,049 € | |
+| Local   | ~0,019 – 0,076 € | |
+| Urbain | ~0,010 – 0,049 € | |
 | 50k–100k | ~0,009 – 0,018 € | Dégressif |
 | 100k–250k | ~0,006 – 0,015 € | |
 | > 250k | ~0,005 – 0,010 € | Quasi-fixe : maintenance |
@@ -67,10 +67,10 @@ Les groupements de communes sont tarifés sur la **population totale du groupeme
 **Supplément intercommunal** : +20 % sur le prix de la tranche correspondante, pour l'accès au tableau de bord multi-communes (vue consolidée, gestion multi-admin, rapports croisés).
 
 **Exemple :**  
-Communauté de communes de 12 000 hab. → tranche « **Ville** » (10 000–50 000 hab.) : 490 €/mois  
+Communauté de communes de 12 000 hab. → tranche « **Urbain** » (10 000–50 000 hab.) : 490 €/mois  
 + supplément intercommunal 20 % → **588 €/mois** (5 880 €/an)
 
-> ⚠️ Attention : 12 000 hab. dépasse le seuil de 10 000 → c'est bien la tranche **Ville** qui s'applique, pas **Commune**.
+> ⚠️ Attention : 12 000 hab. dépasse le seuil de 10 000 → c'est bien la tranche **Urbain** qui s'applique, pas **Local**.
 
 **Option package** : si toutes les communes membres signent en même temps → −10 % sur l'ensemble (équivalent à un pré-paiement groupé).
 
