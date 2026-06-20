@@ -133,7 +133,7 @@ function RootComponent() {
   const navigate = useNavigate();
   const pathname = useRouterState({ select: (s) => s.location.pathname });
 
-  const isShellFree = SHELL_FREE_ROUTES.some((r) => pathname.startsWith(r));
+  const isShellFree = SHELL_FREE_ROUTES.includes(pathname);
 
   useEffect(() => {
     const { data } = supabase.auth.onAuthStateChange(async (event, session) => {

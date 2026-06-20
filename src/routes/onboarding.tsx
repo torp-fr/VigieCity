@@ -57,7 +57,7 @@ function OnboardingPage() {
     },
     onSuccess: () => {
       toast.success(`Commune « ${selected?.name} » enregistrée.`);
-      navigate({ to: "/" });
+      navigate({ to: "/accueil" });
     },
     onError: (e: Error) => toast.error(e.message),
   });

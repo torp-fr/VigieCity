@@ -22,7 +22,7 @@ import { supabase } from "@/integrations/supabase/client";
 const SKIP_ONBOARDING_ROUTES = ["/auth", "/onboarding", "/profil", "/mentions-legales", "/confidentialite"];
 
 // Routes rendered without the app shell (header / bottom nav / padding)
-const SHELL_FREE_ROUTES = ["/landing"];
+const SHELL_FREE_ROUTES = ["/", "/landing"];
 
 function NotFoundComponent() {
   return (
@@ -133,7 +133,7 @@ function RootComponent() {
   const navigate = useNavigate();
   const pathname = useRouterState({ select: (s) => s.location.pathname });
 
-  const isShellFree = SHELL_FREE_ROUTES.some((r) => pathname.startsWith(r));
+  const isShellFree = SHELL_FREE_ROUTES.includes(pathname);
 
   useEffect(() => {
     const { data } = supabase.auth.onAuthStateChange(async (event, session) => {
@@ -153,6 +153,9 @@ function RootComponent() {
           .single();
         if (!profile?.collectivity_id) {
           navigate({ to: "/onboarding" });
+        } else if (pathname === "/") {
+          // Utilisateur connecté sur la landing → app
+          navigate({ to: "/accueil" });
         }
       }
     });

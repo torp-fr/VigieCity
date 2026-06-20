@@ -2,7 +2,7 @@
   "name": "VigieCity",
   "short_name": "VigieCity",
   "description": "La vie de votre commune en temps réel — urgences, alertes, signalements, radio locale.",
-  "start_url": "/",
+  "start_url": "/accueil",
   "scope": "/",
   "display": "standalone",
   "background_color": "#ffffff",

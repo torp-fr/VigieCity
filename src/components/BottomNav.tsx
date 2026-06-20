@@ -20,7 +20,7 @@ const LAST_VISIT_KEY = "vigie_last_quartier_visit";
 
 /** 4 onglets principaux */
 const TABS = [
-  { to: "/", label: "Accueil", icon: Home },
+  { to: "/accueil", label: "Accueil", icon: Home },
   { to: "/actualites", label: "Actualités", icon: Newspaper },
   { to: "/services", label: "Services", icon: LayoutGrid },
 ] as const;
