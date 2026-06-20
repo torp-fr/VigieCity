@@ -15,7 +15,7 @@ const CY              = SIZE / 2;
 const TICK_MS         = 40;    // fréquence de mise à jour de la barre (ms)
 
 // ─── Composant ─────────────────────────────────────────────────────────────────
-export default function SosButton() {
+export function SosButton() {
   const [open, setOpen]               = useState(false);
   const [holdProgress, setHoldProgress] = useState(0);
   const [userId, setUserId]           = useState<string | null>(null);
