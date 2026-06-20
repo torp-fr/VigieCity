@@ -19,7 +19,8 @@ import { Toaster } from "../components/ui/sonner";
 import { supabase } from "@/integrations/supabase/client";
 
 // Routes that don't require onboarding check
-const SKIP_ONBOARDING_ROUTES = ["/auth", "/onboarding", "/profil", "/mentions-legales", "/confidentialite"];
+const SKIP_ONBOARDING_ROUTES = ["/auth", "/onboarding", "/profil", "/mentions-legales", "/confidentialite", "/admin/login"];
+const ADMIN_ROLES = ["commune_admin", "interco_admin", "super_admin"] as const;
 
 // Routes rendered without the app shell (header / bottom nav / padding)
 const SHELL_FREE_ROUTES = ["/", "/landing", "/admin/login"];
@@ -148,9 +149,11 @@ function RootComponent() {
         await new Promise((r) => setTimeout(r, 500));
         const { data: profile } = await supabase
           .from("profiles")
-          .select("collectivity_id")
+          .select("collectivity_id, role")
           .eq("id", session.user.id)
           .single();
+        // Les rôles admin gèrent leur propre navigation (ex: /admin/login → /platform)
+        if (ADMIN_ROLES.includes(profile?.role as typeof ADMIN_ROLES[number])) return;
         if (!profile?.collectivity_id) {
           navigate({ to: "/onboarding" });
         } else if (pathname === "/") {
