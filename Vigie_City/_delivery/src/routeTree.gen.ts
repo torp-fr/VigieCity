@@ -19,6 +19,7 @@ import { Route as CarteRouteImport } from './routes/carte'
 import { Route as FilRouteImport } from './routes/fil'
 import { Route as ForgotPasswordRouteImport } from './routes/forgot-password'
 import { Route as MessagerieRouteImport } from './routes/messagerie'
+import { Route as MesSignalementsRouteImport } from './routes/mes-signalements'
 import { Route as OnboardingRouteImport } from './routes/onboarding'
 import { Route as ProfilRouteImport } from './routes/profil'
 import { Route as ResetPasswordRouteImport } from './routes/reset-password'
@@ -79,6 +80,11 @@ const ForgotPasswordRoute = ForgotPasswordRouteImport.update({
 const MessagerieRoute = MessagerieRouteImport.update({
   id: '/messagerie',
   path: '/messagerie',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const MesSignalementsRoute = MesSignalementsRouteImport.update({
+  id: '/mes-signalements',
+  path: '/mes-signalements',
   getParentRoute: () => rootRouteImport,
 } as any)
 const OnboardingRoute = OnboardingRouteImport.update({
@@ -198,6 +204,7 @@ export interface FileRoutesByFullPath {
   '/fil': typeof FilRoute
   '/forgot-password': typeof ForgotPasswordRoute
   '/messagerie': typeof MessagerieRoute
+  '/mes-signalements': typeof MesSignalementsRoute
   '/onboarding': typeof OnboardingRoute
   '/profil': typeof ProfilRoute
   '/radio': typeof RadioRoute
@@ -228,6 +235,7 @@ export interface FileRoutesByTo {
   '/fil': typeof FilRoute
   '/forgot-password': typeof ForgotPasswordRoute
   '/messagerie': typeof MessagerieRoute
+  '/mes-signalements': typeof MesSignalementsRoute
   '/onboarding': typeof OnboardingRoute
   '/profil': typeof ProfilRoute
   '/radio': typeof RadioRoute
@@ -259,6 +267,7 @@ export interface FileRoutesById {
   '/fil': typeof FilRoute
   '/forgot-password': typeof ForgotPasswordRoute
   '/messagerie': typeof MessagerieRoute
+  '/mes-signalements': typeof MesSignalementsRoute
   '/onboarding': typeof OnboardingRoute
   '/profil': typeof ProfilRoute
   '/radio': typeof RadioRoute
@@ -291,6 +300,7 @@ export interface FileRouteTypes {
     | '/fil'
     | '/forgot-password'
     | '/messagerie'
+    | '/mes-signalements'
     | '/onboarding'
     | '/profil'
     | '/radio'
@@ -321,6 +331,7 @@ export interface FileRouteTypes {
     | '/fil'
     | '/forgot-password'
     | '/messagerie'
+    | '/mes-signalements'
     | '/onboarding'
     | '/profil'
     | '/radio'
@@ -351,6 +362,7 @@ export interface FileRouteTypes {
     | '/fil'
     | '/forgot-password'
     | '/messagerie'
+    | '/mes-signalements'
     | '/onboarding'
     | '/profil'
     | '/radio'
@@ -382,6 +394,7 @@ export interface RootRouteChildren {
   FilRoute: typeof FilRoute
   ForgotPasswordRoute: typeof ForgotPasswordRoute
   MessagerieRoute: typeof MessagerieRoute
+  MesSignalementsRoute: typeof MesSignalementsRoute
   OnboardingRoute: typeof OnboardingRoute
   ProfilRoute: typeof ProfilRoute
   RadioRoute: typeof RadioRoute
@@ -454,6 +467,13 @@ declare module '@tanstack/react-router' {
       path: '/messagerie'
       fullPath: '/messagerie'
       preLoaderRoute: typeof MessagerieRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/mes-signalements': {
+      id: '/mes-signalements'
+      path: '/mes-signalements'
+      fullPath: '/mes-signalements'
+      preLoaderRoute: typeof MesSignalementsRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/onboarding': {
@@ -615,6 +635,7 @@ const rootRouteChildren: RootRouteChildren = {
   FilRoute,
   ForgotPasswordRoute,
   MessagerieRoute,
+  MesSignalementsRoute,
   OnboardingRoute,
   ProfilRoute,
   RadioRoute,
