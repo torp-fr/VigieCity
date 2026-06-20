@@ -22,7 +22,7 @@ import { supabase } from "@/integrations/supabase/client";
 const SKIP_ONBOARDING_ROUTES = ["/auth", "/onboarding", "/profil", "/mentions-legales", "/confidentialite"];
 
 // Routes rendered without the app shell (header / bottom nav / padding)
-const SHELL_FREE_ROUTES = ["/landing"];
+const SHELL_FREE_ROUTES = ["/", "/landing"];
 
 function NotFoundComponent() {
   return (
@@ -153,6 +153,9 @@ function RootComponent() {
           .single();
         if (!profile?.collectivity_id) {
           navigate({ to: "/onboarding" });
+        } else if (pathname === "/") {
+          // Utilisateur connecté sur la landing → app
+          navigate({ to: "/accueil" });
         }
       }
     });
