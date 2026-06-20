@@ -30,6 +30,7 @@ import { Route as RadioRouteImport } from './routes/radio'
 // ── Routes admin ──────────────────────────────────────────────────────────────
 import { Route as AdminIndexRouteImport } from './routes/admin/index'
 import { Route as AdminAlertesRouteImport } from './routes/admin/alertes'
+import { Route as AdminEpciRouteImport } from './routes/admin/epci'
 import { Route as AdminMessagerieRouteImport } from './routes/admin/messagerie'
 import { Route as AdminPublicationsRouteImport } from './routes/admin/publications'
 import { Route as AdminSignalementsRouteImport } from './routes/admin/signalements'
@@ -126,6 +127,11 @@ const AdminAlertesRoute = AdminAlertesRouteImport.update({
   path: '/admin/alertes',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AdminEpciRoute = AdminEpciRouteImport.update({
+  id: '/admin/epci',
+  path: '/admin/epci',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const AdminMessagerieRoute = AdminMessagerieRouteImport.update({
   id: '/admin/messagerie',
   path: '/admin/messagerie',
@@ -201,6 +207,7 @@ export interface FileRoutesByFullPath {
   '/urgences': typeof UrgencesRoute
   '/admin/': typeof AdminIndexRoute
   '/admin/alertes': typeof AdminAlertesRoute
+  '/admin/epci': typeof AdminEpciRoute
   '/admin/evenements': typeof AdminEvenementsRoute
   '/admin/messagerie': typeof AdminMessagerieRoute
   '/admin/publications': typeof AdminPublicationsRoute
@@ -230,6 +237,7 @@ export interface FileRoutesByTo {
   '/urgences': typeof UrgencesRoute
   '/admin': typeof AdminIndexRoute
   '/admin/alertes': typeof AdminAlertesRoute
+  '/admin/epci': typeof AdminEpciRoute
   '/admin/evenements': typeof AdminEvenementsRoute
   '/admin/messagerie': typeof AdminMessagerieRoute
   '/admin/publications': typeof AdminPublicationsRoute
@@ -260,6 +268,7 @@ export interface FileRoutesById {
   '/urgences': typeof UrgencesRoute
   '/admin/': typeof AdminIndexRoute
   '/admin/alertes': typeof AdminAlertesRoute
+  '/admin/epci': typeof AdminEpciRoute
   '/admin/evenements': typeof AdminEvenementsRoute
   '/admin/messagerie': typeof AdminMessagerieRoute
   '/admin/publications': typeof AdminPublicationsRoute
@@ -291,6 +300,7 @@ export interface FileRouteTypes {
     | '/urgences'
     | '/admin/'
     | '/admin/alertes'
+    | '/admin/epci'
     | '/admin/evenements'
     | '/admin/messagerie'
     | '/admin/publications'
@@ -320,6 +330,7 @@ export interface FileRouteTypes {
     | '/urgences'
     | '/admin'
     | '/admin/alertes'
+    | '/admin/epci'
     | '/admin/evenements'
     | '/admin/messagerie'
     | '/admin/publications'
@@ -349,6 +360,7 @@ export interface FileRouteTypes {
     | '/urgences'
     | '/admin/'
     | '/admin/alertes'
+    | '/admin/epci'
     | '/admin/evenements'
     | '/admin/messagerie'
     | '/admin/publications'
@@ -379,6 +391,7 @@ export interface RootRouteChildren {
   UrgencesRoute: typeof UrgencesRoute
   AdminIndexRoute: typeof AdminIndexRoute
   AdminAlertesRoute: typeof AdminAlertesRoute
+  AdminEpciRoute: typeof AdminEpciRoute
   AdminEvenementsRoute: typeof AdminEvenementsRoute
   AdminMessagerieRoute: typeof AdminMessagerieRoute
   AdminPublicationsRoute: typeof AdminPublicationsRoute
@@ -506,6 +519,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminAlertesRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/admin/epci': {
+      id: '/admin/epci'
+      path: '/admin/epci'
+      fullPath: '/admin/epci'
+      preLoaderRoute: typeof AdminEpciRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/admin/evenements': {
       id: '/admin/evenements'
       path: '/admin/evenements'
@@ -604,6 +624,7 @@ const rootRouteChildren: RootRouteChildren = {
   UrgencesRoute,
   AdminIndexRoute,
   AdminAlertesRoute,
+  AdminEpciRoute,
   AdminEvenementsRoute,
   AdminMessagerieRoute,
   AdminPublicationsRoute,

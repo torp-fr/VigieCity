@@ -56,6 +56,7 @@ import { Route as AdminPublicationsRouteImport } from './routes/admin/publicatio
 import { Route as AdminParametresRouteImport } from './routes/admin/parametres'
 import { Route as AdminMessagerieRouteImport } from './routes/admin/messagerie'
 import { Route as AdminEvenementsRouteImport } from './routes/admin/evenements'
+import { Route as AdminEpciRouteImport } from './routes/admin/epci'
 import { Route as AdminAlertesRouteImport } from './routes/admin/alertes'
 import { Route as AdminAgentsRouteImport } from './routes/admin/agents'
 import { Route as ServicesSignalementIdRouteImport } from './routes/services/signalement.$id'
@@ -295,6 +296,11 @@ const AdminEvenementsRoute = AdminEvenementsRouteImport.update({
   path: '/admin/evenements',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AdminEpciRoute = AdminEpciRouteImport.update({
+  id: '/admin/epci',
+  path: '/admin/epci',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const AdminAlertesRoute = AdminAlertesRouteImport.update({
   id: '/admin/alertes',
   path: '/admin/alertes',
@@ -333,6 +339,7 @@ export interface FileRoutesByFullPath {
   '/urgences': typeof UrgencesRoute
   '/admin/agents': typeof AdminAgentsRoute
   '/admin/alertes': typeof AdminAlertesRoute
+  '/admin/epci': typeof AdminEpciRoute
   '/admin/evenements': typeof AdminEvenementsRoute
   '/admin/messagerie': typeof AdminMessagerieRoute
   '/admin/parametres': typeof AdminParametresRoute
@@ -384,6 +391,7 @@ export interface FileRoutesByTo {
   '/urgences': typeof UrgencesRoute
   '/admin/agents': typeof AdminAgentsRoute
   '/admin/alertes': typeof AdminAlertesRoute
+  '/admin/epci': typeof AdminEpciRoute
   '/admin/evenements': typeof AdminEvenementsRoute
   '/admin/messagerie': typeof AdminMessagerieRoute
   '/admin/parametres': typeof AdminParametresRoute
@@ -437,6 +445,7 @@ export interface FileRoutesById {
   '/urgences': typeof UrgencesRoute
   '/admin/agents': typeof AdminAgentsRoute
   '/admin/alertes': typeof AdminAlertesRoute
+  '/admin/epci': typeof AdminEpciRoute
   '/admin/evenements': typeof AdminEvenementsRoute
   '/admin/messagerie': typeof AdminMessagerieRoute
   '/admin/parametres': typeof AdminParametresRoute
@@ -491,6 +500,7 @@ export interface FileRouteTypes {
     | '/urgences'
     | '/admin/agents'
     | '/admin/alertes'
+    | '/admin/epci'
     | '/admin/evenements'
     | '/admin/messagerie'
     | '/admin/parametres'
@@ -542,6 +552,7 @@ export interface FileRouteTypes {
     | '/urgences'
     | '/admin/agents'
     | '/admin/alertes'
+    | '/admin/epci'
     | '/admin/evenements'
     | '/admin/messagerie'
     | '/admin/parametres'
@@ -594,6 +605,7 @@ export interface FileRouteTypes {
     | '/urgences'
     | '/admin/agents'
     | '/admin/alertes'
+    | '/admin/epci'
     | '/admin/evenements'
     | '/admin/messagerie'
     | '/admin/parametres'
@@ -647,6 +659,7 @@ export interface RootRouteChildren {
   UrgencesRoute: typeof UrgencesRoute
   AdminAgentsRoute: typeof AdminAgentsRoute
   AdminAlertesRoute: typeof AdminAlertesRoute
+  AdminEpciRoute: typeof AdminEpciRoute
   AdminEvenementsRoute: typeof AdminEvenementsRoute
   AdminMessagerieRoute: typeof AdminMessagerieRoute
   AdminParametresRoute: typeof AdminParametresRoute
@@ -1007,6 +1020,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminEvenementsRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/admin/epci': {
+      id: '/admin/epci'
+      path: '/admin/epci'
+      fullPath: '/admin/epci'
+      preLoaderRoute: typeof AdminEpciRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/admin/alertes': {
       id: '/admin/alertes'
       path: '/admin/alertes'
@@ -1067,6 +1087,7 @@ const rootRouteChildren: RootRouteChildren = {
   UrgencesRoute: UrgencesRoute,
   AdminAgentsRoute: AdminAgentsRoute,
   AdminAlertesRoute: AdminAlertesRoute,
+  AdminEpciRoute: AdminEpciRoute,
   AdminEvenementsRoute: AdminEvenementsRoute,
   AdminMessagerieRoute: AdminMessagerieRoute,
   AdminParametresRoute: AdminParametresRoute,

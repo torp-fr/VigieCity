@@ -12,17 +12,22 @@
 
 ## Étapes de déploiement
 
-### 1. Migration SQL
+### 1. Migrations SQL
 
-Appliquer la migration (tables + RLS + seed des contacts nationaux et radios nationales) :
+**Commande correcte** (pas de `--project-ref`, `link` est le défaut) :
 
 ```bash
 cd C:\Users\Baptiste-\VigieCity
-supabase db push --project-ref xfhkngecpbvmlstjymfy
+supabase link --project-ref xfhkngecpbvmlstjymfy  # si pas encore linké
+supabase db push
 ```
 
-> Ou via le dashboard Supabase → SQL Editor → coller le contenu de
-> `_delivery/supabase/migrations/20260620000006_emergency_contacts_radio.sql`
+> Ou via le dashboard Supabase → SQL Editor → coller le contenu des migrations une par une.
+
+**Migrations à appliquer dans l'ordre :**
+1. `20260620000006_emergency_contacts_radio.sql` — tables urgences + radio + seed
+2. ✅ `app_role_enum_extend` — déjà appliqué via MCP (enum `super_admin` + `epci_admin`)
+3. ✅ `intercommunalities_epci_v3` — déjà appliqué via MCP (table EPCI + RLS + seed démo)
 
 ### 2. Copier les fichiers _delivery
 
@@ -45,10 +50,11 @@ src/
     urgences.tsx                  ← page numéros d'urgence (nouveau)
     radio.tsx                     ← page radio complète (nouveau)
     admin/
-      index.tsx                   ← lien "Radio locale" ajouté
+      index.tsx                   ← refonte : détection rôle EPCI + 8 modules listés
       radio.tsx                   ← config radios locales (nouveau)
       urgences.tsx                ← config contacts urgences locaux (nouveau)
-  routeTree.gen.ts                ← /radio + /admin/radio ajoutés
+      epci.tsx                    ← tableau de bord intercommunal (nouveau)
+  routeTree.gen.ts                ← /radio + /admin/radio + /admin/epci ajoutés
 ```
 
 ### 3. Vérifications
@@ -64,8 +70,10 @@ Pages à tester :
 - `/urgences` → liste des 17 numéros nationaux + contacts locaux (si configurés)
 - `/radio` → player avec France Info, France Bleu, etc.
 - Lancer une radio → mini-player apparaît au-dessus de la BottomNav, persiste sur toutes les pages
+- `/admin` → dashboard avec les 8 modules + lien EPCI si rôle epci_admin détecté
 - `/admin/radio` → ajouter/modifier/supprimer des radios locales
 - `/admin/urgences` → ajouter/modifier/supprimer des contacts d'urgence locaux
+- `/admin/epci` → tableau de bord intercommunal (réservé epci_admin)
 
 ---
 
