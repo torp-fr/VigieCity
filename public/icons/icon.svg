@@ -1,0 +1,26 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+  <!-- Fond bleu foncé avec coins arrondis -->
+  <rect width="512" height="512" rx="112" fill="#1e3a8a"/>
+
+  <!-- Bouclier VigieCity -->
+  <path d="M256 80 L380 130 L380 270 Q380 360 256 430 Q132 360 132 270 L132 130 Z"
+        fill="#2563eb" stroke="#3b82f6" stroke-width="6"/>
+
+  <!-- Bâtiments stylisés (silhouette ville) -->
+  <rect x="170" y="240" width="36" height="80" rx="4" fill="white" opacity="0.9"/>
+  <rect x="218" y="200" width="48" height="120" rx="4" fill="white"/>
+  <rect x="278" y="220" width="40" height="100" rx="4" fill="white" opacity="0.9"/>
+  <rect x="330" y="255" width="30" height="65" rx="4" fill="white" opacity="0.8"/>
+  <rect x="148" y="260" width="26" height="60" rx="4" fill="white" opacity="0.7"/>
+
+  <!-- Fenêtres bâtiment central -->
+  <rect x="228" y="215" width="10" height="12" rx="2" fill="#1e3a8a"/>
+  <rect x="248" y="215" width="10" height="12" rx="2" fill="#1e3a8a"/>
+  <rect x="228" y="237" width="10" height="12" rx="2" fill="#1e3a8a"/>
+  <rect x="248" y="237" width="10" height="12" rx="2" fill="#1e3a8a"/>
+
+  <!-- Point de surveillance (oeil) -->
+  <circle cx="256" cy="165" r="22" fill="white"/>
+  <circle cx="256" cy="165" r="12" fill="#1e3a8a"/>
+  <circle cx="256" cy="165" r="5" fill="#60a5fa"/>
+</svg>
