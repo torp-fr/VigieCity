@@ -194,7 +194,7 @@ function AdminMessageriePage() {
   // ── Mutations messagerie ──────────────────────────────────────────────────
   const sendReply = useMutation({
     mutationFn: async (content: string) => {
-      if (!userId || !activeConvId) throw new Error();
+      if (!userId || !activeConvId || !activeConv) throw new Error();
       const { error } = await supabase.from("messages").insert({
         conversation_id: activeConvId,
         sender_id:       userId,
@@ -202,6 +202,15 @@ function AdminMessageriePage() {
         content:         content.trim(),
       });
       if (error) throw error;
+      // Notifier le citoyen (best-effort, non bloquant)
+      supabase.functions.invoke("send-push-notification", {
+        body: {
+          user_id: activeConv.citizen_id,
+          title:   `🏛️ Réponse : ${activeConv.subject}`,
+          message: content.length > 80 ? content.slice(0, 77) + "…" : content,
+          url:     "/messagerie",
+        },
+      }).catch(() => {});
     },
     onSuccess: () => {
       setReply("");

@@ -3,6 +3,7 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useEffect, useRef, useState } from "react";
 import { ArrowLeft, MessageSquare, Send, CheckCheck, Plus, X, ChevronRight } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
+import { NotificationBanner } from "@/components/NotificationBanner";
 
 export const Route = createFileRoute("/messagerie")({
   component: MessageriePage,
@@ -184,6 +185,15 @@ function MessageriePage() {
         content:         newContent.trim(),
       });
       if (e2) throw e2;
+      // Notifier les admins de la collectivité (best-effort)
+      supabase.functions.invoke("send-push-notification", {
+        body: {
+          collectivity_id: collectivityId,
+          title:           "💬 Nouveau message citoyen",
+          message:         `${newSubject.trim()} — ${newContent.trim().slice(0, 60)}`,
+          url:             "/admin/messagerie",
+        },
+      }).catch(() => {});
       return conv.id as string;
     },
     onSuccess: (convId) => {
@@ -196,7 +206,7 @@ function MessageriePage() {
 
   const sendReply = useMutation({
     mutationFn: async (content: string) => {
-      if (!userId || !activeConvId) throw new Error();
+      if (!userId || !activeConvId || !collectivityId) throw new Error();
       const { error } = await supabase.from("messages").insert({
         conversation_id: activeConvId,
         sender_id:       userId,
@@ -204,6 +214,15 @@ function MessageriePage() {
         content:         content.trim(),
       });
       if (error) throw error;
+      // Notifier les admins (best-effort)
+      supabase.functions.invoke("send-push-notification", {
+        body: {
+          collectivity_id: collectivityId,
+          title:           "💬 Réponse citoyen",
+          message:         content.length > 80 ? content.slice(0, 77) + "…" : content,
+          url:             "/admin/messagerie",
+        },
+      }).catch(() => {});
     },
     onSuccess: () => {
       setReply("");
@@ -328,6 +347,9 @@ function MessageriePage() {
           </button>
         </div>
       </div>
+
+      {/* Bandeau notifications push */}
+      <NotificationBanner userId={userId} />
 
       {/* Liste conversations */}
       {!conversations?.length ? (

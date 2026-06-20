@@ -138,6 +138,15 @@ function RootComponent() {
   const navigate = useNavigate();
   const pathname = useRouterState({ select: (s) => s.location.pathname });
 
+  // Enregistrement du Service Worker (Web Push notifications)
+  useEffect(() => {
+    if ("serviceWorker" in navigator) {
+      navigator.serviceWorker.register("/sw.js").catch((err) =>
+        console.error("[sw] registration failed:", err)
+      );
+    }
+  }, []);
+
   useEffect(() => {
     const { data } = supabase.auth.onAuthStateChange(async (event, session) => {
       // Gestion de la réinitialisation du mot de passe
