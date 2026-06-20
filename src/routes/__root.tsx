@@ -15,6 +15,7 @@ import appCss from "../styles.css?url";
 import { reportLovableError } from "../lib/lovable-error-reporting";
 import { AppHeader } from "../components/AppHeader";
 import { BottomNav } from "../components/BottomNav";
+import { MiniRadioPlayer } from "../components/MiniRadioPlayer";
 import { Toaster } from "../components/ui/sonner";
 import { supabase } from "@/integrations/supabase/client";
 
@@ -210,6 +211,7 @@ function RootComponent() {
         <main className="flex-1 pb-4">
           <Outlet />
         </main>
+        {showNav && <MiniRadioPlayer />}
         {showNav && <BottomNav />}
       </div>
       <Toaster richColors position="top-center" />

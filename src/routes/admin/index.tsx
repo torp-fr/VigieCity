@@ -12,6 +12,7 @@ import {
   CalendarDays,
   MapPin,
   MessageSquare,
+  Radio,
 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 
@@ -184,6 +185,16 @@ function AdminIndex() {
         </div>
       ),
       badge: unreadCount && unreadCount > 0 ? unreadCount : undefined,
+    },
+    {
+      to: "/admin/radio",
+      label: "Radio locale",
+      description: "Flux audio diffusés aux citoyens",
+      icon: (
+        <div className="flex h-10 w-10 items-center justify-center rounded-full bg-primary/10">
+          <Radio className="h-5 w-5 text-primary" />
+        </div>
+      ),
     },
   ];
 

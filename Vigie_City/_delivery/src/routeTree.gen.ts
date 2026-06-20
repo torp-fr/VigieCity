@@ -25,6 +25,7 @@ import { Route as ResetPasswordRouteImport } from './routes/reset-password'
 import { Route as ServicesRouteImport } from './routes/services'
 import { Route as SignalerRouteImport } from './routes/signaler'
 import { Route as UrgencesRouteImport } from './routes/urgences'
+import { Route as RadioRouteImport } from './routes/radio'
 
 // ── Routes admin ──────────────────────────────────────────────────────────────
 import { Route as AdminIndexRouteImport } from './routes/admin/index'
@@ -35,6 +36,7 @@ import { Route as AdminSignalementsRouteImport } from './routes/admin/signalemen
 import { Route as AdminEvenementsRouteImport } from './routes/admin/evenements'
 import { Route as AdminServicesRouteImport } from './routes/admin/services'
 import { Route as AdminUrgencesRouteImport } from './routes/admin/urgences'
+import { Route as AdminRadioRouteImport } from './routes/admin/radio'
 
 // ── Routes plateforme (backoffice opérateur) ──────────────────────────────────
 import { Route as PlatformKnowledgeRouteImport } from './routes/platform/knowledge'
@@ -108,6 +110,11 @@ const UrgencesRoute = UrgencesRouteImport.update({
   path: '/urgences',
   getParentRoute: () => rootRouteImport,
 } as any)
+const RadioRoute = RadioRouteImport.update({
+  id: '/radio',
+  path: '/radio',
+  getParentRoute: () => rootRouteImport,
+} as any)
 
 const AdminIndexRoute = AdminIndexRouteImport.update({
   id: '/admin/',
@@ -149,6 +156,11 @@ const AdminUrgencesRoute = AdminUrgencesRouteImport.update({
   path: '/admin/urgences',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AdminRadioRoute = AdminRadioRouteImport.update({
+  id: '/admin/radio',
+  path: '/admin/radio',
+  getParentRoute: () => rootRouteImport,
+} as any)
 
 const PlatformKnowledgeRoute = PlatformKnowledgeRouteImport.update({
   id: '/platform/knowledge',
@@ -182,6 +194,7 @@ export interface FileRoutesByFullPath {
   '/messagerie': typeof MessagerieRoute
   '/onboarding': typeof OnboardingRoute
   '/profil': typeof ProfilRoute
+  '/radio': typeof RadioRoute
   '/reset-password': typeof ResetPasswordRoute
   '/services': typeof ServicesRoute
   '/signaler': typeof SignalerRoute
@@ -191,6 +204,7 @@ export interface FileRoutesByFullPath {
   '/admin/evenements': typeof AdminEvenementsRoute
   '/admin/messagerie': typeof AdminMessagerieRoute
   '/admin/publications': typeof AdminPublicationsRoute
+  '/admin/radio': typeof AdminRadioRoute
   '/admin/services': typeof AdminServicesRoute
   '/admin/signalements': typeof AdminSignalementsRoute
   '/admin/urgences': typeof AdminUrgencesRoute
@@ -209,6 +223,7 @@ export interface FileRoutesByTo {
   '/messagerie': typeof MessagerieRoute
   '/onboarding': typeof OnboardingRoute
   '/profil': typeof ProfilRoute
+  '/radio': typeof RadioRoute
   '/reset-password': typeof ResetPasswordRoute
   '/services': typeof ServicesRoute
   '/signaler': typeof SignalerRoute
@@ -218,6 +233,7 @@ export interface FileRoutesByTo {
   '/admin/evenements': typeof AdminEvenementsRoute
   '/admin/messagerie': typeof AdminMessagerieRoute
   '/admin/publications': typeof AdminPublicationsRoute
+  '/admin/radio': typeof AdminRadioRoute
   '/admin/services': typeof AdminServicesRoute
   '/admin/signalements': typeof AdminSignalementsRoute
   '/admin/urgences': typeof AdminUrgencesRoute
@@ -237,6 +253,7 @@ export interface FileRoutesById {
   '/messagerie': typeof MessagerieRoute
   '/onboarding': typeof OnboardingRoute
   '/profil': typeof ProfilRoute
+  '/radio': typeof RadioRoute
   '/reset-password': typeof ResetPasswordRoute
   '/services': typeof ServicesRoute
   '/signaler': typeof SignalerRoute
@@ -246,6 +263,7 @@ export interface FileRoutesById {
   '/admin/evenements': typeof AdminEvenementsRoute
   '/admin/messagerie': typeof AdminMessagerieRoute
   '/admin/publications': typeof AdminPublicationsRoute
+  '/admin/radio': typeof AdminRadioRoute
   '/admin/services': typeof AdminServicesRoute
   '/admin/signalements': typeof AdminSignalementsRoute
   '/admin/urgences': typeof AdminUrgencesRoute
@@ -266,6 +284,7 @@ export interface FileRouteTypes {
     | '/messagerie'
     | '/onboarding'
     | '/profil'
+    | '/radio'
     | '/reset-password'
     | '/services'
     | '/signaler'
@@ -275,6 +294,7 @@ export interface FileRouteTypes {
     | '/admin/evenements'
     | '/admin/messagerie'
     | '/admin/publications'
+    | '/admin/radio'
     | '/admin/services'
     | '/admin/signalements'
     | '/admin/urgences'
@@ -293,6 +313,7 @@ export interface FileRouteTypes {
     | '/messagerie'
     | '/onboarding'
     | '/profil'
+    | '/radio'
     | '/reset-password'
     | '/services'
     | '/signaler'
@@ -302,6 +323,7 @@ export interface FileRouteTypes {
     | '/admin/evenements'
     | '/admin/messagerie'
     | '/admin/publications'
+    | '/admin/radio'
     | '/admin/services'
     | '/admin/signalements'
     | '/admin/urgences'
@@ -320,6 +342,7 @@ export interface FileRouteTypes {
     | '/messagerie'
     | '/onboarding'
     | '/profil'
+    | '/radio'
     | '/reset-password'
     | '/services'
     | '/signaler'
@@ -329,6 +352,7 @@ export interface FileRouteTypes {
     | '/admin/evenements'
     | '/admin/messagerie'
     | '/admin/publications'
+    | '/admin/radio'
     | '/admin/services'
     | '/admin/signalements'
     | '/admin/urgences'
@@ -348,6 +372,7 @@ export interface RootRouteChildren {
   MessagerieRoute: typeof MessagerieRoute
   OnboardingRoute: typeof OnboardingRoute
   ProfilRoute: typeof ProfilRoute
+  RadioRoute: typeof RadioRoute
   ResetPasswordRoute: typeof ResetPasswordRoute
   ServicesRoute: typeof ServicesRoute
   SignalerRoute: typeof SignalerRoute
@@ -357,6 +382,7 @@ export interface RootRouteChildren {
   AdminEvenementsRoute: typeof AdminEvenementsRoute
   AdminMessagerieRoute: typeof AdminMessagerieRoute
   AdminPublicationsRoute: typeof AdminPublicationsRoute
+  AdminRadioRoute: typeof AdminRadioRoute
   AdminServicesRoute: typeof AdminServicesRoute
   AdminSignalementsRoute: typeof AdminSignalementsRoute
   AdminUrgencesRoute: typeof AdminUrgencesRoute
@@ -459,6 +485,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof UrgencesRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/radio': {
+      id: '/radio'
+      path: '/radio'
+      fullPath: '/radio'
+      preLoaderRoute: typeof RadioRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/admin/': {
       id: '/admin/'
       path: '/admin'
@@ -515,6 +548,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminUrgencesRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/admin/radio': {
+      id: '/admin/radio'
+      path: '/admin/radio'
+      fullPath: '/admin/radio'
+      preLoaderRoute: typeof AdminRadioRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/platform/knowledge': {
       id: '/platform/knowledge'
       path: '/platform/knowledge'
@@ -557,6 +597,7 @@ const rootRouteChildren: RootRouteChildren = {
   MessagerieRoute,
   OnboardingRoute,
   ProfilRoute,
+  RadioRoute,
   ResetPasswordRoute,
   ServicesRoute,
   SignalerRoute,
@@ -566,6 +607,7 @@ const rootRouteChildren: RootRouteChildren = {
   AdminEvenementsRoute,
   AdminMessagerieRoute,
   AdminPublicationsRoute,
+  AdminRadioRoute,
   AdminServicesRoute,
   AdminSignalementsRoute,
   AdminUrgencesRoute,
