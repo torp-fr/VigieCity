@@ -18,6 +18,7 @@ import { Route as AuthRouteImport } from './routes/auth'
 import { Route as CarteRouteImport } from './routes/carte'
 import { Route as FilRouteImport } from './routes/fil'
 import { Route as ForgotPasswordRouteImport } from './routes/forgot-password'
+import { Route as MessagerieRouteImport } from './routes/messagerie'
 import { Route as OnboardingRouteImport } from './routes/onboarding'
 import { Route as ProfilRouteImport } from './routes/profil'
 import { Route as ResetPasswordRouteImport } from './routes/reset-password'
@@ -28,6 +29,7 @@ import { Route as UrgencesRouteImport } from './routes/urgences'
 // ── Routes admin ──────────────────────────────────────────────────────────────
 import { Route as AdminIndexRouteImport } from './routes/admin/index'
 import { Route as AdminAlertesRouteImport } from './routes/admin/alertes'
+import { Route as AdminMessagerieRouteImport } from './routes/admin/messagerie'
 import { Route as AdminPublicationsRouteImport } from './routes/admin/publications'
 import { Route as AdminSignalementsRouteImport } from './routes/admin/signalements'
 import { Route as AdminEvenementsRouteImport } from './routes/admin/evenements'
@@ -71,6 +73,11 @@ const ForgotPasswordRoute = ForgotPasswordRouteImport.update({
   path: '/forgot-password',
   getParentRoute: () => rootRouteImport,
 } as any)
+const MessagerieRoute = MessagerieRouteImport.update({
+  id: '/messagerie',
+  path: '/messagerie',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const OnboardingRoute = OnboardingRouteImport.update({
   id: '/onboarding',
   path: '/onboarding',
@@ -110,6 +117,11 @@ const AdminIndexRoute = AdminIndexRouteImport.update({
 const AdminAlertesRoute = AdminAlertesRouteImport.update({
   id: '/admin/alertes',
   path: '/admin/alertes',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AdminMessagerieRoute = AdminMessagerieRouteImport.update({
+  id: '/admin/messagerie',
+  path: '/admin/messagerie',
   getParentRoute: () => rootRouteImport,
 } as any)
 const AdminPublicationsRoute = AdminPublicationsRouteImport.update({
@@ -167,6 +179,7 @@ export interface FileRoutesByFullPath {
   '/carte': typeof CarteRoute
   '/fil': typeof FilRoute
   '/forgot-password': typeof ForgotPasswordRoute
+  '/messagerie': typeof MessagerieRoute
   '/onboarding': typeof OnboardingRoute
   '/profil': typeof ProfilRoute
   '/reset-password': typeof ResetPasswordRoute
@@ -176,6 +189,7 @@ export interface FileRoutesByFullPath {
   '/admin/': typeof AdminIndexRoute
   '/admin/alertes': typeof AdminAlertesRoute
   '/admin/evenements': typeof AdminEvenementsRoute
+  '/admin/messagerie': typeof AdminMessagerieRoute
   '/admin/publications': typeof AdminPublicationsRoute
   '/admin/services': typeof AdminServicesRoute
   '/admin/signalements': typeof AdminSignalementsRoute
@@ -192,6 +206,7 @@ export interface FileRoutesByTo {
   '/carte': typeof CarteRoute
   '/fil': typeof FilRoute
   '/forgot-password': typeof ForgotPasswordRoute
+  '/messagerie': typeof MessagerieRoute
   '/onboarding': typeof OnboardingRoute
   '/profil': typeof ProfilRoute
   '/reset-password': typeof ResetPasswordRoute
@@ -201,6 +216,7 @@ export interface FileRoutesByTo {
   '/admin': typeof AdminIndexRoute
   '/admin/alertes': typeof AdminAlertesRoute
   '/admin/evenements': typeof AdminEvenementsRoute
+  '/admin/messagerie': typeof AdminMessagerieRoute
   '/admin/publications': typeof AdminPublicationsRoute
   '/admin/services': typeof AdminServicesRoute
   '/admin/signalements': typeof AdminSignalementsRoute
@@ -218,6 +234,7 @@ export interface FileRoutesById {
   '/carte': typeof CarteRoute
   '/fil': typeof FilRoute
   '/forgot-password': typeof ForgotPasswordRoute
+  '/messagerie': typeof MessagerieRoute
   '/onboarding': typeof OnboardingRoute
   '/profil': typeof ProfilRoute
   '/reset-password': typeof ResetPasswordRoute
@@ -227,6 +244,7 @@ export interface FileRoutesById {
   '/admin/': typeof AdminIndexRoute
   '/admin/alertes': typeof AdminAlertesRoute
   '/admin/evenements': typeof AdminEvenementsRoute
+  '/admin/messagerie': typeof AdminMessagerieRoute
   '/admin/publications': typeof AdminPublicationsRoute
   '/admin/services': typeof AdminServicesRoute
   '/admin/signalements': typeof AdminSignalementsRoute
@@ -245,6 +263,7 @@ export interface FileRouteTypes {
     | '/carte'
     | '/fil'
     | '/forgot-password'
+    | '/messagerie'
     | '/onboarding'
     | '/profil'
     | '/reset-password'
@@ -254,6 +273,7 @@ export interface FileRouteTypes {
     | '/admin/'
     | '/admin/alertes'
     | '/admin/evenements'
+    | '/admin/messagerie'
     | '/admin/publications'
     | '/admin/services'
     | '/admin/signalements'
@@ -270,6 +290,7 @@ export interface FileRouteTypes {
     | '/carte'
     | '/fil'
     | '/forgot-password'
+    | '/messagerie'
     | '/onboarding'
     | '/profil'
     | '/reset-password'
@@ -279,6 +300,7 @@ export interface FileRouteTypes {
     | '/admin'
     | '/admin/alertes'
     | '/admin/evenements'
+    | '/admin/messagerie'
     | '/admin/publications'
     | '/admin/services'
     | '/admin/signalements'
@@ -295,6 +317,7 @@ export interface FileRouteTypes {
     | '/carte'
     | '/fil'
     | '/forgot-password'
+    | '/messagerie'
     | '/onboarding'
     | '/profil'
     | '/reset-password'
@@ -304,6 +327,7 @@ export interface FileRouteTypes {
     | '/admin/'
     | '/admin/alertes'
     | '/admin/evenements'
+    | '/admin/messagerie'
     | '/admin/publications'
     | '/admin/services'
     | '/admin/signalements'
@@ -321,6 +345,7 @@ export interface RootRouteChildren {
   CarteRoute: typeof CarteRoute
   FilRoute: typeof FilRoute
   ForgotPasswordRoute: typeof ForgotPasswordRoute
+  MessagerieRoute: typeof MessagerieRoute
   OnboardingRoute: typeof OnboardingRoute
   ProfilRoute: typeof ProfilRoute
   ResetPasswordRoute: typeof ResetPasswordRoute
@@ -330,6 +355,7 @@ export interface RootRouteChildren {
   AdminIndexRoute: typeof AdminIndexRoute
   AdminAlertesRoute: typeof AdminAlertesRoute
   AdminEvenementsRoute: typeof AdminEvenementsRoute
+  AdminMessagerieRoute: typeof AdminMessagerieRoute
   AdminPublicationsRoute: typeof AdminPublicationsRoute
   AdminServicesRoute: typeof AdminServicesRoute
   AdminSignalementsRoute: typeof AdminSignalementsRoute
@@ -382,6 +408,13 @@ declare module '@tanstack/react-router' {
       path: '/forgot-password'
       fullPath: '/forgot-password'
       preLoaderRoute: typeof ForgotPasswordRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/messagerie': {
+      id: '/messagerie'
+      path: '/messagerie'
+      fullPath: '/messagerie'
+      preLoaderRoute: typeof MessagerieRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/onboarding': {
@@ -445,6 +478,13 @@ declare module '@tanstack/react-router' {
       path: '/admin/evenements'
       fullPath: '/admin/evenements'
       preLoaderRoute: typeof AdminEvenementsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/admin/messagerie': {
+      id: '/admin/messagerie'
+      path: '/admin/messagerie'
+      fullPath: '/admin/messagerie'
+      preLoaderRoute: typeof AdminMessagerieRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/admin/services': {
@@ -514,6 +554,7 @@ const rootRouteChildren: RootRouteChildren = {
   CarteRoute,
   FilRoute,
   ForgotPasswordRoute,
+  MessagerieRoute,
   OnboardingRoute,
   ProfilRoute,
   ResetPasswordRoute,
@@ -523,6 +564,7 @@ const rootRouteChildren: RootRouteChildren = {
   AdminIndexRoute,
   AdminAlertesRoute,
   AdminEvenementsRoute,
+  AdminMessagerieRoute,
   AdminPublicationsRoute,
   AdminServicesRoute,
   AdminSignalementsRoute,
