@@ -67,8 +67,10 @@ Les groupements de communes sont tarifés sur la **population totale du groupeme
 **Supplément intercommunal** : +20 % sur le prix de la tranche correspondante, pour l'accès au tableau de bord multi-communes (vue consolidée, gestion multi-admin, rapports croisés).
 
 **Exemple :**  
-Communauté de communes de 12 000 hab. → tranche « Commune » : 189 €/mois  
-+ supplément intercommunal 20 % → **227 €/mois** (2 265 €/an)
+Communauté de communes de 12 000 hab. → tranche « **Ville** » (10 000–50 000 hab.) : 490 €/mois  
++ supplément intercommunal 20 % → **588 €/mois** (5 880 €/an)
+
+> ⚠️ Attention : 12 000 hab. dépasse le seuil de 10 000 → c'est bien la tranche **Ville** qui s'applique, pas **Commune**.
 
 **Option package** : si toutes les communes membres signent en même temps → −10 % sur l'ensemble (équivalent à un pré-paiement groupé).
 
@@ -124,7 +126,7 @@ Pour les **20 premières collectivités** :
 |---------|------------|------|
 | Application web & mobile | Vercel | CDN mondial, déploiement continu |
 | Base de données | Supabase (AWS EU) | Région Europe, RGPD conforme |
-| Nom de domaine | À définir (registrar à choisir) | Ex. vigiecity.fr via Gandi ou OVHcloud |
+| Nom de domaine | ionos.fr (non encore acheté) | vigiecity.fr — achat à faire |
 
 > **Hébergeur ≠ registrar de domaine.** Vercel et Supabase sont les hébergeurs de l'application. Le nom de domaine (`vigiecity.fr`) est une adresse séparée, à enregistrer auprès d'un registrar (Gandi, OVHcloud, etc.).  
 > OVHcloud pourrait être utilisé comme registrar du domaine, mais ce n'est PAS l'hébergeur de l'app.
