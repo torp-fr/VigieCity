@@ -15,24 +15,14 @@ import appCss from "../styles.css?url";
 import { reportLovableError } from "../lib/lovable-error-reporting";
 import { AppHeader } from "../components/AppHeader";
 import { BottomNav } from "../components/BottomNav";
-import { MiniRadioPlayer } from "../components/MiniRadioPlayer";
-import { PWAInstallBanner } from "../components/PWAInstallBanner";
 import { Toaster } from "../components/ui/sonner";
 import { supabase } from "@/integrations/supabase/client";
 
-// Routes qui ne nécessitent pas de vérification d'onboarding ni de BottomNav
-const SKIP_ONBOARDING_ROUTES = [
-  "/auth",
-  "/onboarding",
-  "/profil",
-  "/mentions-legales",
-  "/confidentialite",
-  "/forgot-password",
-  "/reset-password",
-];
+// Routes that don't require onboarding check
+const SKIP_ONBOARDING_ROUTES = ["/auth", "/onboarding", "/profil", "/mentions-legales", "/confidentialite"];
 
-// Routes sans BottomNav (admin, plateforme, auth, onboarding, messagerie)
-const HIDE_NAV_PREFIXES = ["/auth", "/onboarding", "/admin", "/platform", "/forgot-password", "/reset-password", "/messagerie"];
+// Routes rendered without the app shell (header / bottom nav / padding)
+const SHELL_FREE_ROUTES = ["/landing"];
 
 function NotFoundComponent() {
   return (
@@ -98,10 +88,6 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       { charSet: "utf-8" },
       { name: "viewport", content: "width=device-width, initial-scale=1, viewport-fit=cover" },
       { name: "theme-color", content: "#1e3a8a" },
-      { name: "mobile-web-app-capable", content: "yes" },
-      { name: "apple-mobile-web-app-capable", content: "yes" },
-      { name: "apple-mobile-web-app-status-bar-style", content: "black-translucent" },
-      { name: "apple-mobile-web-app-title", content: "VigieCity" },
       { title: "VigieCity — Sécurité de proximité" },
       {
         name: "description",
@@ -116,12 +102,7 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary" },
     ],
-    links: [
-      { rel: "stylesheet", href: appCss },
-      { rel: "manifest", href: "/manifest.webmanifest" },
-      { rel: "apple-touch-icon", href: "/icons/icon.svg" },
-      { rel: "apple-touch-icon", sizes: "192x192", href: "/icons/icon-192.png" },
-    ],
+    links: [{ rel: "stylesheet", href: appCss }],
   }),
   shellComponent: RootShell,
   component: RootComponent,
@@ -149,31 +130,18 @@ function RootComponent() {
   const navigate = useNavigate();
   const pathname = useRouterState({ select: (s) => s.location.pathname });
 
-  // Enregistrement du Service Worker (Web Push notifications)
-  useEffect(() => {
-    if ("serviceWorker" in navigator) {
-      navigator.serviceWorker.register("/sw.js").catch((err) =>
-        console.error("[sw] registration failed:", err)
-      );
-    }
-  }, []);
+  const isShellFree = SHELL_FREE_ROUTES.some((r) => pathname.startsWith(r));
 
   useEffect(() => {
     const { data } = supabase.auth.onAuthStateChange(async (event, session) => {
-      // Gestion de la réinitialisation du mot de passe
-      if (event === "PASSWORD_RECOVERY") {
-        navigate({ to: "/reset-password" });
-        return;
-      }
-
       if (event !== "SIGNED_IN" && event !== "SIGNED_OUT" && event !== "USER_UPDATED") return;
       router.invalidate();
       if (event !== "SIGNED_OUT") queryClient.invalidateQueries();
 
-      // Après connexion, vérifier si l'utilisateur a besoin de l'onboarding
+      // After sign-in, check if user needs onboarding
       if (event === "SIGNED_IN" && session?.user) {
         if (SKIP_ONBOARDING_ROUTES.includes(pathname)) return;
-        // Court délai pour laisser le trigger DB propager le profil auto-créé
+        // Délai court : laisse la DB propager le profil auto-créé par le trigger
         await new Promise((r) => setTimeout(r, 500));
         const { data: profile } = await supabase
           .from("profiles")
@@ -188,12 +156,13 @@ function RootComponent() {
     return () => data.subscription.unsubscribe();
   }, [router, queryClient, navigate, pathname]);
 
-  // Au montage, vérifier si l'utilisateur connecté a besoin de l'onboarding
+  // On mount, check if logged-in user needs onboarding
   useEffect(() => {
     if (SKIP_ONBOARDING_ROUTES.includes(pathname)) return;
+    if (isShellFree) return; // pas de check onboarding sur les pages marketing
     supabase.auth.getSession().then(async ({ data: { session } }) => {
       if (!session?.user) return;
-      // Retry une fois après 600ms pour éviter la race condition post-inscription
+      // Retry once after 600ms to avoid a write-after-signup race (DB propagation delay)
       const checkOnboarding = async (isRetry = false): Promise<void> => {
         const { data: profile } = await supabase
           .from("profiles")
@@ -212,7 +181,15 @@ function RootComponent() {
     });
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
-  const showNav = !HIDE_NAV_PREFIXES.some((prefix) => pathname.startsWith(prefix));
+  // ── Pages marketing : rendu sans shell applicatif ──────────────────────────
+  if (isShellFree) {
+    return (
+      <QueryClientProvider client={queryClient}>
+        <Outlet />
+        <Toaster richColors position="top-center" />
+      </QueryClientProvider>
+    );
+  }
 
   return (
     <QueryClientProvider client={queryClient}>
@@ -221,9 +198,7 @@ function RootComponent() {
         <main className="flex-1 pb-4">
           <Outlet />
         </main>
-        {showNav && <MiniRadioPlayer />}
-        {showNav && <PWAInstallBanner />}
-        {showNav && <BottomNav />}
+        <BottomNav />
       </div>
       <Toaster richColors position="top-center" />
     </QueryClientProvider>
