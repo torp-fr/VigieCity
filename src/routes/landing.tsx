@@ -28,568 +28,614 @@ export const Route = createFileRoute("/landing")({
   component: LandingPage,
 });
 
-// ── Logo SVG ──────────────────────────────────────────────────────────────────
+// ── Logo (icon.svg depuis /public/icons/) ─────────────────────────────────────
 
-function VCLogo({ size = 34, light = false }: { size?: number; light?: boolean }) {
-  const fill = light ? "white" : "#1e3a8a";
-  const stroke = "white";
+function VCLogo({ size = 34 }: { size?: number }) {
   return (
-    <svg
+    <img
+      src="/icons/icon.svg"
+      alt="VigieCity"
       width={size}
       height={size}
-      viewBox="0 0 36 36"
-      fill="none"
-      xmlns="http://www.w3.org/2000/svg"
-      aria-hidden="true"
-    >
-      <path
-        d="M18 2.5L30.5 8V19C30.5 26.5 24.8 32.3 18 34C11.2 32.3 5.5 26.5 5.5 19V8L18 2.5Z"
-        fill={fill}
-      />
-      {/* Outer wifi arc */}
-      <path
-        d="M10 10.5C12.5 7.5 15 6 18 6C21 6 23.5 7.5 26 10.5"
-        stroke={stroke}
-        strokeWidth="1.6"
-        strokeLinecap="round"
-        fill="none"
-        opacity="0.45"
-      />
-      {/* Inner wifi arc */}
-      <path
-        d="M13 13.5C14.5 11.5 16 10.5 18 10.5C20 10.5 21.5 11.5 23 13.5"
-        stroke={stroke}
-        strokeWidth="1.6"
-        strokeLinecap="round"
-        fill="none"
-        opacity="0.8"
-      />
-      {/* Pin dot */}
-      <circle cx="18" cy="17" r="3" fill={stroke} />
-      {/* Pin tail */}
-      <path d="M18 20L18 25" stroke={stroke} strokeWidth="1.8" strokeLinecap="round" />
-    </svg>
+      style={{ flexShrink: 0 }}
+    />
   );
 }
 
-// ── 3D Phone mockup ───────────────────────────────────────────────────────────
+// ── Contenu écran app ─────────────────────────────────────────────────────────
 
-function PhoneMockup() {
+function AppContent() {
   return (
-    <div style={{ perspective: "1400px", perspectiveOrigin: "40% 50%" }}>
-      {/* Phone chassis */}
+    <div
+      style={{
+        height: "100%",
+        display: "flex",
+        flexDirection: "column",
+        fontFamily: "-apple-system, BlinkMacSystemFont, 'SF Pro Text', sans-serif",
+        background: "#f0f4f8",
+      }}
+    >
+      {/* Status bar */}
       <div
         style={{
-          width: 272,
-          height: 560,
-          borderRadius: 42,
-          background: "linear-gradient(150deg, #232338 0%, #16162a 45%, #0d0d1c 100%)",
-          border: "1.5px solid #35355a",
-          boxShadow:
-            "32px 48px 90px rgba(0,0,0,0.75), 12px 16px 32px rgba(0,0,0,0.4), -4px -4px 20px rgba(255,255,255,0.04), inset 0 1px 0 rgba(255,255,255,0.10), inset 1px 0 0 rgba(255,255,255,0.05)",
-          transform: "rotateY(-22deg) rotateX(7deg) rotateZ(-1.5deg)",
-          transformStyle: "preserve-3d",
-          position: "relative",
+          background: "#1e3a8a",
+          padding: "12px 18px 0",
+          display: "flex",
+          justifyContent: "space-between",
+          alignItems: "center",
           flexShrink: 0,
         }}
       >
-        {/* Side buttons — volume up */}
+        <span style={{ color: "white", fontSize: 10, fontWeight: 700 }}>9:41</span>
+        <div style={{ display: "flex", gap: 4, alignItems: "center" }}>
+          <span style={{ color: "rgba(255,255,255,0.8)", fontSize: 8 }}>▐▐▐</span>
+          <span style={{ color: "rgba(255,255,255,0.8)", fontSize: 8 }}>WiFi</span>
+          <span style={{ color: "rgba(255,255,255,0.8)", fontSize: 8 }}>⚡87%</span>
+        </div>
+      </div>
+
+      {/* App header */}
+      <div
+        style={{
+          background: "linear-gradient(150deg, #1e3a8a 0%, #1d4ed8 100%)",
+          padding: "8px 14px 14px",
+          flexShrink: 0,
+        }}
+      >
         <div
           style={{
-            position: "absolute",
-            left: -4,
-            top: 110,
-            width: 4,
-            height: 28,
-            background: "linear-gradient(to right, #1e1e30, #2a2a42)",
-            borderRadius: "3px 0 0 3px",
+            display: "flex",
+            justifyContent: "space-between",
+            alignItems: "center",
           }}
-        />
+        >
+          <div>
+            <p style={{ color: "#bfdbfe", fontSize: 9, margin: 0, fontWeight: 500 }}>
+              Saint-Martin-des-Champs
+            </p>
+            <p
+              style={{
+                color: "white",
+                fontSize: 14,
+                fontWeight: 800,
+                margin: "2px 0 0",
+              }}
+            >
+              Bonjour, Marie 👋
+            </p>
+          </div>
+          <div
+            style={{
+              background: "rgba(255,255,255,0.18)",
+              borderRadius: 18,
+              padding: "5px 9px",
+              display: "flex",
+              alignItems: "center",
+              gap: 4,
+            }}
+          >
+            <span style={{ fontSize: 12 }}>⛅</span>
+            <span style={{ color: "white", fontSize: 11, fontWeight: 700 }}>18°</span>
+          </div>
+        </div>
+        {/* Mini search */}
         <div
           style={{
-            position: "absolute",
-            left: -4,
-            top: 150,
-            width: 4,
-            height: 28,
-            background: "linear-gradient(to right, #1e1e30, #2a2a42)",
-            borderRadius: "3px 0 0 3px",
+            background: "rgba(255,255,255,0.15)",
+            borderRadius: 10,
+            padding: "7px 11px",
+            marginTop: 9,
+            display: "flex",
+            alignItems: "center",
+            gap: 7,
           }}
-        />
-        {/* Power button */}
+        >
+          <span style={{ fontSize: 11, color: "rgba(255,255,255,0.65)" }}>🔍</span>
+          <span style={{ fontSize: 10, color: "rgba(255,255,255,0.55)" }}>
+            Rechercher...
+          </span>
+        </div>
+      </div>
+
+      {/* Urgent alert */}
+      <div style={{ margin: "8px 8px 0", flexShrink: 0 }}>
+        <div
+          style={{
+            background: "linear-gradient(90deg, #b91c1c, #dc2626)",
+            borderRadius: 11,
+            padding: "8px 11px",
+            display: "flex",
+            alignItems: "center",
+            gap: 9,
+          }}
+        >
+          <span style={{ fontSize: 15 }}>🚨</span>
+          <div style={{ flex: 1 }}>
+            <p
+              style={{
+                color: "white",
+                fontSize: 8,
+                fontWeight: 800,
+                margin: 0,
+                textTransform: "uppercase",
+                letterSpacing: 0.4,
+              }}
+            >
+              Alerte urgente
+            </p>
+            <p
+              style={{
+                color: "rgba(255,255,255,0.9)",
+                fontSize: 9,
+                margin: "2px 0 0",
+              }}
+            >
+              Coupure eau — Secteur Nord · 14h–18h
+            </p>
+          </div>
+          <span style={{ color: "rgba(255,255,255,0.75)", fontSize: 14 }}>›</span>
+        </div>
+      </div>
+
+      {/* Quick actions 2×2 */}
+      <div style={{ padding: "8px 8px 0", flexShrink: 0 }}>
+        <div
+          style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 5 }}
+        >
+          {[
+            { icon: "🔔", label: "Alertes", badge: "3", bg: "#fff7ed", border: "#f59e0b" },
+            { icon: "📍", label: "Signaler", badge: null, bg: "#fff1f2", border: "#f43f5e" },
+            { icon: "📅", label: "Agenda", badge: "5", bg: "#eff6ff", border: "#3b82f6" },
+            { icon: "📰", label: "Infos", badge: "12", bg: "#f0fdf4", border: "#22c55e" },
+          ].map((a) => (
+            <div
+              key={a.label}
+              style={{
+                background: a.bg,
+                border: `1px solid ${a.border}33`,
+                borderRadius: 11,
+                padding: "9px 10px",
+                display: "flex",
+                alignItems: "center",
+                gap: 7,
+                position: "relative",
+              }}
+            >
+              <span style={{ fontSize: 17 }}>{a.icon}</span>
+              <span
+                style={{ fontSize: 10, fontWeight: 700, color: "#1f2937" }}
+              >
+                {a.label}
+              </span>
+              {a.badge && (
+                <div
+                  style={{
+                    position: "absolute",
+                    top: 5,
+                    right: 7,
+                    background: a.border,
+                    color: "white",
+                    fontSize: 7,
+                    fontWeight: 800,
+                    borderRadius: 8,
+                    padding: "1px 4px",
+                  }}
+                >
+                  {a.badge}
+                </div>
+              )}
+            </div>
+          ))}
+        </div>
+      </div>
+
+      {/* Fil local */}
+      <div
+        style={{
+          flex: 1,
+          overflow: "hidden",
+          padding: "6px 8px 0",
+        }}
+      >
+        <p
+          style={{
+            fontSize: 8,
+            fontWeight: 800,
+            color: "#94a3b8",
+            textTransform: "uppercase",
+            letterSpacing: 0.7,
+            margin: "0 0 5px",
+          }}
+        >
+          Fil local
+        </p>
+        <div style={{ display: "flex", flexDirection: "column", gap: 5 }}>
+          {/* Event */}
+          <div
+            style={{
+              background: "white",
+              borderRadius: 11,
+              padding: "7px 9px",
+              display: "flex",
+              alignItems: "center",
+              gap: 8,
+              boxShadow: "0 1px 3px rgba(0,0,0,0.06)",
+            }}
+          >
+            <div
+              style={{
+                width: 34,
+                height: 34,
+                background: "#eff6ff",
+                borderRadius: 8,
+                display: "flex",
+                flexDirection: "column",
+                alignItems: "center",
+                justifyContent: "center",
+                flexShrink: 0,
+              }}
+            >
+              <span
+                style={{ fontSize: 7, color: "#3b82f6", fontWeight: 800 }}
+              >
+                JUN
+              </span>
+              <span
+                style={{
+                  fontSize: 14,
+                  color: "#1e3a8a",
+                  fontWeight: 900,
+                  lineHeight: 1,
+                }}
+              >
+                22
+              </span>
+            </div>
+            <div style={{ flex: 1, minWidth: 0 }}>
+              <p
+                style={{
+                  fontSize: 10,
+                  fontWeight: 700,
+                  color: "#1f2937",
+                  margin: 0,
+                  overflow: "hidden",
+                  whiteSpace: "nowrap",
+                  textOverflow: "ellipsis",
+                }}
+              >
+                Fête de quartier — Place du bourg
+              </p>
+              <p style={{ fontSize: 8, color: "#6b7280", margin: "1px 0 0" }}>
+                14h–20h · Organisé par la mairie
+              </p>
+            </div>
+          </div>
+
+          {/* Signal */}
+          <div
+            style={{
+              background: "white",
+              borderRadius: 11,
+              padding: "7px 9px",
+              display: "flex",
+              alignItems: "center",
+              gap: 8,
+              boxShadow: "0 1px 3px rgba(0,0,0,0.06)",
+            }}
+          >
+            <div
+              style={{
+                width: 34,
+                height: 34,
+                background: "#fff7ed",
+                borderRadius: 8,
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                flexShrink: 0,
+                fontSize: 17,
+              }}
+            >
+              🚧
+            </div>
+            <div style={{ flex: 1, minWidth: 0 }}>
+              <p
+                style={{
+                  fontSize: 10,
+                  fontWeight: 700,
+                  color: "#1f2937",
+                  margin: 0,
+                }}
+              >
+                Nid-de-poule · Route D12
+              </p>
+              <p style={{ fontSize: 8, color: "#6b7280", margin: "1px 0 0" }}>
+                Signalé il y a 30 min · Pris en charge ✓
+              </p>
+            </div>
+            <span
+              style={{
+                fontSize: 7,
+                fontWeight: 800,
+                background: "#f59e0b",
+                color: "white",
+                borderRadius: 8,
+                padding: "2px 5px",
+                flexShrink: 0,
+              }}
+            >
+              En cours
+            </span>
+          </div>
+        </div>
+      </div>
+
+      {/* Bottom nav */}
+      <div
+        style={{
+          background: "white",
+          borderTop: "1px solid #f1f5f9",
+          display: "flex",
+          justifyContent: "space-around",
+          alignItems: "center",
+          padding: "7px 10px 12px",
+          flexShrink: 0,
+        }}
+      >
+        {[
+          { icon: "🏠", label: "Accueil", active: true },
+          { icon: "🗺️", label: "Carte", active: false },
+          { icon: "🔔", label: "Alertes", active: false },
+          { icon: "👤", label: "Profil", active: false },
+        ].map((tab) => (
+          <div
+            key={tab.label}
+            style={{ textAlign: "center", opacity: tab.active ? 1 : 0.38 }}
+          >
+            <span style={{ fontSize: 17 }}>{tab.icon}</span>
+            <p
+              style={{
+                fontSize: 7,
+                margin: "1px 0 0",
+                fontWeight: 700,
+                color: tab.active ? "#1e3a8a" : "#94a3b8",
+              }}
+            >
+              {tab.label}
+            </p>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+// ── Phone mockup 3D front-facing ──────────────────────────────────────────────
+
+function PhoneMockup() {
+  return (
+    <div style={{ position: "relative", paddingBottom: 28, paddingRight: 30 }}>
+      {/* Ambient blue glow */}
+      <div
+        style={{
+          position: "absolute",
+          top: "10%",
+          left: "50%",
+          transform: "translateX(-50%)",
+          width: 320,
+          height: 460,
+          background:
+            "radial-gradient(ellipse, rgba(59,130,246,0.22) 0%, transparent 68%)",
+          pointerEvents: "none",
+          zIndex: 0,
+        }}
+      />
+
+      {/* Floating push notification */}
+      <div
+        style={{
+          position: "absolute",
+          top: 72,
+          right: -12,
+          width: 196,
+          background: "white",
+          borderRadius: 16,
+          padding: "10px 12px",
+          boxShadow:
+            "0 10px 30px rgba(0,0,0,0.15), 0 2px 6px rgba(0,0,0,0.08)",
+          zIndex: 20,
+        }}
+      >
+        <div
+          style={{
+            display: "flex",
+            alignItems: "center",
+            gap: 6,
+            marginBottom: 5,
+          }}
+        >
+          <img
+            src="/icons/icon.svg"
+            width={18}
+            height={18}
+            style={{ borderRadius: 5 }}
+            alt=""
+          />
+          <span
+            style={{ fontSize: 9, fontWeight: 700, color: "#6b7280" }}
+          >
+            VigieCity
+          </span>
+          <span
+            style={{ marginLeft: "auto", fontSize: 8, color: "#9ca3af" }}
+          >
+            maintenant
+          </span>
+        </div>
+        <p
+          style={{
+            fontSize: 10,
+            fontWeight: 700,
+            color: "#1f2937",
+            margin: 0,
+          }}
+        >
+          ⚠️ Alerte eau — Secteur Nord
+        </p>
+        <p style={{ fontSize: 9, color: "#6b7280", margin: "2px 0 0" }}>
+          Coupure 14h–18h · Rue des Acacias
+        </p>
+      </div>
+
+      {/* Shadow pool under phone */}
+      <div
+        style={{
+          position: "absolute",
+          bottom: 4,
+          left: "12%",
+          right: "12%",
+          height: 32,
+          background:
+            "radial-gradient(ellipse, rgba(0,0,0,0.38) 0%, transparent 70%)",
+          filter: "blur(10px)",
+          zIndex: 0,
+        }}
+      />
+
+      {/* Phone chassis */}
+      <div
+        style={{
+          width: 282,
+          height: 578,
+          borderRadius: 47,
+          background:
+            "linear-gradient(162deg, #1e1e2e 0%, #131320 52%, #070710 100%)",
+          border: "1px solid #28283e",
+          boxShadow: `
+            0 52px 88px rgba(0,0,0,0.65),
+            0 20px 40px rgba(0,0,0,0.42),
+            0 8px 18px rgba(0,0,0,0.28),
+            inset 0 1px 0 rgba(255,255,255,0.13),
+            inset 0 0 0 1px rgba(255,255,255,0.03)
+          `,
+          position: "relative",
+          zIndex: 5,
+        }}
+      >
+        {/* Chassis light sheen top-left */}
         <div
           style={{
             position: "absolute",
-            right: -4,
-            top: 130,
-            width: 4,
-            height: 44,
-            background: "linear-gradient(to left, #1e1e30, #2a2a42)",
-            borderRadius: "0 3px 3px 0",
+            top: 0,
+            left: 0,
+            width: 170,
+            height: 220,
+            background:
+              "radial-gradient(ellipse at 30% 25%, rgba(255,255,255,0.07) 0%, transparent 55%)",
+            borderRadius: "47px 0 0 0",
+            pointerEvents: "none",
           }}
         />
 
-        {/* Screen glass */}
+        {/* Side buttons — left (silent + volume) */}
         <div
           style={{
             position: "absolute",
-            inset: 10,
-            borderRadius: 32,
+            left: -3,
+            top: 98,
+            width: 3,
+            height: 28,
+            background: "#18182a",
+            borderRadius: "2px 0 0 2px",
+          }}
+        />
+        <div
+          style={{
+            position: "absolute",
+            left: -3,
+            top: 138,
+            width: 3,
+            height: 44,
+            background: "#18182a",
+            borderRadius: "2px 0 0 2px",
+          }}
+        />
+        <div
+          style={{
+            position: "absolute",
+            left: -3,
+            top: 194,
+            width: 3,
+            height: 44,
+            background: "#18182a",
+            borderRadius: "2px 0 0 2px",
+          }}
+        />
+
+        {/* Side button — right (power) */}
+        <div
+          style={{
+            position: "absolute",
+            right: -3,
+            top: 148,
+            width: 3,
+            height: 66,
+            background: "#18182a",
+            borderRadius: "0 2px 2px 0",
+          }}
+        />
+
+        {/* Screen */}
+        <div
+          style={{
+            position: "absolute",
+            inset: 9,
+            borderRadius: 38,
             overflow: "hidden",
             background: "#f0f4f8",
           }}
         >
-          {/* Dynamic island */}
+          {/* Dynamic Island */}
           <div
             style={{
               position: "absolute",
-              top: 10,
+              top: 12,
               left: "50%",
               transform: "translateX(-50%)",
-              width: 88,
-              height: 27,
+              width: 98,
+              height: 30,
               background: "#000",
-              borderRadius: 14,
-              zIndex: 20,
+              borderRadius: 15,
+              zIndex: 30,
             }}
           />
 
-          {/* Glass reflection overlay */}
+          {/* Glass sheen */}
           <div
             style={{
               position: "absolute",
               inset: 0,
               background:
-                "linear-gradient(140deg, rgba(255,255,255,0.18) 0%, rgba(255,255,255,0.04) 35%, transparent 60%)",
-              zIndex: 50,
+                "linear-gradient(148deg, rgba(255,255,255,0.15) 0%, rgba(255,255,255,0.05) 28%, transparent 48%)",
+              zIndex: 100,
               pointerEvents: "none",
-              borderRadius: 32,
+              borderRadius: 38,
             }}
           />
 
-          {/* App content */}
-          <div
-            style={{
-              fontFamily: "-apple-system, BlinkMacSystemFont, 'SF Pro', sans-serif",
-              height: "100%",
-              display: "flex",
-              flexDirection: "column",
-              background: "#f1f5f9",
-            }}
-          >
-            {/* Status bar */}
-            <div
-              style={{
-                background: "#1e3a8a",
-                padding: "6px 18px 0",
-                display: "flex",
-                justifyContent: "space-between",
-                alignItems: "center",
-                paddingTop: 12,
-                flexShrink: 0,
-              }}
-            >
-              <span style={{ color: "white", fontSize: 10, fontWeight: 700 }}>9:41</span>
-              <div
-                style={{
-                  display: "flex",
-                  gap: 4,
-                  alignItems: "center",
-                }}
-              >
-                <span style={{ color: "rgba(255,255,255,0.8)", fontSize: 9 }}>●●●</span>
-                <span style={{ color: "rgba(255,255,255,0.8)", fontSize: 9 }}>WiFi</span>
-                <span style={{ color: "rgba(255,255,255,0.8)", fontSize: 9 }}>⚡84%</span>
-              </div>
-            </div>
-
-            {/* App header */}
-            <div
-              style={{
-                background: "#1e3a8a",
-                padding: "10px 14px 14px",
-                flexShrink: 0,
-              }}
-            >
-              <div
-                style={{
-                  display: "flex",
-                  justifyContent: "space-between",
-                  alignItems: "center",
-                }}
-              >
-                <div>
-                  <p
-                    style={{ color: "#93c5fd", fontSize: 9, margin: 0, fontWeight: 500 }}
-                  >
-                    Bonjour, Marie 👋
-                  </p>
-                  <p
-                    style={{
-                      color: "white",
-                      fontSize: 13,
-                      fontWeight: 800,
-                      margin: "2px 0 0",
-                    }}
-                  >
-                    Saint-Martin-des-Champs
-                  </p>
-                </div>
-                <div
-                  style={{
-                    background: "rgba(255,255,255,0.15)",
-                    borderRadius: 18,
-                    padding: "5px 9px",
-                    display: "flex",
-                    alignItems: "center",
-                    gap: 4,
-                  }}
-                >
-                  <span style={{ fontSize: 11 }}>⛅</span>
-                  <span
-                    style={{ color: "white", fontSize: 11, fontWeight: 700 }}
-                  >
-                    18°
-                  </span>
-                </div>
-              </div>
-            </div>
-
-            {/* Alert banner */}
-            <div
-              style={{
-                margin: "8px 8px 0",
-                background: "linear-gradient(90deg, #fef3c7, #fde68a)",
-                borderRadius: 10,
-                padding: "7px 10px",
-                display: "flex",
-                alignItems: "flex-start",
-                gap: 7,
-                border: "1px solid #f59e0b55",
-                flexShrink: 0,
-              }}
-            >
-              <span style={{ fontSize: 13, marginTop: 1 }}>⚠️</span>
-              <div>
-                <p
-                  style={{
-                    fontSize: 9,
-                    fontWeight: 800,
-                    color: "#92400e",
-                    margin: 0,
-                  }}
-                >
-                  Coupure d'eau — Secteur Nord
-                </p>
-                <p
-                  style={{ fontSize: 8, color: "#b45309", margin: "2px 0 0" }}
-                >
-                  Aujourd'hui de 14h à 18h · Vos équipes interviennent
-                </p>
-              </div>
-            </div>
-
-            {/* Quick actions */}
-            <div style={{ padding: "8px 8px 4px", flexShrink: 0 }}>
-              <p
-                style={{
-                  fontSize: 8,
-                  fontWeight: 700,
-                  color: "#94a3b8",
-                  textTransform: "uppercase",
-                  letterSpacing: 0.6,
-                  margin: "0 0 6px",
-                }}
-              >
-                Accès rapide
-              </p>
-              <div
-                style={{
-                  display: "grid",
-                  gridTemplateColumns: "1fr 1fr 1fr 1fr",
-                  gap: 5,
-                }}
-              >
-                {[
-                  { icon: "🔔", label: "Alertes", bg: "#fff7ed", border: "#f59e0b" },
-                  { icon: "📍", label: "Signaler", bg: "#fff1f2", border: "#f43f5e" },
-                  { icon: "📅", label: "Agenda", bg: "#eff6ff", border: "#3b82f6" },
-                  { icon: "📰", label: "Infos", bg: "#f0fdf4", border: "#22c55e" },
-                ].map((a) => (
-                  <div
-                    key={a.label}
-                    style={{
-                      background: a.bg,
-                      border: `1px solid ${a.border}44`,
-                      borderRadius: 9,
-                      padding: "7px 4px",
-                      textAlign: "center",
-                    }}
-                  >
-                    <span style={{ fontSize: 15 }}>{a.icon}</span>
-                    <p
-                      style={{
-                        fontSize: 8,
-                        fontWeight: 600,
-                        color: "#374151",
-                        margin: "3px 0 0",
-                      }}
-                    >
-                      {a.label}
-                    </p>
-                  </div>
-                ))}
-              </div>
-            </div>
-
-            {/* Feed */}
-            <div
-              style={{
-                padding: "0 8px",
-                display: "flex",
-                flexDirection: "column",
-                gap: 5,
-                flex: 1,
-                overflow: "hidden",
-              }}
-            >
-              <p
-                style={{
-                  fontSize: 8,
-                  fontWeight: 700,
-                  color: "#94a3b8",
-                  textTransform: "uppercase",
-                  letterSpacing: 0.6,
-                  margin: "2px 0 5px",
-                }}
-              >
-                Fil local
-              </p>
-
-              {/* Event card */}
-              <div
-                style={{
-                  background: "white",
-                  borderRadius: 10,
-                  padding: "7px 9px",
-                  boxShadow: "0 1px 4px rgba(0,0,0,0.06)",
-                  display: "flex",
-                  alignItems: "center",
-                  gap: 8,
-                }}
-              >
-                <div
-                  style={{
-                    width: 34,
-                    height: 34,
-                    background: "#eff6ff",
-                    borderRadius: 8,
-                    display: "flex",
-                    flexDirection: "column",
-                    alignItems: "center",
-                    justifyContent: "center",
-                    flexShrink: 0,
-                  }}
-                >
-                  <span
-                    style={{
-                      fontSize: 7,
-                      color: "#3b82f6",
-                      fontWeight: 800,
-                      textTransform: "uppercase",
-                    }}
-                  >
-                    JUN
-                  </span>
-                  <span
-                    style={{
-                      fontSize: 14,
-                      color: "#1e3a8a",
-                      fontWeight: 800,
-                      lineHeight: 1,
-                    }}
-                  >
-                    22
-                  </span>
-                </div>
-                <div style={{ flex: 1, minWidth: 0 }}>
-                  <p
-                    style={{
-                      fontSize: 10,
-                      fontWeight: 700,
-                      color: "#1f2937",
-                      margin: 0,
-                      whiteSpace: "nowrap",
-                      overflow: "hidden",
-                      textOverflow: "ellipsis",
-                    }}
-                  >
-                    Fête de quartier — Place du bourg
-                  </p>
-                  <p
-                    style={{ fontSize: 8, color: "#6b7280", margin: "2px 0 0" }}
-                  >
-                    14h → 20h · Organisé par la commune
-                  </p>
-                </div>
-              </div>
-
-              {/* Signal card */}
-              <div
-                style={{
-                  background: "white",
-                  borderRadius: 10,
-                  padding: "7px 9px",
-                  boxShadow: "0 1px 4px rgba(0,0,0,0.06)",
-                  display: "flex",
-                  alignItems: "center",
-                  gap: 8,
-                }}
-              >
-                <div
-                  style={{
-                    width: 34,
-                    height: 34,
-                    background: "#fff7ed",
-                    borderRadius: 8,
-                    display: "flex",
-                    alignItems: "center",
-                    justifyContent: "center",
-                    flexShrink: 0,
-                  }}
-                >
-                  <span style={{ fontSize: 17 }}>🚧</span>
-                </div>
-                <div style={{ flex: 1, minWidth: 0 }}>
-                  <p
-                    style={{
-                      fontSize: 10,
-                      fontWeight: 700,
-                      color: "#1f2937",
-                      margin: 0,
-                    }}
-                  >
-                    Signalement — Route D12
-                  </p>
-                  <p
-                    style={{ fontSize: 8, color: "#6b7280", margin: "2px 0 0" }}
-                  >
-                    Nid-de-poule · Pris en charge ✓
-                  </p>
-                </div>
-                <span
-                  style={{
-                    fontSize: 7,
-                    fontWeight: 800,
-                    background: "#d97706",
-                    color: "white",
-                    borderRadius: 20,
-                    padding: "2px 6px",
-                    flexShrink: 0,
-                  }}
-                >
-                  En cours
-                </span>
-              </div>
-
-              {/* Info card */}
-              <div
-                style={{
-                  background: "white",
-                  borderRadius: 10,
-                  padding: "7px 9px",
-                  boxShadow: "0 1px 4px rgba(0,0,0,0.06)",
-                  display: "flex",
-                  alignItems: "center",
-                  gap: 8,
-                }}
-              >
-                <div
-                  style={{
-                    width: 34,
-                    height: 34,
-                    background: "#f0fdf4",
-                    borderRadius: 8,
-                    display: "flex",
-                    alignItems: "center",
-                    justifyContent: "center",
-                    flexShrink: 0,
-                  }}
-                >
-                  <span style={{ fontSize: 17 }}>📰</span>
-                </div>
-                <div style={{ flex: 1, minWidth: 0 }}>
-                  <p
-                    style={{
-                      fontSize: 10,
-                      fontWeight: 700,
-                      color: "#1f2937",
-                      margin: 0,
-                      whiteSpace: "nowrap",
-                      overflow: "hidden",
-                      textOverflow: "ellipsis",
-                    }}
-                  >
-                    Nouveau PLU adopté en conseil
-                  </p>
-                  <p
-                    style={{ fontSize: 8, color: "#6b7280", margin: "2px 0 0" }}
-                  >
-                    Il y a 2 h · Mairie de Saint-Martin
-                  </p>
-                </div>
-              </div>
-            </div>
-
-            {/* Bottom nav */}
-            <div
-              style={{
-                background: "white",
-                borderTop: "1px solid #f1f5f9",
-                display: "flex",
-                justifyContent: "space-around",
-                alignItems: "center",
-                padding: "6px 10px 10px",
-                flexShrink: 0,
-              }}
-            >
-              {[
-                { icon: "🏠", label: "Accueil", active: true },
-                { icon: "🗺️", label: "Carte", active: false },
-                { icon: "🔔", label: "Alertes", active: false },
-                { icon: "👤", label: "Profil", active: false },
-              ].map((tab) => (
-                <div
-                  key={tab.label}
-                  style={{ textAlign: "center", opacity: tab.active ? 1 : 0.45 }}
-                >
-                  <span style={{ fontSize: 16 }}>{tab.icon}</span>
-                  <p
-                    style={{
-                      fontSize: 7,
-                      margin: "1px 0 0",
-                      fontWeight: 700,
-                      color: tab.active ? "#1e3a8a" : "#94a3b8",
-                    }}
-                  >
-                    {tab.label}
-                  </p>
-                </div>
-              ))}
-            </div>
-          </div>
+          <AppContent />
         </div>
 
         {/* Home indicator */}
         <div
           style={{
             position: "absolute",
-            bottom: 5,
+            bottom: 6,
             left: "50%",
             transform: "translateX(-50%)",
             width: 90,
             height: 4,
-            background: "rgba(255,255,255,0.18)",
+            background: "rgba(255,255,255,0.16)",
             borderRadius: 2,
           }}
         />
@@ -694,24 +740,36 @@ function LandingPage() {
         style={{ backgroundColor: "#1e3a8a" }}
         className="sticky top-0 z-50"
       >
-        <div className="mx-auto flex max-w-7xl items-center justify-between px-6 py-3.5">
+        <div className="mx-auto flex max-w-7xl items-center justify-between px-6 py-3">
           <div className="flex items-center gap-2.5">
-            <VCLogo size={32} light />
+            <VCLogo size={30} />
             <span className="text-xl font-extrabold tracking-tight text-white">
               VigieCity
             </span>
           </div>
           <nav className="hidden items-center gap-8 md:flex">
-            <a href="#modules" className="text-sm text-blue-200 transition hover:text-white">
+            <a
+              href="#modules"
+              className="text-sm text-blue-200 transition hover:text-white"
+            >
               Fonctionnalités
             </a>
-            <a href="#pour-qui" className="text-sm text-blue-200 transition hover:text-white">
+            <a
+              href="#pour-qui"
+              className="text-sm text-blue-200 transition hover:text-white"
+            >
               Pour qui
             </a>
-            <a href="#comment-ca-marche" className="text-sm text-blue-200 transition hover:text-white">
+            <a
+              href="#comment-ca-marche"
+              className="text-sm text-blue-200 transition hover:text-white"
+            >
               Comment ça marche
             </a>
-            <a href="#tarifs" className="text-sm text-blue-200 transition hover:text-white">
+            <a
+              href="#tarifs"
+              className="text-sm text-blue-200 transition hover:text-white"
+            >
               Tarifs
             </a>
             <a
@@ -727,13 +785,14 @@ function LandingPage() {
       {/* ── Hero ───────────────────────────────────────────────────────── */}
       <section
         style={{
-          background: "linear-gradient(140deg, #1e3a8a 0%, #1e40af 55%, #1d4ed8 100%)",
+          background:
+            "linear-gradient(140deg, #1e3a8a 0%, #1e40af 55%, #1d4ed8 100%)",
         }}
         className="pb-20 pt-16 md:pb-28 md:pt-24"
       >
         <div className="mx-auto max-w-7xl px-6">
-          <div className="flex flex-col items-center gap-12 lg:flex-row lg:items-center lg:gap-20">
-            {/* Left */}
+          <div className="flex flex-col items-center gap-10 lg:flex-row lg:items-center lg:gap-16">
+            {/* Left copy */}
             <div className="flex-1 text-center lg:text-left">
               <div
                 className="mb-5 inline-flex items-center gap-2 rounded-full px-4 py-1.5 text-sm font-medium"
@@ -743,7 +802,7 @@ function LandingPage() {
                 Pensée pour les collectivités locales françaises
               </div>
 
-              <h1 className="text-4xl font-extrabold leading-tight text-white md:text-5xl lg:text-[3.4rem]">
+              <h1 className="text-4xl font-extrabold leading-tight text-white md:text-5xl lg:text-[3.25rem]">
                 L'application qui connecte{" "}
                 <span style={{ color: "#93c5fd" }}>
                   vos habitants à la vie de leur commune
@@ -751,8 +810,9 @@ function LandingPage() {
               </h1>
 
               <p className="mt-6 max-w-lg text-lg text-blue-200 lg:text-xl">
-                Alertes locales, signalements, agenda, actualités, messagerie citoyenne
-                — un seul outil pour rapprocher vos habitants de leurs services municipaux.
+                Alertes locales, signalements, agenda, actualités, messagerie
+                citoyenne — un seul outil pour rapprocher vos habitants de
+                leurs services municipaux.
               </p>
 
               <div className="mt-10 flex flex-col items-center gap-4 sm:flex-row lg:items-start">
@@ -773,11 +833,12 @@ function LandingPage() {
               </div>
 
               <p className="mt-6 text-sm text-blue-300">
-                ✓ Application iOS & Android&emsp;✓ Espace admin web&emsp;✓ Tous modules inclus
+                ✓ Application iOS & Android&emsp;✓ Espace admin web&emsp;✓
+                Tous modules inclus
               </p>
             </div>
 
-            {/* Right — 3D phone */}
+            {/* Right — phone */}
             <div className="flex flex-shrink-0 justify-center">
               <PhoneMockup />
             </div>
@@ -796,8 +857,8 @@ function LandingPage() {
               Toutes les collectivités, sans distinction
             </h2>
             <p className="mx-auto mt-4 max-w-xl text-lg text-gray-500">
-              Que vous gériez 200 ou 200 000 habitants, VigieCity s'adapte à votre
-              territoire et à votre organisation.
+              Que vous gériez 200 ou 200 000 habitants, VigieCity s'adapte à
+              votre territoire et à votre organisation.
             </p>
           </div>
 
@@ -808,14 +869,18 @@ function LandingPage() {
                 className="rounded-2xl border border-gray-100 bg-gray-50 p-8"
               >
                 <span className="text-4xl">{c.icon}</span>
-                <h3 className="mt-4 text-lg font-bold text-gray-900">{c.title}</h3>
+                <h3 className="mt-4 text-lg font-bold text-gray-900">
+                  {c.title}
+                </h3>
                 <p
                   className="mt-1 text-xs font-semibold uppercase tracking-wider"
                   style={{ color: "#1e3a8a" }}
                 >
                   {c.sub}
                 </p>
-                <p className="mt-3 text-sm leading-relaxed text-gray-500">{c.desc}</p>
+                <p className="mt-3 text-sm leading-relaxed text-gray-500">
+                  {c.desc}
+                </p>
               </div>
             ))}
           </div>
@@ -833,8 +898,8 @@ function LandingPage() {
               Bien plus qu'un simple outil de signalement
             </h2>
             <p className="mx-auto mt-4 max-w-xl text-lg text-gray-500">
-              VigieCity couvre l'ensemble des besoins de communication entre votre
-              collectivité et ses habitants.
+              VigieCity couvre l'ensemble des besoins de communication entre
+              votre collectivité et ses habitants.
             </p>
           </div>
 
@@ -858,14 +923,19 @@ function LandingPage() {
             {/* Admin card */}
             <div
               className="rounded-2xl p-7"
-              style={{ background: "linear-gradient(135deg, #1e3a8a, #1d4ed8)" }}
+              style={{
+                background: "linear-gradient(135deg, #1e3a8a, #1d4ed8)",
+              }}
             >
               <div className="mb-4 flex h-12 w-12 items-center justify-center rounded-xl bg-white/20 text-2xl">
                 🖥️
               </div>
-              <h3 className="mb-2 font-bold text-white">Espace d'administration</h3>
+              <h3 className="mb-2 font-bold text-white">
+                Espace d'administration
+              </h3>
               <p className="mb-4 text-sm leading-relaxed text-blue-200">
-                Interface web dédiée à vos agents pour gérer l'ensemble des contenus et interactions.
+                Interface web dédiée à vos agents pour gérer l'ensemble des
+                contenus et interactions.
               </p>
               <div className="grid grid-cols-2 gap-1.5">
                 {ADMIN_FEATURES.map((f) => (
@@ -891,13 +961,13 @@ function LandingPage() {
               Opérationnel en 48 heures
             </h2>
             <p className="mx-auto mt-4 max-w-lg text-lg text-gray-500">
-              Pas d'équipe technique requise. De la configuration à votre premier
-              habitant connecté, tout se fait simplement.
+              Pas d'équipe technique requise. De la configuration à votre
+              premier habitant connecté, tout se fait simplement.
             </p>
           </div>
 
           <div className="mt-14 grid gap-8 md:grid-cols-3">
-            {STEPS.map((step, i) => (
+            {STEPS.map((step) => (
               <div
                 key={step.n}
                 className="rounded-2xl border border-gray-100 bg-gray-50 p-8"
@@ -908,8 +978,12 @@ function LandingPage() {
                 >
                   {step.n}
                 </div>
-                <h3 className="mb-2 text-base font-bold text-gray-900">{step.title}</h3>
-                <p className="text-sm leading-relaxed text-gray-500">{step.desc}</p>
+                <h3 className="mb-2 text-base font-bold text-gray-900">
+                  {step.title}
+                </h3>
+                <p className="text-sm leading-relaxed text-gray-500">
+                  {step.desc}
+                </p>
               </div>
             ))}
           </div>
@@ -924,12 +998,14 @@ function LandingPage() {
           </p>
           <h2 className="mt-2 text-3xl font-extrabold text-gray-900 md:text-4xl">
             Un modèle transparent,{" "}
-            <span style={{ color: "#1e3a8a" }}>adapté à votre territoire</span>
+            <span style={{ color: "#1e3a8a" }}>
+              adapté à votre territoire
+            </span>
           </h2>
           <p className="mx-auto mt-4 max-w-xl text-lg text-gray-500">
             La tarification est basée sur la taille de votre collectivité.{" "}
-            <strong>Tous les modules sont inclus</strong>, sans fonctionnalité réservée
-            à un plan supérieur.
+            <strong>Tous les modules sont inclus</strong>, sans fonctionnalité
+            réservée à un plan supérieur.
           </p>
 
           <div className="mt-10 grid gap-6 text-left sm:grid-cols-3">
@@ -942,7 +1018,7 @@ function LandingPage() {
               {
                 icon: "📏",
                 title: "Tarif par taille de territoire",
-                desc: "Le prix s'adapte au nombre d'habitants ou au nombre de communes dans votre groupement. Simple et prévisible.",
+                desc: "Le prix s'adapte au nombre d'habitants de votre collectivité. Simple et prévisible.",
               },
               {
                 icon: "📋",
@@ -956,7 +1032,9 @@ function LandingPage() {
               >
                 <span className="text-2xl">{item.icon}</span>
                 <h3 className="mt-3 font-bold text-gray-900">{item.title}</h3>
-                <p className="mt-2 text-sm leading-relaxed text-gray-500">{item.desc}</p>
+                <p className="mt-2 text-sm leading-relaxed text-gray-500">
+                  {item.desc}
+                </p>
               </div>
             ))}
           </div>
@@ -966,12 +1044,12 @@ function LandingPage() {
             style={{ background: "#1e3a8a" }}
           >
             <p className="text-base font-semibold text-white">
-              Nous sommes en phase de lancement et travaillons directement avec les
-              premières collectivités pour définir les offres.
+              Nous sommes en phase de lancement et travaillons directement avec
+              les premières collectivités pour définir les offres.
             </p>
             <p className="mt-2 text-sm text-blue-200">
-              Contactez-nous pour discuter de votre projet — pas de grille tarifaire
-              publique pour le moment, mais une réponse personnalisée sous 48h.
+              Contactez-nous pour discuter de votre projet — réponse
+              personnalisée sous 48h.
             </p>
             <a
               href="#contact"
@@ -988,7 +1066,9 @@ function LandingPage() {
       <section
         id="contact"
         className="py-20"
-        style={{ background: "linear-gradient(135deg, #f0f4ff 0%, #e0e7ff 100%)" }}
+        style={{
+          background: "linear-gradient(135deg, #f0f4ff 0%, #e0e7ff 100%)",
+        }}
       >
         <div className="mx-auto max-w-3xl px-6 text-center">
           <p className="text-sm font-semibold uppercase tracking-widest text-blue-600">
@@ -999,9 +1079,9 @@ function LandingPage() {
             <span style={{ color: "#1e3a8a" }}>direct avec ses habitants</span>
           </h2>
           <p className="mx-auto mt-5 max-w-lg text-lg text-gray-500">
-            Nous accompagnons les premières collectivités qui souhaitent adopter VigieCity.
-            Prenez contact pour en savoir plus sur le projet et les conditions de
-            lancement.
+            Nous accompagnons les premières collectivités qui souhaitent adopter
+            VigieCity. Prenez contact pour en savoir plus sur le projet et les
+            conditions de lancement.
           </p>
 
           <div className="mt-10 flex flex-col items-center justify-center gap-4 sm:flex-row">
@@ -1020,7 +1100,7 @@ function LandingPage() {
               "Application iOS & Android",
               "Espace admin web",
               "Support inclus",
-              "Données hébergées en France",
+              "Données hébergées en Europe",
               "Conforme RGPD",
             ].map((item) => (
               <span key={item} className="flex items-center gap-1.5">
@@ -1037,7 +1117,7 @@ function LandingPage() {
         <div className="mx-auto max-w-7xl px-6">
           <div className="flex flex-col items-center justify-between gap-6 md:flex-row">
             <div className="flex items-center gap-2.5">
-              <VCLogo size={28} light />
+              <VCLogo size={26} />
               <span className="text-lg font-bold text-white">VigieCity</span>
               <span className="text-sm text-slate-500">
                 — L'app citoyenne pour votre commune
@@ -1056,17 +1136,25 @@ function LandingPage() {
               >
                 Connexion habitants
               </Link>
-              <a href="#" className="text-sm text-slate-400 transition hover:text-white">
+              <a
+                href="#"
+                className="text-sm text-slate-400 transition hover:text-white"
+              >
                 Mentions légales
               </a>
-              <a href="#" className="text-sm text-slate-400 transition hover:text-white">
+              <a
+                href="#"
+                className="text-sm text-slate-400 transition hover:text-white"
+              >
                 Confidentialité
               </a>
             </div>
           </div>
           <div className="mt-6 border-t border-slate-800 pt-6 text-center text-xs text-slate-600">
-            © {new Date().getFullYear()} VigieCity — Hébergement OVHcloud France — Données
-            stockées en Union Européenne
+            © {new Date().getFullYear()} VigieCity · Application déployée sur{" "}
+            <span className="text-slate-500">Vercel</span> · Base de données{" "}
+            <span className="text-slate-500">Supabase (EU)</span> · Données
+            hébergées en Europe · Conforme RGPD
           </div>
         </div>
       </footer>
