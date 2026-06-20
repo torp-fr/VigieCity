@@ -13,12 +13,10 @@ export const Route = createFileRoute("/platform/onboarding")({
 });
 
 const PLANS = [
-  { value: "trial",         label: "Trial 30 jours", desc: "Accès complet, sans engagement — 0 €",      color: "bg-amber-50 border-amber-200",   price: 0 },
-  { value: "decouverte",    label: "Découverte",      desc: "< 500 hab. — 29 €/mois HT",                 color: "bg-green-50 border-green-200",   price: 29 },
-  { value: "essentiel",     label: "Essentiel",       desc: "500–2 000 hab. — 49 €/mois HT",             color: "bg-blue-50 border-blue-200",     price: 49 },
-  { value: "standard",      label: "Standard",        desc: "2 000–10 000 hab. — 129 €/mois HT",         color: "bg-indigo-50 border-indigo-200", price: 129 },
-  { value: "pro",           label: "Pro",             desc: "10 000–50 000 hab. — 249 €/mois HT",        color: "bg-violet-50 border-violet-200", price: 249 },
-  { value: "intercommunal", label: "Intercommunal",   desc: "EPCI / multi-communes — sur devis",          color: "bg-gray-50 border-gray-200",     price: 0 },
+  { value: "trial",      label: "Trial 30 jours", desc: "Accès complet, sans engagement", color: "bg-amber-50 border-amber-200" },
+  { value: "starter",    label: "Starter",         desc: "Jusqu'à 5 000 habitants",        color: "bg-blue-50 border-blue-200"   },
+  { value: "pro",        label: "Pro",             desc: "Communes jusqu'à 50 000 hab.",   color: "bg-violet-50 border-violet-200" },
+  { value: "enterprise", label: "Enterprise",      desc: "Communes >50 000 hab. + SLA",    color: "bg-gray-50 border-gray-200"   },
 ];
 
 type Step = 1 | 2 | 3 | 4;
@@ -341,7 +339,6 @@ function PlatformOnboardingPage() {
                 >
                   <p className="text-sm font-semibold">{p.label}</p>
                   <p className="mt-0.5 text-xs text-muted-foreground">{p.desc}</p>
-                  {p.price > 0 && <p className="mt-1 text-xs font-semibold text-muted-foreground">{p.price} €/mois HT</p>}
                   {plan === p.value && (
                     <CheckCircle className="mt-2 h-4 w-4 text-blue-600" />
                   )}
@@ -393,7 +390,7 @@ function PlatformOnboardingPage() {
             <div className="space-y-2 rounded-xl bg-muted/50 p-4 text-sm">
               <div className="flex justify-between">
                 <span className="text-muted-foreground">Plan</span>
-                <span className="font-medium">{PLANS.find(p => p.value === plan)?.label ?? plan}</span>
+                <span className="font-medium capitalize">{plan}</span>
               </div>
               <div className="flex justify-between">
                 <span className="text-muted-foreground">Admin</span>
@@ -414,7 +411,7 @@ function PlatformOnboardingPage() {
               <div className="flex justify-between">
                 <span className="text-muted-foreground">Durée</span>
                 <span className="font-medium">
-                  {plan === "trial" ? "30 jours" : plan === "intercommunal" ? "Sur devis" : "12 mois"}
+                  {plan === "trial" ? "30 jours" : "12 mois"}
                 </span>
               </div>
             </div>

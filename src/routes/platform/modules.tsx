@@ -9,7 +9,7 @@ export const Route = createFileRoute("/platform/modules")({
 });
 
 // ─── Types ────────────────────────────────────────────────────────────────────
-type PlanKey = "decouverte" | "essentiel" | "standard" | "pro" | "intercommunal";
+type PlanKey = "starter" | "pro" | "enterprise";
 
 type Module = {
   id:          string;
@@ -34,7 +34,7 @@ const MODULES: Module[] = [
       "Historique et export CSV",
       "Alertes email aux modérateurs",
     ],
-    plans: { decouverte: true, essentiel: true, standard: true, pro: true, intercommunal: true },
+    plans: { starter: true, pro: true, enterprise: true },
   },
   {
     id:          "communication",
@@ -48,7 +48,7 @@ const MODULES: Module[] = [
       "Temps réel (Supabase Realtime)",
       "Export et historique",
     ],
-    plans: { decouverte: true, essentiel: true, standard: true, pro: true, intercommunal: true },
+    plans: { starter: true, pro: true, enterprise: true },
   },
   {
     id:          "services",
@@ -62,7 +62,7 @@ const MODULES: Module[] = [
       "Catégorisation et tags",
       "Visibilité publié / brouillon",
     ],
-    plans: { decouverte: false, essentiel: "partial", standard: "partial", pro: true, intercommunal: true },
+    plans: { starter: "partial", pro: true, enterprise: true },
   },
   {
     id:          "carte",
@@ -76,7 +76,7 @@ const MODULES: Module[] = [
       "Périmètre de la commune",
       "Export GeoJSON",
     ],
-    plans: { decouverte: false, essentiel: false, standard: "partial", pro: true, intercommunal: true },
+    plans: { starter: false, pro: true, enterprise: true },
   },
   {
     id:          "push",
@@ -90,7 +90,7 @@ const MODULES: Module[] = [
       "Historique d'envoi",
       "Opt-in / Opt-out citoyen",
     ],
-    plans: { decouverte: false, essentiel: false, standard: false, pro: "partial", intercommunal: true },
+    plans: { starter: false, pro: "partial", enterprise: true },
   },
   {
     id:          "stats",
@@ -104,7 +104,7 @@ const MODULES: Module[] = [
       "Détection churn automatique",
       "Export PDF des rapports",
     ],
-    plans: { decouverte: false, essentiel: false, standard: false, pro: "partial", intercommunal: true },
+    plans: { starter: false, pro: "partial", enterprise: true },
   },
   {
     id:          "api",
@@ -118,7 +118,7 @@ const MODULES: Module[] = [
       "Authentification OAuth2",
       "Sandbox de test dédié",
     ],
-    plans: { decouverte: false, essentiel: false, standard: false, pro: false, intercommunal: true },
+    plans: { starter: false, pro: false, enterprise: true },
   },
   {
     id:          "white-label",
@@ -132,17 +132,15 @@ const MODULES: Module[] = [
       "Emails transactionnels brandés",
       "Suppression mentions VigieCity",
     ],
-    plans: { decouverte: false, essentiel: false, standard: false, pro: false, intercommunal: true },
+    plans: { starter: false, pro: false, enterprise: true },
   },
 ];
 
 // ─── Plans ────────────────────────────────────────────────────────────────────
 const PLANS: { key: PlanKey; name: string; color: string; price: string }[] = [
-  { key: "decouverte",    name: "Découverte",    color: "bg-muted text-foreground",  price: "29 €/mois" },
-  { key: "essentiel",    name: "Essentiel",    color: "bg-blue-500",        price: "49 €/mois" },
-  { key: "standard",     name: "Standard",     color: "bg-primary",         price: "129 €/mois" },
-  { key: "pro",          name: "Pro",          color: "bg-purple-600",      price: "249 €/mois" },
-  { key: "intercommunal",name: "Intercommunal",color: "bg-slate-700",       price: "Sur devis" },
+  { key: "starter",    name: "Starter",    color: "bg-muted",           price: "Gratuit" },
+  { key: "pro",        name: "Pro",        color: "bg-primary",         price: "99 €/mois" },
+  { key: "enterprise", name: "Enterprise", color: "bg-purple-600",      price: "Sur devis" },
 ];
 
 function PlanBadge({ status }: { status: boolean | "partial" }) {
@@ -298,12 +296,8 @@ function ModulesPlatform() {
               </span>
               <div className="mt-3 text-2xl font-extrabold">{p.price}</div>
               <p className="mt-1 text-xs text-muted-foreground">
-                {p.key === "decouverte"
-                  ? "1 commune · 200 utilisateurs"
-                  : p.key === "essentiel"
-                  ? "1 commune · 500 utilisateurs"
-                  : p.key === "standard"
-                  ? "1 commune · 2 000 utilisateurs"
+                {p.key === "starter"
+                  ? "1 commune · 50 utilisateurs"
                   : p.key === "pro"
                   ? "Communes illimitées · SLA 99,9 %"
                   : "Multi-tenant · Support dédié · SLA 99,99 %"}

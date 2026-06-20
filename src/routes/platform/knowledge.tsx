@@ -6,7 +6,6 @@ import {
   BookOpen, Plus, Pencil, Trash2, X, Save, Eye, EyeOff,
   Tag, Search, AlertTriangle,
 } from "lucide-react";
-import { ActionMenu } from "@/components/ActionMenu";
 import { toast } from "sonner";
 import { formatDistanceToNow } from "date-fns";
 import { fr } from "date-fns/locale";
@@ -322,11 +321,40 @@ function KnowledgePlatform() {
                   </div>
 
                   {/* Actions */}
-                  <ActionMenu actions={[
-                    { label: a.is_published ? "Dépublier" : "Publier", icon: a.is_published ? EyeOff : Eye, onClick: () => toggleMutation.mutate({ id: a.id, val: !a.is_published }) },
-                    { label: "Modifier", icon: Pencil, onClick: () => openEdit(a) },
-                    { label: "Supprimer", icon: Trash2, onClick: () => setDeleteTarget(a), variant: "danger" },
-                  ]} />
+                  <div className="flex shrink-0 flex-col gap-1.5">
+                    <button
+                      onClick={() =>
+                        toggleMutation.mutate({ id: a.id, val: !a.is_published })
+                      }
+                      className={[
+                        "flex h-8 w-8 items-center justify-center rounded-xl",
+                        a.is_published
+                          ? "bg-green-100 text-green-700"
+                          : "bg-muted text-muted-foreground",
+                      ].join(" ")}
+                      title={a.is_published ? "Dépublier" : "Publier"}
+                    >
+                      {a.is_published ? (
+                        <Eye className="h-3.5 w-3.5" />
+                      ) : (
+                        <EyeOff className="h-3.5 w-3.5" />
+                      )}
+                    </button>
+                    <button
+                      onClick={() => openEdit(a)}
+                      className="flex h-8 w-8 items-center justify-center rounded-xl bg-muted text-muted-foreground"
+                      title="Modifier"
+                    >
+                      <Pencil className="h-3.5 w-3.5" />
+                    </button>
+                    <button
+                      onClick={() => setDeleteTarget(a)}
+                      className="flex h-8 w-8 items-center justify-center rounded-xl bg-sos/10 text-sos"
+                      title="Supprimer"
+                    >
+                      <Trash2 className="h-3.5 w-3.5" />
+                    </button>
+                  </div>
                 </div>
               </li>
             );

@@ -120,13 +120,13 @@ function PublicationsPage() {
         image_path: f.image_path || null,
       };
       if (editId) {
-        const { error } = await supabase.from("publications").update(payload as any).eq("id", editId);
+        const { error } = await supabase.from("publications").update(payload).eq("id", editId);
         if (error) throw error;
       } else {
         const uid = (await supabase.auth.getUser()).data.user!.id;
         const { error } = await supabase.from("publications").insert({
           ...payload, collectivity_id: data!.collectivityId, created_by: uid,
-        } as any);
+        });
         if (error) throw error;
       }
     },
