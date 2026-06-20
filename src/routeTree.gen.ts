@@ -27,6 +27,7 @@ import { Route as ServicesRouteImport } from './routes/services'
 import { Route as SignalerRouteImport } from './routes/signaler'
 import { Route as UrgencesRouteImport } from './routes/urgences'
 import { Route as RadioRouteImport } from './routes/radio'
+import { Route as LandingRouteImport } from './routes/landing'
 
 // ── Routes admin ──────────────────────────────────────────────────────────────
 import { Route as AdminIndexRouteImport } from './routes/admin/index'
@@ -122,6 +123,11 @@ const RadioRoute = RadioRouteImport.update({
   path: '/radio',
   getParentRoute: () => rootRouteImport,
 } as any)
+const LandingRoute = LandingRouteImport.update({
+  id: '/landing',
+  path: '/landing',
+  getParentRoute: () => rootRouteImport,
+} as any)
 
 const AdminIndexRoute = AdminIndexRouteImport.update({
   id: '/admin/',
@@ -203,6 +209,7 @@ export interface FileRoutesByFullPath {
   '/carte': typeof CarteRoute
   '/fil': typeof FilRoute
   '/forgot-password': typeof ForgotPasswordRoute
+  '/landing': typeof LandingRoute
   '/messagerie': typeof MessagerieRoute
   '/mes-signalements': typeof MesSignalementsRoute
   '/onboarding': typeof OnboardingRoute
@@ -234,6 +241,7 @@ export interface FileRoutesByTo {
   '/carte': typeof CarteRoute
   '/fil': typeof FilRoute
   '/forgot-password': typeof ForgotPasswordRoute
+  '/landing': typeof LandingRoute
   '/messagerie': typeof MessagerieRoute
   '/mes-signalements': typeof MesSignalementsRoute
   '/onboarding': typeof OnboardingRoute
@@ -266,6 +274,7 @@ export interface FileRoutesById {
   '/carte': typeof CarteRoute
   '/fil': typeof FilRoute
   '/forgot-password': typeof ForgotPasswordRoute
+  '/landing': typeof LandingRoute
   '/messagerie': typeof MessagerieRoute
   '/mes-signalements': typeof MesSignalementsRoute
   '/onboarding': typeof OnboardingRoute
@@ -299,6 +308,7 @@ export interface FileRouteTypes {
     | '/carte'
     | '/fil'
     | '/forgot-password'
+    | '/landing'
     | '/messagerie'
     | '/mes-signalements'
     | '/onboarding'
@@ -330,6 +340,7 @@ export interface FileRouteTypes {
     | '/carte'
     | '/fil'
     | '/forgot-password'
+    | '/landing'
     | '/messagerie'
     | '/mes-signalements'
     | '/onboarding'
@@ -361,6 +372,7 @@ export interface FileRouteTypes {
     | '/carte'
     | '/fil'
     | '/forgot-password'
+    | '/landing'
     | '/messagerie'
     | '/mes-signalements'
     | '/onboarding'
@@ -393,6 +405,7 @@ export interface RootRouteChildren {
   CarteRoute: typeof CarteRoute
   FilRoute: typeof FilRoute
   ForgotPasswordRoute: typeof ForgotPasswordRoute
+  LandingRoute: typeof LandingRoute
   MessagerieRoute: typeof MessagerieRoute
   MesSignalementsRoute: typeof MesSignalementsRoute
   OnboardingRoute: typeof OnboardingRoute
@@ -460,6 +473,13 @@ declare module '@tanstack/react-router' {
       path: '/forgot-password'
       fullPath: '/forgot-password'
       preLoaderRoute: typeof ForgotPasswordRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/landing': {
+      id: '/landing'
+      path: '/landing'
+      fullPath: '/landing'
+      preLoaderRoute: typeof LandingRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/messagerie': {
@@ -564,6 +584,7 @@ declare module '@tanstack/react-router' {
       id: '/admin/services'
       path: '/admin/services'
       fullPath: '/admin/services'
+      fullPath: '/admin/services'
       preLoaderRoute: typeof AdminServicesRouteImport
       parentRoute: typeof rootRouteImport
     }
@@ -634,6 +655,7 @@ const rootRouteChildren: RootRouteChildren = {
   CarteRoute,
   FilRoute,
   ForgotPasswordRoute,
+  LandingRoute,
   MessagerieRoute,
   MesSignalementsRoute,
   OnboardingRoute,
