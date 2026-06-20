@@ -30,6 +30,7 @@ import { Route as RadioRouteImport } from './routes/radio'
 import { Route as LandingRouteImport } from './routes/landing'
 
 // ── Routes admin ──────────────────────────────────────────────────────────────
+import { Route as AdminLoginRouteImport } from './routes/admin/login'
 import { Route as AdminIndexRouteImport } from './routes/admin/index'
 import { Route as AdminAlertesRouteImport } from './routes/admin/alertes'
 import { Route as AdminEpciRouteImport } from './routes/admin/epci'
@@ -42,6 +43,12 @@ import { Route as AdminUrgencesRouteImport } from './routes/admin/urgences'
 import { Route as AdminRadioRouteImport } from './routes/admin/radio'
 
 // ── Routes plateforme (backoffice opérateur) ──────────────────────────────────
+import { Route as PlatformIndexRouteImport } from './routes/platform/index'
+import { Route as PlatformCollectivitesRouteImport } from './routes/platform/collectivites'
+import { Route as PlatformUsersRouteImport } from './routes/platform/users'
+import { Route as PlatformRssRouteImport } from './routes/platform/rss'
+import { Route as PlatformPublishersRouteImport } from './routes/platform/publishers'
+import { Route as PlatformSettingsRouteImport } from './routes/platform/settings'
 import { Route as PlatformKnowledgeRouteImport } from './routes/platform/knowledge'
 import { Route as PlatformModulesRouteImport } from './routes/platform/modules'
 import { Route as PlatformOnboardingRouteImport } from './routes/platform/onboarding'
@@ -129,6 +136,11 @@ const LandingRoute = LandingRouteImport.update({
   getParentRoute: () => rootRouteImport,
 } as any)
 
+const AdminLoginRoute = AdminLoginRouteImport.update({
+  id: '/admin/login',
+  path: '/admin/login',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const AdminIndexRoute = AdminIndexRouteImport.update({
   id: '/admin/',
   path: '/admin/',
@@ -180,6 +192,36 @@ const AdminRadioRoute = AdminRadioRouteImport.update({
   getParentRoute: () => rootRouteImport,
 } as any)
 
+const PlatformIndexRoute = PlatformIndexRouteImport.update({
+  id: '/platform/',
+  path: '/platform/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const PlatformCollectivitesRoute = PlatformCollectivitesRouteImport.update({
+  id: '/platform/collectivites',
+  path: '/platform/collectivites',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const PlatformUsersRoute = PlatformUsersRouteImport.update({
+  id: '/platform/users',
+  path: '/platform/users',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const PlatformRssRoute = PlatformRssRouteImport.update({
+  id: '/platform/rss',
+  path: '/platform/rss',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const PlatformPublishersRoute = PlatformPublishersRouteImport.update({
+  id: '/platform/publishers',
+  path: '/platform/publishers',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const PlatformSettingsRoute = PlatformSettingsRouteImport.update({
+  id: '/platform/settings',
+  path: '/platform/settings',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const PlatformKnowledgeRoute = PlatformKnowledgeRouteImport.update({
   id: '/platform/knowledge',
   path: '/platform/knowledge',
@@ -219,6 +261,7 @@ export interface FileRoutesByFullPath {
   '/services': typeof ServicesRoute
   '/signaler': typeof SignalerRoute
   '/urgences': typeof UrgencesRoute
+  '/admin/login': typeof AdminLoginRoute
   '/admin/': typeof AdminIndexRoute
   '/admin/alertes': typeof AdminAlertesRoute
   '/admin/epci': typeof AdminEpciRoute
@@ -229,6 +272,12 @@ export interface FileRoutesByFullPath {
   '/admin/services': typeof AdminServicesRoute
   '/admin/signalements': typeof AdminSignalementsRoute
   '/admin/urgences': typeof AdminUrgencesRoute
+  '/platform/': typeof PlatformIndexRoute
+  '/platform/collectivites': typeof PlatformCollectivitesRoute
+  '/platform/users': typeof PlatformUsersRoute
+  '/platform/rss': typeof PlatformRssRoute
+  '/platform/publishers': typeof PlatformPublishersRoute
+  '/platform/settings': typeof PlatformSettingsRoute
   '/platform/knowledge': typeof PlatformKnowledgeRoute
   '/platform/modules': typeof PlatformModulesRoute
   '/platform/onboarding': typeof PlatformOnboardingRoute
@@ -251,6 +300,7 @@ export interface FileRoutesByTo {
   '/services': typeof ServicesRoute
   '/signaler': typeof SignalerRoute
   '/urgences': typeof UrgencesRoute
+  '/admin/login': typeof AdminLoginRoute
   '/admin': typeof AdminIndexRoute
   '/admin/alertes': typeof AdminAlertesRoute
   '/admin/epci': typeof AdminEpciRoute
@@ -261,6 +311,12 @@ export interface FileRoutesByTo {
   '/admin/services': typeof AdminServicesRoute
   '/admin/signalements': typeof AdminSignalementsRoute
   '/admin/urgences': typeof AdminUrgencesRoute
+  '/platform': typeof PlatformIndexRoute
+  '/platform/collectivites': typeof PlatformCollectivitesRoute
+  '/platform/users': typeof PlatformUsersRoute
+  '/platform/rss': typeof PlatformRssRoute
+  '/platform/publishers': typeof PlatformPublishersRoute
+  '/platform/settings': typeof PlatformSettingsRoute
   '/platform/knowledge': typeof PlatformKnowledgeRoute
   '/platform/modules': typeof PlatformModulesRoute
   '/platform/onboarding': typeof PlatformOnboardingRoute
@@ -284,6 +340,7 @@ export interface FileRoutesById {
   '/services': typeof ServicesRoute
   '/signaler': typeof SignalerRoute
   '/urgences': typeof UrgencesRoute
+  '/admin/login': typeof AdminLoginRoute
   '/admin/': typeof AdminIndexRoute
   '/admin/alertes': typeof AdminAlertesRoute
   '/admin/epci': typeof AdminEpciRoute
@@ -294,6 +351,12 @@ export interface FileRoutesById {
   '/admin/services': typeof AdminServicesRoute
   '/admin/signalements': typeof AdminSignalementsRoute
   '/admin/urgences': typeof AdminUrgencesRoute
+  '/platform/': typeof PlatformIndexRoute
+  '/platform/collectivites': typeof PlatformCollectivitesRoute
+  '/platform/users': typeof PlatformUsersRoute
+  '/platform/rss': typeof PlatformRssRoute
+  '/platform/publishers': typeof PlatformPublishersRoute
+  '/platform/settings': typeof PlatformSettingsRoute
   '/platform/knowledge': typeof PlatformKnowledgeRoute
   '/platform/modules': typeof PlatformModulesRoute
   '/platform/onboarding': typeof PlatformOnboardingRoute
@@ -318,6 +381,7 @@ export interface FileRouteTypes {
     | '/services'
     | '/signaler'
     | '/urgences'
+    | '/admin/login'
     | '/admin/'
     | '/admin/alertes'
     | '/admin/epci'
@@ -328,6 +392,12 @@ export interface FileRouteTypes {
     | '/admin/services'
     | '/admin/signalements'
     | '/admin/urgences'
+    | '/platform/'
+    | '/platform/collectivites'
+    | '/platform/users'
+    | '/platform/rss'
+    | '/platform/publishers'
+    | '/platform/settings'
     | '/platform/knowledge'
     | '/platform/modules'
     | '/platform/onboarding'
@@ -350,6 +420,7 @@ export interface FileRouteTypes {
     | '/services'
     | '/signaler'
     | '/urgences'
+    | '/admin/login'
     | '/admin'
     | '/admin/alertes'
     | '/admin/epci'
@@ -360,6 +431,12 @@ export interface FileRouteTypes {
     | '/admin/services'
     | '/admin/signalements'
     | '/admin/urgences'
+    | '/platform'
+    | '/platform/collectivites'
+    | '/platform/users'
+    | '/platform/rss'
+    | '/platform/publishers'
+    | '/platform/settings'
     | '/platform/knowledge'
     | '/platform/modules'
     | '/platform/onboarding'
@@ -382,6 +459,7 @@ export interface FileRouteTypes {
     | '/services'
     | '/signaler'
     | '/urgences'
+    | '/admin/login'
     | '/admin/'
     | '/admin/alertes'
     | '/admin/epci'
@@ -392,6 +470,12 @@ export interface FileRouteTypes {
     | '/admin/services'
     | '/admin/signalements'
     | '/admin/urgences'
+    | '/platform/'
+    | '/platform/collectivites'
+    | '/platform/users'
+    | '/platform/rss'
+    | '/platform/publishers'
+    | '/platform/settings'
     | '/platform/knowledge'
     | '/platform/modules'
     | '/platform/onboarding'
@@ -415,6 +499,7 @@ export interface RootRouteChildren {
   ServicesRoute: typeof ServicesRoute
   SignalerRoute: typeof SignalerRoute
   UrgencesRoute: typeof UrgencesRoute
+  AdminLoginRoute: typeof AdminLoginRoute
   AdminIndexRoute: typeof AdminIndexRoute
   AdminAlertesRoute: typeof AdminAlertesRoute
   AdminEpciRoute: typeof AdminEpciRoute
@@ -425,6 +510,12 @@ export interface RootRouteChildren {
   AdminServicesRoute: typeof AdminServicesRoute
   AdminSignalementsRoute: typeof AdminSignalementsRoute
   AdminUrgencesRoute: typeof AdminUrgencesRoute
+  PlatformIndexRoute: typeof PlatformIndexRoute
+  PlatformCollectivitesRoute: typeof PlatformCollectivitesRoute
+  PlatformUsersRoute: typeof PlatformUsersRoute
+  PlatformRssRoute: typeof PlatformRssRoute
+  PlatformPublishersRoute: typeof PlatformPublishersRoute
+  PlatformSettingsRoute: typeof PlatformSettingsRoute
   PlatformKnowledgeRoute: typeof PlatformKnowledgeRoute
   PlatformModulesRoute: typeof PlatformModulesRoute
   PlatformOnboardingRoute: typeof PlatformOnboardingRoute
@@ -545,6 +636,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof RadioRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/admin/login': {
+      id: '/admin/login'
+      path: '/admin/login'
+      fullPath: '/admin/login'
+      preLoaderRoute: typeof AdminLoginRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/admin/': {
       id: '/admin/'
       path: '/admin'
@@ -584,7 +682,6 @@ declare module '@tanstack/react-router' {
       id: '/admin/services'
       path: '/admin/services'
       fullPath: '/admin/services'
-      fullPath: '/admin/services'
       preLoaderRoute: typeof AdminServicesRouteImport
       parentRoute: typeof rootRouteImport
     }
@@ -614,6 +711,48 @@ declare module '@tanstack/react-router' {
       path: '/admin/radio'
       fullPath: '/admin/radio'
       preLoaderRoute: typeof AdminRadioRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/platform/': {
+      id: '/platform/'
+      path: '/platform'
+      fullPath: '/platform/'
+      preLoaderRoute: typeof PlatformIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/platform/collectivites': {
+      id: '/platform/collectivites'
+      path: '/platform/collectivites'
+      fullPath: '/platform/collectivites'
+      preLoaderRoute: typeof PlatformCollectivitesRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/platform/users': {
+      id: '/platform/users'
+      path: '/platform/users'
+      fullPath: '/platform/users'
+      preLoaderRoute: typeof PlatformUsersRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/platform/rss': {
+      id: '/platform/rss'
+      path: '/platform/rss'
+      fullPath: '/platform/rss'
+      preLoaderRoute: typeof PlatformRssRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/platform/publishers': {
+      id: '/platform/publishers'
+      path: '/platform/publishers'
+      fullPath: '/platform/publishers'
+      preLoaderRoute: typeof PlatformPublishersRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/platform/settings': {
+      id: '/platform/settings'
+      path: '/platform/settings'
+      fullPath: '/platform/settings'
+      preLoaderRoute: typeof PlatformSettingsRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/platform/knowledge': {
@@ -665,6 +804,7 @@ const rootRouteChildren: RootRouteChildren = {
   ServicesRoute,
   SignalerRoute,
   UrgencesRoute,
+  AdminLoginRoute,
   AdminIndexRoute,
   AdminAlertesRoute,
   AdminEpciRoute,
@@ -675,6 +815,12 @@ const rootRouteChildren: RootRouteChildren = {
   AdminServicesRoute,
   AdminSignalementsRoute,
   AdminUrgencesRoute,
+  PlatformIndexRoute,
+  PlatformCollectivitesRoute,
+  PlatformUsersRoute,
+  PlatformRssRoute,
+  PlatformPublishersRoute,
+  PlatformSettingsRoute,
   PlatformKnowledgeRoute,
   PlatformModulesRoute,
   PlatformOnboardingRoute,

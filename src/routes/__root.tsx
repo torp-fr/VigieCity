@@ -134,7 +134,9 @@ function RootComponent() {
   const navigate = useNavigate();
   const pathname = useRouterState({ select: (s) => s.location.pathname });
 
-  const isShellFree = SHELL_FREE_ROUTES.includes(pathname);
+  const isShellFree  = SHELL_FREE_ROUTES.includes(pathname);
+  // Admin & platform : pas de shell citoyen, pas de check onboarding
+  const isAdminRoute = pathname.startsWith("/admin") || pathname.startsWith("/platform");
 
   useEffect(() => {
     const { data } = supabase.auth.onAuthStateChange(async (event, session) => {
@@ -168,16 +170,19 @@ function RootComponent() {
   // On mount, check if logged-in user needs onboarding
   useEffect(() => {
     if (SKIP_ONBOARDING_ROUTES.includes(pathname)) return;
-    if (isShellFree) return; // pas de check onboarding sur les pages marketing
+    if (isShellFree) return;  // pages marketing
+    if (isAdminRoute) return; // pages admin gèrent leur propre auth
     supabase.auth.getSession().then(async ({ data: { session } }) => {
       if (!session?.user) return;
       // Retry once after 600ms to avoid a write-after-signup race (DB propagation delay)
       const checkOnboarding = async (isRetry = false): Promise<void> => {
         const { data: profile } = await supabase
           .from("profiles")
-          .select("collectivity_id")
+          .select("collectivity_id, role")
           .eq("id", session.user.id)
           .single();
+        // Double garde : les admins ne passent jamais par l'onboarding citoyen
+        if (ADMIN_ROLES.includes(profile?.role as typeof ADMIN_ROLES[number])) return;
         if (!profile?.collectivity_id) {
           if (!isRetry) {
             await new Promise((r) => setTimeout(r, 600));
@@ -190,8 +195,8 @@ function RootComponent() {
     });
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
-  // ── Pages marketing : rendu sans shell applicatif ──────────────────────────
-  if (isShellFree) {
+  // ── Pages sans shell citoyen : marketing + admin/platform ─────────────────
+  if (isShellFree || isAdminRoute) {
     return (
       <QueryClientProvider client={queryClient}>
         <Outlet />
