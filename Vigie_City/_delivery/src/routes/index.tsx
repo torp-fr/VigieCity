@@ -1029,6 +1029,12 @@ function LandingPage() {
             >
               Tarifs
             </a>
+            <Link
+              to="/admin/login"
+              className="rounded-lg border border-blue-400 px-4 py-2 text-sm font-semibold text-blue-200 transition hover:border-white hover:text-white"
+            >
+              Connexion
+            </Link>
             <a
               href="mailto:contact@vigiecity.fr"
               className="rounded-lg bg-white px-4 py-2 text-sm font-bold text-blue-900 transition hover:bg-blue-50"
