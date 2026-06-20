@@ -5,6 +5,7 @@ import {
   Plus, Pencil, Trash2, ToggleLeft, ToggleRight, X, MapPin, Phone, Globe, Mail, Clock,
 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
+import { AdminShell } from "@/components/AdminShell";
 
 export const Route = createFileRoute("/admin/services")({
   component: AdminServicesPage,
@@ -207,6 +208,7 @@ function AdminServicesPage() {
   }
 
   return (
+    <AdminShell activePath="/admin/services">
     <div className="flex flex-col gap-0 pb-10">
       {/* ── Header ── */}
       <div className="sticky top-0 z-10 flex items-center justify-between border-b border-border bg-background/95 px-4 py-3 backdrop-blur">
@@ -558,5 +560,6 @@ function AdminServicesPage() {
         </>
       )}
     </div>
+    </AdminShell>
   );
 }

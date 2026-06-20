@@ -28,6 +28,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Switch } from "@/components/ui/switch";
+import { AdminShell } from "@/components/AdminShell";
 
 export const Route = createFileRoute("/admin/evenements")({
   component: AdminEvenementsPage,
@@ -233,6 +234,7 @@ function AdminEvenementsPage() {
 
   // ── Rendu ──────────────────────────────────────────────────────────────────
   return (
+    <AdminShell activePath="/admin/evenements">
     <>
       <div className="flex flex-col gap-4 px-4 pt-4 pb-6">
         {/* En-tête */}
@@ -476,6 +478,7 @@ function AdminEvenementsPage() {
         </div>
       )}
     </>
+    </AdminShell>
   );
 }
 

@@ -7,6 +7,7 @@ import {
 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
+import { AdminShell } from "@/components/AdminShell";
 
 export const Route = createFileRoute("/admin/radio")({
   component: AdminRadioPage,
@@ -175,6 +176,7 @@ function AdminRadioPage() {
 
   // ─── Render ───────────────────────────────────────────────────────────────
   return (
+    <AdminShell activePath="/admin/radio">
     <div className="space-y-8 px-4 py-6">
       {/* En-tête */}
       <div className="flex items-center justify-between">
@@ -384,5 +386,6 @@ function Field({ label, children }: { label: string; children: React.ReactNode }
       <label className="mb-1.5 block text-xs font-semibold text-muted-foreground uppercase tracking-wide">{label}</label>
       {children}
     </div>
+    </AdminShell>
   );
 }

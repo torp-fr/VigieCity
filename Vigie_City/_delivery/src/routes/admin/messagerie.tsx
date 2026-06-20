@@ -3,6 +3,7 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useEffect, useRef, useState } from "react";
 import { ArrowLeft, MessageSquare, Send, CheckCheck, Plus, X, GripVertical, Settings, Inbox } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
+import { AdminShell } from "@/components/AdminShell";
 
 export const Route = createFileRoute("/admin/messagerie")({
   component: AdminMessageriePage,
@@ -93,14 +94,12 @@ function AdminMessageriePage() {
       const uid = data.user?.id ?? null;
       setUserId(uid);
       if (uid) {
-        const { data: ur } = await supabase
-          .from("user_roles")
+        const { data: profile } = await supabase
+          .from("profiles")
           .select("collectivity_id")
-          .eq("user_id", uid)
-          .in("role", ["admin", "moderator"])
-          .limit(1)
+          .eq("id", uid)
           .single();
-        setCollectivityId(ur?.collectivity_id ?? null);
+        setCollectivityId(profile?.collectivity_id ?? null);
       }
       setReady(true);
     });
@@ -288,7 +287,8 @@ function AdminMessageriePage() {
   // ── Vue fil de messages ────────────────────────────────────────────────────
   if (activeConvId && activeConv) {
     return (
-      <div className="flex h-[100dvh] flex-col">
+      <AdminShell activePath="/admin/messagerie">
+      <div className="flex flex-col">
         <div className="flex items-center gap-3 border-b border-border bg-background/95 px-4 py-3 backdrop-blur">
           <button onClick={() => setActiveConvId(null)} className="rounded-full p-2 text-muted-foreground hover:bg-accent">
             <ArrowLeft className="h-5 w-5" />
@@ -366,11 +366,13 @@ function AdminMessageriePage() {
           </div>
         )}
       </div>
+      </AdminShell>
     );
   }
 
   // ── Vue principale (tabs) ─────────────────────────────────────────────────
   return (
+    <AdminShell activePath="/admin/messagerie">
     <div className="flex flex-col">
       {/* Header */}
       <div className="sticky top-0 z-10 border-b border-border bg-background/95 px-4 py-3 backdrop-blur">
@@ -576,5 +578,6 @@ function AdminMessageriePage() {
         </>
       )}
     </div>
+    </AdminShell>
   );
 }

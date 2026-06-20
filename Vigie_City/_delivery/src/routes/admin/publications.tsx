@@ -8,6 +8,7 @@ import {
 import { toast } from "sonner";
 import { formatDistanceToNow } from "date-fns";
 import { fr } from "date-fns/locale";
+import { AdminShell } from "@/components/AdminShell";
 
 export const Route = createFileRoute("/admin/publications")({
   component: PublicationsPage,
@@ -187,6 +188,7 @@ function PublicationsPage() {
 
   // ── Render ────────────────────────────────────────────────────────────────
   return (
+    <AdminShell activePath="/admin/publications">
     <div className="space-y-6">
 
       {/* En-tête */}
@@ -443,5 +445,6 @@ function PublicationsPage() {
         </div>
       )}
     </div>
+    </AdminShell>
   );
 }

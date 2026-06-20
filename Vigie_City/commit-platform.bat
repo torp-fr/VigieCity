@@ -1,15 +1,19 @@
 @echo off
 cd /d "%~dp0"
 git add -A
-git commit -m "feat(platform): pages /platform/* + PlatformShell + routeTree complet
+git commit -m "feat(admin): M24 — AdminShell desktop + dashboard stats + wrapping toutes les pages /admin/*
 
-- PlatformShell.tsx : sidebar + auth guard super_admin
-- /platform/rss : gestion flux RSS avec toggle active/delete/sync
-- /platform/collectivites : liste collectivites + toggle is_active
-- /platform/users : liste profils + changement role inline
-- /platform/publishers : grille editeurs + compteur articles
-- /platform/settings : infos plateforme + modules + RSS cron
-- routeTree.gen.ts : toutes les routes /platform/* + /admin/login enregistrees, bug fullPath duplique corrige"
+- AdminShell.tsx : sidebar emerald fixe + auth guard profiles.role + commune name
+- admin/index.tsx : dashboard stats (4 cartes + tableau signalements recents)
+- admin/alertes.tsx : nouvelle page diffusion alertes push (creer, historique)
+- admin/signalements.tsx : suppression gate auth (AdminShell gere), profiles.collectivity_id
+- admin/epci.tsx : suppression gates auth, wrap AdminShell
+- admin/messagerie.tsx : profiles.collectivity_id (remplace user_roles), 2 vues wrappees
+- admin/publications.tsx : AdminShell wrapper
+- admin/evenements.tsx : AdminShell wrapper
+- admin/services.tsx : AdminShell wrapper
+- admin/urgences.tsx : AdminShell wrapper
+- admin/radio.tsx : AdminShell wrapper"
 git push
 echo.
 echo Done! Press any key to close.

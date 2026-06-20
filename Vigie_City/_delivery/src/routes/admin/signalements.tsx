@@ -7,7 +7,6 @@ import {
   Archive,
   ArrowRight,
   Loader2,
-  Lock,
   Clock,
   MapPin,
   MessageSquare,
@@ -16,6 +15,7 @@ import {
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { categoryIcon, categoryLabel } from "@/lib/categories";
+import { AdminShell } from "@/components/AdminShell";
 
 export const Route = createFileRoute("/admin/signalements")({
   head: () => ({ meta: [{ title: "Modération signalements — VigieCity" }] }),
@@ -75,33 +75,26 @@ function SignalementsAdmin() {
   const qc = useQueryClient();
   const [userId, setUserId] = useState<string | null>(null);
   const [collectivityId, setCollectivityId] = useState<string | null>(null);
-  const [authed, setAuthed] = useState<boolean | null>(null);
-  const [isMod, setIsMod] = useState<boolean | null>(null);
   const [activeTab, setActiveTab] = useState<StatusFilter>("pending");
   const [modal, setModal] = useState<ModalState>(null);
 
   useEffect(() => {
     supabase.auth.getUser().then(async ({ data }) => {
       const uid = data.user?.id ?? null;
-      setAuthed(!!uid);
       setUserId(uid);
       if (!uid) return;
-      const [{ data: profile }, { data: roles }] = await Promise.all([
-        supabase.from("profiles").select("collectivity_id").eq("id", uid).single(),
-        supabase
-          .from("user_roles")
-          .select("role")
-          .eq("user_id", uid)
-          .in("role", ["moderator", "admin", "super_admin"]),
-      ]);
+      const { data: profile } = await supabase
+        .from("profiles")
+        .select("collectivity_id")
+        .eq("id", uid)
+        .single();
       setCollectivityId(profile?.collectivity_id ?? null);
-      setIsMod((roles?.length ?? 0) > 0);
     });
   }, []);
 
   const { data: reports, isLoading } = useQuery({
     queryKey: ["reports", "admin", collectivityId, activeTab],
-    enabled: !!collectivityId && isMod === true,
+    enabled: !!collectivityId,
     queryFn: async () => {
       const { data, error } = await supabase
         .from("reports")
@@ -194,8 +187,9 @@ function SignalementsAdmin() {
   }
 
   return (
+    <AdminShell activePath="/admin/signalements">
     <>
-      <div className="space-y-4 pb-24">
+      <div className="space-y-4 pb-4">
         <header className="px-4 pt-5">
           <h1 className="text-2xl font-bold">Signalements</h1>
           <p className="mt-1 text-sm text-muted-foreground">
@@ -259,6 +253,7 @@ function SignalementsAdmin() {
         />
       )}
     </>
+    </AdminShell>
   );
 }
 

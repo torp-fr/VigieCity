@@ -1,236 +1,301 @@
-import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
-import { useEffect, useState } from "react";
+import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
+import { useState, useEffect } from "react";
 import {
-  ShieldCheck,
   FileText,
-  Megaphone,
-  Loader2,
-  Lock,
-  Radio,
-  AlertTriangle,
   MessageSquare,
-  BookOpen,
   Calendar,
-  Wrench,
-  Phone,
-  Building2,
+  BookOpen,
+  Clock,
+  AlertTriangle,
+  ArrowRight,
+  Loader2,
 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
+import { AdminShell } from "@/components/AdminShell";
 
 export const Route = createFileRoute("/admin/")({
-  head: () => ({ meta: [{ title: "Administration — VigieCity" }] }),
-  component: AdminIndex,
+  head: () => ({ meta: [{ title: "Tableau de bord — VigieCity Admin" }] }),
+  component: AdminDashboard,
 });
 
-type NavItem = {
-  to: string;
-  label: string;
+// ── Types ─────────────────────────────────────────────────────────────────────
+
+type RecentReport = {
+  id: string;
+  category: string;
+  severity: string;
   description: string;
-  icon: React.ReactNode;
-  color: string;
+  created_at: string;
 };
 
-const communeNavItems: NavItem[] = [
-  {
-    to: "/admin/signalements",
-    label: "Signalements",
-    description: "Modérer les signalements en attente",
-    icon: <FileText className="h-5 w-5" />,
-    color: "bg-warning/10 text-warning-foreground",
-  },
-  {
-    to: "/admin/alertes",
-    label: "Créer une alerte",
-    description: "Diffuser un message à votre commune",
-    icon: <Megaphone className="h-5 w-5 text-sos" />,
-    color: "bg-sos/10",
-  },
-  {
-    to: "/admin/publications",
-    label: "Publications",
-    description: "Actualités et informations locales",
-    icon: <BookOpen className="h-5 w-5 text-primary" />,
-    color: "bg-primary/10",
-  },
-  {
-    to: "/admin/evenements",
-    label: "Événements",
-    description: "Agenda des événements communaux",
-    icon: <Calendar className="h-5 w-5 text-violet-500" />,
-    color: "bg-violet-100",
-  },
-  {
-    to: "/admin/messagerie",
-    label: "Messagerie",
-    description: "Messages citoyens et services",
-    icon: <MessageSquare className="h-5 w-5 text-sky-500" />,
-    color: "bg-sky-100",
-  },
-  {
-    to: "/admin/services",
-    label: "Services",
-    description: "Guichet numérique et lieux",
-    icon: <Wrench className="h-5 w-5 text-emerald-600" />,
-    color: "bg-emerald-100",
-  },
-  {
-    to: "/admin/urgences",
-    label: "Numéros d'urgence",
-    description: "Contacts locaux configurables",
-    icon: <Phone className="h-5 w-5 text-red-500" />,
-    color: "bg-red-100",
-  },
-  {
-    to: "/admin/radio",
-    label: "Radio locale",
-    description: "Flux audio diffusés aux citoyens",
-    icon: <Radio className="h-5 w-5 text-purple-500" />,
-    color: "bg-purple-100",
-  },
-];
+// ── Severity badge ─────────────────────────────────────────────────────────────
 
-function AdminIndex() {
-  const [userId, setUserId] = useState<string | null>(null);
-  const [authed, setAuthed] = useState<boolean | null>(null);
+const SEV_COLORS: Record<string, string> = {
+  low:      "bg-slate-100 text-slate-600",
+  medium:   "bg-amber-100 text-amber-700",
+  high:     "bg-orange-100 text-orange-700",
+  critical: "bg-red-100 text-red-700",
+};
+
+function SeverityBadge({ severity }: { severity: string }) {
+  return (
+    <span className={`rounded-full px-2 py-0.5 text-xs font-semibold ${SEV_COLORS[severity] ?? "bg-slate-100 text-slate-600"}`}>
+      {severity}
+    </span>
+  );
+}
+
+// ── Page ──────────────────────────────────────────────────────────────────────
+
+function AdminDashboard() {
   const navigate = useNavigate();
+  const [collectivityId, setCollectivityId] = useState<string | null>(null);
+  const [communeName,    setCommuneName]    = useState<string>("");
+  const [ready,          setReady]          = useState(false);
 
+  // Resolve current user's collectivity (AdminShell handles auth guard)
   useEffect(() => {
-    supabase.auth.getUser().then(({ data }) => {
-      setAuthed(!!data.user);
-      setUserId(data.user?.id ?? null);
-    });
+    (async () => {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session) return;
+      const { data: profile } = await supabase
+        .from("profiles")
+        .select("collectivity_id, collectivities(name)")
+        .eq("id", session.user.id)
+        .single();
+      setCollectivityId(profile?.collectivity_id ?? null);
+      setCommuneName((profile as any)?.collectivities?.name ?? "");
+      setReady(true);
+    })();
   }, []);
 
-  const { data: roles } = useQuery({
-    queryKey: ["user-roles-admin", userId],
-    enabled: !!userId,
+  // ── Stat queries ───────────────────────────────────────────────────────────
+
+  const { data: pendingCount = 0 } = useQuery<number>({
+    queryKey: ["admin-stat-pending", collectivityId],
+    enabled: ready,
     queryFn: async () => {
-      const { data } = await supabase
-        .from("user_roles")
-        .select("role, collectivity_id, epci_id")
-        .eq("user_id", userId!);
-      return data ?? [];
+      let q = supabase.from("reports").select("*", { count: "exact", head: true }).eq("status", "pending");
+      if (collectivityId) q = q.eq("collectivity_id", collectivityId);
+      const { count } = await q;
+      return count ?? 0;
     },
   });
 
-  const isEpciAdmin = roles?.some((r) => r.role === "epci_admin");
-  const isCommuneAdmin = roles?.some((r) =>
-    ["admin", "moderator"].includes(r.role),
-  );
-  const isSuperAdmin = roles?.some((r) => r.role === "super_admin");
+  const { data: unreadCount = 0 } = useQuery<number>({
+    queryKey: ["admin-stat-unread", collectivityId],
+    enabled: ready,
+    queryFn: async () => {
+      let q = supabase.from("conversations").select("*", { count: "exact", head: true }).gt("unread_admin", 0);
+      if (collectivityId) q = q.eq("collectivity_id", collectivityId);
+      const { count } = await q;
+      return count ?? 0;
+    },
+  });
 
-  // Redirection automatique pour les epci_admin purs (sans rôle commune)
-  useEffect(() => {
-    if (roles === undefined) return;
-    if (isEpciAdmin && !isCommuneAdmin && !isSuperAdmin) {
-      navigate({ to: "/admin/epci" });
-    }
-  }, [roles, isEpciAdmin, isCommuneAdmin, isSuperAdmin, navigate]);
+  const { data: upcomingCount = 0 } = useQuery<number>({
+    queryKey: ["admin-stat-events", collectivityId],
+    enabled: ready,
+    queryFn: async () => {
+      const today = new Date().toISOString().split("T")[0];
+      let q = supabase.from("events").select("*", { count: "exact", head: true }).gte("date", today);
+      if (collectivityId) q = q.eq("collectivity_id", collectivityId);
+      const { count } = await q;
+      return count ?? 0;
+    },
+  });
 
-  // ── Chargement ───────────────────────────────────────────────────────────────
-  if (authed === null || roles === undefined) {
-    return (
-      <div className="flex justify-center pt-20">
-        <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
-      </div>
-    );
-  }
+  const { data: pubsCount = 0 } = useQuery<number>({
+    queryKey: ["admin-stat-pubs", collectivityId],
+    enabled: ready,
+    queryFn: async () => {
+      const firstOfMonth = new Date(new Date().getFullYear(), new Date().getMonth(), 1).toISOString();
+      let q = supabase.from("publications").select("*", { count: "exact", head: true }).gte("created_at", firstOfMonth);
+      if (collectivityId) q = q.eq("collectivity_id", collectivityId);
+      const { count } = await q;
+      return count ?? 0;
+    },
+  });
 
-  // ── Accès refusé ─────────────────────────────────────────────────────────────
-  if (authed === false || (!isCommuneAdmin && !isEpciAdmin && !isSuperAdmin)) {
-    return (
-      <div className="flex flex-col items-center justify-center px-4 pt-20 text-center">
-        <Lock className="mx-auto h-10 w-10 text-muted-foreground" />
-        <h1 className="mt-3 text-xl font-semibold">Droits modérateur requis</h1>
-        <p className="mt-2 text-sm text-muted-foreground">
-          Votre compte n'a pas encore les droits modérateur. Contactez
-          l'administrateur de votre commune ou Baptiste à{" "}
-          <a
-            href="mailto:admin@vigiecity.fr"
-            className="underline hover:text-foreground"
-          >
-            admin@vigiecity.fr
-          </a>
-          .
-        </p>
-        <Link
-          to="/"
-          className="mt-5 inline-flex items-center gap-2 rounded-xl bg-primary px-5 py-3 text-sm font-semibold text-primary-foreground"
-        >
-          Retour à l'accueil
-        </Link>
-      </div>
-    );
-  }
+  // ── Recent pending reports ─────────────────────────────────────────────────
+
+  const { data: recentReports = [], isLoading: loadingReports } = useQuery<RecentReport[]>({
+    queryKey: ["admin-recent-reports", collectivityId],
+    enabled: ready,
+    queryFn: async () => {
+      let q = supabase
+        .from("reports")
+        .select("id, category, severity, description, created_at")
+        .eq("status", "pending")
+        .order("created_at", { ascending: false })
+        .limit(5);
+      if (collectivityId) q = q.eq("collectivity_id", collectivityId);
+      const { data, error } = await q;
+      if (error) throw error;
+      return (data ?? []) as RecentReport[];
+    },
+  });
+
+  // ── Stat cards config ──────────────────────────────────────────────────────
+
+  const STATS = [
+    {
+      label:  "Signalements en attente",
+      value:  pendingCount,
+      icon:   <FileText className="h-5 w-5 text-amber-600" />,
+      bg:     "bg-amber-50 border-amber-200",
+      iconBg: "bg-amber-100",
+      link:   "/admin/signalements",
+      urgent: pendingCount > 0,
+    },
+    {
+      label:  "Messages non lus",
+      value:  unreadCount,
+      icon:   <MessageSquare className="h-5 w-5 text-sky-600" />,
+      bg:     "bg-sky-50 border-sky-200",
+      iconBg: "bg-sky-100",
+      link:   "/admin/messagerie",
+      urgent: unreadCount > 0,
+    },
+    {
+      label:  "Événements à venir",
+      value:  upcomingCount,
+      icon:   <Calendar className="h-5 w-5 text-violet-600" />,
+      bg:     "bg-violet-50 border-violet-200",
+      iconBg: "bg-violet-100",
+      link:   "/admin/evenements",
+      urgent: false,
+    },
+    {
+      label:  "Publications ce mois",
+      value:  pubsCount,
+      icon:   <BookOpen className="h-5 w-5 text-emerald-600" />,
+      bg:     "bg-emerald-50 border-emerald-200",
+      iconBg: "bg-emerald-100",
+      link:   "/admin/publications",
+      urgent: false,
+    },
+  ];
+
+  // ── Render ─────────────────────────────────────────────────────────────────
 
   return (
-    <div className="space-y-6 px-4 pt-5">
-      <header>
-        <div className="flex items-center gap-2">
-          <ShieldCheck className="h-6 w-6 text-primary" />
-          <h1 className="text-2xl font-bold">Administration</h1>
-        </div>
-        <p className="mt-1 text-sm text-muted-foreground">
-          Modération et gestion des alertes de votre commune.
-        </p>
-      </header>
+    <AdminShell activePath="/admin">
+      <div className="p-8">
 
-      {/* Lien EPCI si l'utilisateur a les deux rôles */}
-      {isEpciAdmin && (
-        <Link
-          to="/admin/epci"
-          className="flex items-center gap-4 rounded-2xl border border-blue-200 bg-blue-50 p-4 shadow-card transition hover:bg-blue-100"
-        >
-          <div className="flex h-10 w-10 items-center justify-center rounded-full bg-blue-100">
-            <Building2 className="h-5 w-5 text-blue-600" />
-          </div>
-          <div>
-            <p className="font-semibold text-blue-800">
-              Tableau de bord intercommunal
-            </p>
-            <p className="text-xs text-blue-600">
-              Gérer vos communes et leurs administrateurs
-            </p>
-          </div>
-        </Link>
-      )}
-
-      {/* Nav commune (admin / moderator) */}
-      {(isCommuneAdmin || isSuperAdmin) && (
-        <nav className="grid gap-3">
-          {communeNavItems.map((item) => (
-            <Link
-              key={item.to}
-              to={item.to as any}
-              className="flex items-center gap-4 rounded-2xl border border-border bg-card p-4 shadow-card transition hover:bg-muted"
-            >
-              <div
-                className={`flex h-10 w-10 items-center justify-center rounded-full ${item.color}`}
-              >
-                {item.icon}
-              </div>
-              <div>
-                <p className="font-semibold">{item.label}</p>
-                <p className="text-xs text-muted-foreground">
-                  {item.description}
-                </p>
-              </div>
-            </Link>
-          ))}
-        </nav>
-      )}
-
-      {/* Avertissement modérateur sans commune */}
-      {isCommuneAdmin && !roles?.some((r) => r.collectivity_id) && (
-        <div className="flex items-start gap-3 rounded-2xl border border-warning/40 bg-warning/10 p-4">
-          <AlertTriangle className="mt-0.5 h-4 w-4 shrink-0 text-warning-foreground" />
-          <p className="text-sm text-warning-foreground">
-            Votre rôle n'est pas encore associé à une commune. Contactez un
-            super-administrateur.
+        {/* Header */}
+        <div className="mb-8">
+          <h1 className="text-2xl font-bold text-slate-900">Tableau de bord</h1>
+          <p className="mt-1 text-sm text-slate-500">
+            {communeName ? `Commune de ${communeName}` : "Administration VigieCity"}
           </p>
         </div>
-      )}
-    </div>
+
+        {/* Stat cards */}
+        <div className="mb-8 grid grid-cols-2 gap-4 lg:grid-cols-4">
+          {STATS.map(({ label, value, icon, bg, iconBg, link, urgent }) => (
+            <button
+              key={label}
+              onClick={() => navigate({ to: link as any })}
+              className={`group relative rounded-2xl border p-5 text-left shadow-sm transition hover:shadow-md ${bg}`}
+            >
+              {urgent && (
+                <span className="absolute right-3 top-3 flex h-2 w-2">
+                  <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-red-400 opacity-75" />
+                  <span className="relative inline-flex h-2 w-2 rounded-full bg-red-500" />
+                </span>
+              )}
+              <div className={`mb-3 inline-flex h-10 w-10 items-center justify-center rounded-xl ${iconBg}`}>
+                {icon}
+              </div>
+              <p className="text-3xl font-bold text-slate-900">{value}</p>
+              <p className="mt-0.5 text-sm text-slate-500">{label}</p>
+              <ArrowRight className="mt-3 h-4 w-4 text-slate-400 transition group-hover:translate-x-0.5 group-hover:text-slate-600" />
+            </button>
+          ))}
+        </div>
+
+        <div className="grid gap-6 lg:grid-cols-3">
+
+          {/* Recent pending reports */}
+          <div className="lg:col-span-2">
+            <div className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
+              <div className="flex items-center justify-between border-b border-slate-100 px-5 py-4">
+                <h2 className="font-semibold text-slate-900">Signalements récents</h2>
+                <button
+                  onClick={() => navigate({ to: "/admin/signalements" as any })}
+                  className="flex items-center gap-1 text-xs font-medium text-emerald-600 hover:text-emerald-700"
+                >
+                  Voir tous <ArrowRight className="h-3.5 w-3.5" />
+                </button>
+              </div>
+
+              {loadingReports ? (
+                <div className="flex items-center justify-center py-12">
+                  <Loader2 className="h-5 w-5 animate-spin text-slate-400" />
+                </div>
+              ) : recentReports.length === 0 ? (
+                <div className="flex flex-col items-center gap-2 py-12 text-center">
+                  <FileText className="h-8 w-8 text-slate-300" />
+                  <p className="text-sm text-slate-400">Aucun signalement en attente</p>
+                </div>
+              ) : (
+                <table className="w-full text-sm">
+                  <thead>
+                    <tr className="border-b border-slate-100 text-left text-xs font-semibold uppercase tracking-wide text-slate-400">
+                      <th className="px-5 py-3">Catégorie</th>
+                      <th className="px-5 py-3">Description</th>
+                      <th className="px-5 py-3">Gravité</th>
+                      <th className="px-5 py-3">Date</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-slate-50">
+                    {recentReports.map(r => (
+                      <tr
+                        key={r.id}
+                        onClick={() => navigate({ to: "/admin/signalements" as any })}
+                        className="cursor-pointer transition hover:bg-slate-50"
+                      >
+                        <td className="px-5 py-3 font-medium capitalize text-slate-700">{r.category}</td>
+                        <td className="max-w-[180px] truncate px-5 py-3 text-slate-500">{r.description}</td>
+                        <td className="px-5 py-3"><SeverityBadge severity={r.severity} /></td>
+                        <td className="px-5 py-3 text-xs text-slate-400">
+                          {new Date(r.created_at).toLocaleDateString("fr-FR")}
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              )}
+            </div>
+          </div>
+
+          {/* Quick actions */}
+          <div className="space-y-3">
+            <h2 className="font-semibold text-slate-900">Actions rapides</h2>
+            {(
+              [
+                { label: "Publier une actualité",  icon: <BookOpen     className="h-4 w-4 text-emerald-600" />, path: "/admin/publications", bg: "bg-emerald-50 border-emerald-200" },
+                { label: "Créer un événement",      icon: <Calendar     className="h-4 w-4 text-violet-600"  />, path: "/admin/evenements",  bg: "bg-violet-50 border-violet-200"  },
+                { label: "Diffuser une alerte",     icon: <AlertTriangle className="h-4 w-4 text-red-600"   />, path: "/admin/alertes",     bg: "bg-red-50 border-red-200"        },
+                { label: "Historique signalements", icon: <Clock        className="h-4 w-4 text-amber-600"  />, path: "/admin/signalements", bg: "bg-amber-50 border-amber-200"    },
+              ] as const
+            ).map(({ label, icon, path, bg }) => (
+              <button
+                key={label}
+                onClick={() => navigate({ to: path as any })}
+                className={`flex w-full items-center gap-3 rounded-xl border px-4 py-3 text-sm font-medium text-slate-700 shadow-sm transition hover:shadow-md ${bg}`}
+              >
+                <span className="shrink-0">{icon}</span>
+                {label}
+                <ArrowRight className="ml-auto h-4 w-4 text-slate-400" />
+              </button>
+            ))}
+          </div>
+
+        </div>
+      </div>
+    </AdminShell>
   );
 }

@@ -7,6 +7,7 @@ import {
   Clock, Tag, Star,
 } from "lucide-react";
 import { toast } from "sonner";
+import { AdminShell } from "@/components/AdminShell";
 
 export const Route = createFileRoute("/admin/urgences")({
   component: UrgencesAdmin,
@@ -194,6 +195,7 @@ function UrgencesAdmin() {
 
   // ─── UI ──────────────────────────────────────────────────────────────────
   return (
+    <AdminShell activePath="/admin/urgences">
     <div className="space-y-6 px-4 py-6">
       {/* En-tête */}
       <div className="flex items-center justify-between">
@@ -490,5 +492,6 @@ function UrgencesAdmin() {
         </div>
       )}
     </div>
+    </AdminShell>
   );
 }
