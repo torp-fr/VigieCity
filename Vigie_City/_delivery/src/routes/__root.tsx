@@ -29,8 +29,8 @@ const SKIP_ONBOARDING_ROUTES = [
   "/reset-password",
 ];
 
-// Routes sans BottomNav (admin, plateforme, auth, onboarding)
-const HIDE_NAV_PREFIXES = ["/auth", "/onboarding", "/admin", "/platform", "/forgot-password", "/reset-password"];
+// Routes sans BottomNav (admin, plateforme, auth, onboarding, messagerie)
+const HIDE_NAV_PREFIXES = ["/auth", "/onboarding", "/admin", "/platform", "/forgot-password", "/reset-password", "/messagerie"];
 
 function NotFoundComponent() {
   return (
