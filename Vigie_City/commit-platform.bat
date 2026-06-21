@@ -9,7 +9,7 @@ echo OK
 
 echo [2/3] Git add + commit...
 git add -A
-git commit -m "feat: J8.2 — carte services augmentée (Overpass API: hôpitaux, pharmacies, DAE, transports) + toggle couches"
+git commit -m "feat: J8.3 — consultations citoyennes (sondages + votes) + gestion admin polls"
 git push
 
 echo.

@@ -29,6 +29,7 @@ import { Route as UrgencesRouteImport } from './routes/urgences'
 import { Route as RadioRouteImport } from './routes/radio'
 import { Route as LandingRouteImport } from './routes/landing'
 import { Route as EvenementsRouteImport } from './routes/evenements'
+import { Route as ConsultationsRouteImport } from './routes/consultations'
 
 // ── Routes admin ──────────────────────────────────────────────────────────────
 import { Route as AdminLoginRouteImport } from './routes/admin/login'
@@ -42,6 +43,7 @@ import { Route as AdminEvenementsRouteImport } from './routes/admin/evenements'
 import { Route as AdminServicesRouteImport } from './routes/admin/services'
 import { Route as AdminUrgencesRouteImport } from './routes/admin/urgences'
 import { Route as AdminRadioRouteImport } from './routes/admin/radio'
+import { Route as AdminConsultationsRouteImport } from './routes/admin/consultations'
 
 // ── Routes plateforme (backoffice opérateur) ──────────────────────────────────
 import { Route as PlatformIndexRouteImport } from './routes/platform/index'
@@ -141,6 +143,11 @@ const EvenementsRoute = EvenementsRouteImport.update({
   path: '/evenements',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ConsultationsRoute = ConsultationsRouteImport.update({
+  id: '/consultations',
+  path: '/consultations',
+  getParentRoute: () => rootRouteImport,
+} as any)
 
 const AdminLoginRoute = AdminLoginRouteImport.update({
   id: '/admin/login',
@@ -195,6 +202,11 @@ const AdminUrgencesRoute = AdminUrgencesRouteImport.update({
 const AdminRadioRoute = AdminRadioRouteImport.update({
   id: '/admin/radio',
   path: '/admin/radio',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AdminConsultationsRoute = AdminConsultationsRouteImport.update({
+  id: '/admin/consultations',
+  path: '/admin/consultations',
   getParentRoute: () => rootRouteImport,
 } as any)
 
@@ -255,6 +267,7 @@ export interface FileRoutesByFullPath {
   '/actualites': typeof ActualitesRoute
   '/auth': typeof AuthRoute
   '/carte': typeof CarteRoute
+  '/consultations': typeof ConsultationsRoute
   '/evenements': typeof EvenementsRoute
   '/fil': typeof FilRoute
   '/forgot-password': typeof ForgotPasswordRoute
@@ -271,6 +284,7 @@ export interface FileRoutesByFullPath {
   '/admin/login': typeof AdminLoginRoute
   '/admin/': typeof AdminIndexRoute
   '/admin/alertes': typeof AdminAlertesRoute
+  '/admin/consultations': typeof AdminConsultationsRoute
   '/admin/epci': typeof AdminEpciRoute
   '/admin/evenements': typeof AdminEvenementsRoute
   '/admin/messagerie': typeof AdminMessagerieRoute
@@ -311,6 +325,7 @@ export interface FileRoutesByTo {
   '/admin/login': typeof AdminLoginRoute
   '/admin': typeof AdminIndexRoute
   '/admin/alertes': typeof AdminAlertesRoute
+  '/admin/consultations': typeof AdminConsultationsRoute
   '/admin/epci': typeof AdminEpciRoute
   '/admin/evenements': typeof AdminEvenementsRoute
   '/admin/messagerie': typeof AdminMessagerieRoute
@@ -352,6 +367,7 @@ export interface FileRoutesById {
   '/admin/login': typeof AdminLoginRoute
   '/admin/': typeof AdminIndexRoute
   '/admin/alertes': typeof AdminAlertesRoute
+  '/admin/consultations': typeof AdminConsultationsRoute
   '/admin/epci': typeof AdminEpciRoute
   '/admin/evenements': typeof AdminEvenementsRoute
   '/admin/messagerie': typeof AdminMessagerieRoute
@@ -378,6 +394,7 @@ export interface FileRouteTypes {
     | '/actualites'
     | '/auth'
     | '/carte'
+    | '/consultations'
     | '/evenements'
     | '/fil'
     | '/forgot-password'
@@ -394,6 +411,7 @@ export interface FileRouteTypes {
     | '/admin/login'
     | '/admin/'
     | '/admin/alertes'
+    | '/admin/consultations'
     | '/admin/epci'
     | '/admin/evenements'
     | '/admin/messagerie'
@@ -434,6 +452,7 @@ export interface FileRouteTypes {
     | '/admin/login'
     | '/admin'
     | '/admin/alertes'
+    | '/admin/consultations'
     | '/admin/epci'
     | '/admin/evenements'
     | '/admin/messagerie'
@@ -458,6 +477,7 @@ export interface FileRouteTypes {
     | '/actualites'
     | '/auth'
     | '/carte'
+    | '/consultations'
     | '/evenements'
     | '/fil'
     | '/forgot-password'
@@ -474,6 +494,7 @@ export interface FileRouteTypes {
     | '/admin/login'
     | '/admin/'
     | '/admin/alertes'
+    | '/admin/consultations'
     | '/admin/epci'
     | '/admin/evenements'
     | '/admin/messagerie'
@@ -499,6 +520,7 @@ export interface RootRouteChildren {
   ActualitesRoute: typeof ActualitesRoute
   AuthRoute: typeof AuthRoute
   CarteRoute: typeof CarteRoute
+  ConsultationsRoute: typeof ConsultationsRoute
   EvenementsRoute: typeof EvenementsRoute
   FilRoute: typeof FilRoute
   ForgotPasswordRoute: typeof ForgotPasswordRoute
@@ -515,6 +537,7 @@ export interface RootRouteChildren {
   AdminLoginRoute: typeof AdminLoginRoute
   AdminIndexRoute: typeof AdminIndexRoute
   AdminAlertesRoute: typeof AdminAlertesRoute
+  AdminConsultationsRoute: typeof AdminConsultationsRoute
   AdminEpciRoute: typeof AdminEpciRoute
   AdminEvenementsRoute: typeof AdminEvenementsRoute
   AdminMessagerieRoute: typeof AdminMessagerieRoute
@@ -563,6 +586,13 @@ declare module '@tanstack/react-router' {
       path: '/carte'
       fullPath: '/carte'
       preLoaderRoute: typeof CarteRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/consultations': {
+      id: '/consultations'
+      path: '/consultations'
+      fullPath: '/consultations'
+      preLoaderRoute: typeof ConsultationsRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/evenements': {
@@ -675,6 +705,13 @@ declare module '@tanstack/react-router' {
       path: '/admin/alertes'
       fullPath: '/admin/alertes'
       preLoaderRoute: typeof AdminAlertesRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/admin/consultations': {
+      id: '/admin/consultations'
+      path: '/admin/consultations'
+      fullPath: '/admin/consultations'
+      preLoaderRoute: typeof AdminConsultationsRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/admin/epci': {
@@ -812,6 +849,7 @@ const rootRouteChildren: RootRouteChildren = {
   ActualitesRoute,
   AuthRoute,
   CarteRoute,
+  ConsultationsRoute,
   EvenementsRoute,
   FilRoute,
   ForgotPasswordRoute,
@@ -828,6 +866,7 @@ const rootRouteChildren: RootRouteChildren = {
   AdminLoginRoute,
   AdminIndexRoute,
   AdminAlertesRoute,
+  AdminConsultationsRoute,
   AdminEpciRoute,
   AdminEvenementsRoute,
   AdminMessagerieRoute,
