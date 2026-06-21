@@ -9,7 +9,7 @@ echo OK
 
 echo [2/3] Git add + commit...
 git add -A
-git commit -m "feat: session 6 — push_notifications_log, types regen, M23 terrain mobile"
+git commit -m "feat: session 8 — usePlatformAuth cache, useAppAuth cache, fix platform nav, fix actualites"
 git push
 
 echo.

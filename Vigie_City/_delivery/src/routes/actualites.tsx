@@ -1,12 +1,13 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import {
   Newspaper, ExternalLink, RefreshCw, Globe, Shield,
   Calendar, Tag, Loader2, AlertCircle, ChevronRight,
 } from "lucide-react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
+import { useAppAuth } from "@/hooks/useAppAuth";
 
 export const Route = createFileRoute("/actualites")({
   head: () => ({
@@ -74,25 +75,14 @@ function relativeTime(dateStr: string | null): string {
 function ActualitesPage() {
   const queryClient = useQueryClient();
   const [category, setCategory] = useState<string>("all");
-  const [collectivityId, setCollectivityId] = useState<string | null>(null);
 
-  // Récupérer la collectivité de l'utilisateur
-  useEffect(() => {
-    supabase.auth.getUser().then(({ data }) => {
-      if (!data.user) return;
-      supabase
-        .from("profiles")
-        .select("collectivity_id")
-        .eq("id", data.user.id)
-        .single()
-        .then(({ data: p }) => setCollectivityId(p?.collectivity_id ?? null));
-    });
-  }, []);
+  // Auth en cache via React Query — plus de getUser() individuel
+  const { collectivityId, isLoading: authLoading } = useAppAuth();
 
-  // Charger les articles
+  // Charger les articles (attend la fin du check auth)
   const { data: articles, isLoading, error } = useQuery({
     queryKey: ["news_articles", collectivityId, category],
-    enabled: collectivityId !== undefined, // attend la réponse (même null)
+    enabled: !authLoading,
     queryFn: async () => {
       let q = supabase
         .from("news_articles")
@@ -119,7 +109,6 @@ function ActualitesPage() {
   // Mutation : déclenche fetch-rss manuellement
   const refresh = useMutation({
     mutationFn: async () => {
-      const { data: { session } } = await supabase.auth.getSession();
       const res = await supabase.functions.invoke("fetch-rss", {
         body: collectivityId ? { collectivity_id: collectivityId } : {},
       });
