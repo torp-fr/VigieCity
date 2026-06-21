@@ -9,7 +9,7 @@ echo OK
 
 echo [2/3] Git add + commit...
 git add -A
-git commit -m "feat: J10 — PWA v4 (sw multi-cache, offline.html, manifest Lighthouse, icons PNG, preconnect)"
+git commit -m "feat: J11 — Monitoring & Ops (health-check EF, rss-health-alert cron, RUNBOOK.md)"
 git push
 
 echo.
