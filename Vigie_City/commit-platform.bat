@@ -9,7 +9,7 @@ echo OK
 
 echo [2/3] Git add + commit...
 git add -A
-git commit -m "feat: session 11 — PostHog VITE_POSTHOG_KEY, Resend EF, Brave EF, analytics page"
+git commit -m "fix: force rebuild Vercel pour injecter VITE_POSTHOG_KEY dans le bundle Vite"
 git push
 
 echo.

@@ -16,8 +16,9 @@ import appCss from "../styles.css?url";
 import { reportLovableError } from "../lib/lovable-error-reporting";
 
 // ── PostHog — analytics GDPR-compliant (EU Cloud Frankfurt) ──────────────────
-// Clé lue depuis VITE_POSTHOG_KEY (variable d'environnement Vercel)
+// Clé lue depuis VITE_POSTHOG_KEY (variable Vercel, injectée au build)
 // En local dev : PostHog ne s'initialise pas (pas de tracking dev involontaire)
+// rebuild: 2026-06-21
 const POSTHOG_KEY = (import.meta.env.VITE_POSTHOG_KEY as string) ?? "";
 if (POSTHOG_KEY) {
   posthog.init(POSTHOG_KEY, {
