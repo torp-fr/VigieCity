@@ -9,7 +9,7 @@ echo OK
 
 echo [2/3] Git add + commit...
 git add -A
-git commit -m "feat: J8.6 — timeline visuelle mes-signalements (dots colorés par statut + ligne connectante + entrée Soumission)"
+git commit -m "feat: J8.2 — carte services augmentée (Overpass API: hôpitaux, pharmacies, DAE, transports) + toggle couches"
 git push
 
 echo.
