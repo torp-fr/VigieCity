@@ -9,7 +9,7 @@ echo OK
 
 echo [2/3] Git add + commit...
 git add -A
-git commit -m "feat: perf AdminShell + forgot password + reset-password + /admin/settings changement mdp"
+git commit -m "feat: J1 multi-tenant theming — logo/couleurs par commune, AdminShell dynamique, AppHeader citoyen, settings identite visuelle"
 git push
 
 echo.

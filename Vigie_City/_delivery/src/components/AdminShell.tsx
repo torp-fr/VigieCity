@@ -21,6 +21,10 @@ import {
 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 
+// ── Default commune theme ────────────────────────────────────────────────────
+const DEFAULT_PRIMARY   = "#1e3a8a";
+const DEFAULT_SECONDARY = "#065f46";
+
 // ── Nav items ─────────────────────────────────────────────────────────────────
 
 const BASE_NAV = [
@@ -52,10 +56,13 @@ export interface AdminShellProps {
 
 export function AdminShell({ activePath, children }: AdminShellProps) {
   const navigate = useNavigate();
-  const [authReady,    setAuthReady]    = useState(false);
-  const [authError,    setAuthError]    = useState(false);
-  const [communeName,  setCommuneName]  = useState<string | null>(null);
-  const [hasEpci,      setHasEpci]      = useState(false);
+  const [authReady,     setAuthReady]     = useState(false);
+  const [authError,     setAuthError]     = useState(false);
+  const [communeName,   setCommuneName]   = useState<string | null>(null);
+  const [hasEpci,       setHasEpci]       = useState(false);
+  const [logoUrl,       setLogoUrl]       = useState<string | null>(null);
+  const [primaryColor,  setPrimaryColor]  = useState(DEFAULT_PRIMARY);
+  const [secondaryColor,setSecondaryColor]= useState(DEFAULT_SECONDARY);
 
   useEffect(() => {
     const timeout = setTimeout(() => setAuthError(true), 10_000);
@@ -65,7 +72,6 @@ export function AdminShell({ activePath, children }: AdminShellProps) {
         const { data: { session } } = await supabase.auth.getSession();
         if (!session) { clearTimeout(timeout); navigate({ to: "/admin/login" }); return; }
 
-        // Fetches parallèles : profile + (éventuelle collectivité résolue après)
         const { data: profile } = await supabase
           .from("profiles")
           .select("role, collectivity_id")
@@ -79,18 +85,31 @@ export function AdminShell({ activePath, children }: AdminShellProps) {
           return;
         }
 
-        // EPCI tab visible for interco_admin and super_admin
         const showEpci = profile?.role === "interco_admin" || profile?.role === "super_admin";
 
-        // Résolution du nom de commune (parallèle, non bloquante)
+        // Fetch collectivity: name + theming
         const collPromise = profile?.collectivity_id
-          ? supabase.from("collectivities").select("name").eq("id", profile.collectivity_id).single()
+          ? supabase
+              .from("collectivities")
+              .select("name, logo_url, primary_color, secondary_color")
+              .eq("id", profile.collectivity_id)
+              .single()
           : Promise.resolve({ data: null });
 
         const [{ data: coll }] = await Promise.all([collPromise]);
 
+        const pc = coll?.primary_color  ?? DEFAULT_PRIMARY;
+        const sc = coll?.secondary_color ?? DEFAULT_SECONDARY;
+
+        // Inject CSS variables for the rest of the UI
+        document.documentElement.style.setProperty("--commune-primary",   pc);
+        document.documentElement.style.setProperty("--commune-secondary", sc);
+
         setHasEpci(showEpci);
-        setCommuneName(coll?.name ?? null);
+        setCommuneName(coll?.name   ?? null);
+        setLogoUrl(coll?.logo_url   ?? null);
+        setPrimaryColor(pc);
+        setSecondaryColor(sc);
         clearTimeout(timeout);
         setAuthReady(true);
       } catch {
@@ -143,16 +162,19 @@ export function AdminShell({ activePath, children }: AdminShellProps) {
       {/* ── Sidebar ── */}
       <aside
         className="fixed inset-y-0 left-0 flex w-60 flex-col px-3 py-6 shadow-lg"
-        style={{ backgroundColor: "#065f46" }}
+        style={{ backgroundColor: secondaryColor }}
       >
         {/* Logo */}
         <div className="mb-6 flex items-center gap-2.5 px-2">
-          <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-white/15">
-            <Shield className="h-[18px] w-[18px] text-white" />
+          <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-white/15 overflow-hidden">
+            {logoUrl
+              ? <img src={logoUrl} alt="logo" className="h-full w-full object-contain p-0.5" />
+              : <Shield className="h-[18px] w-[18px] text-white" />
+            }
           </div>
           <div>
             <span className="text-sm font-extrabold text-white">VigieCity</span>
-            <p className="truncate text-[10px] leading-none text-emerald-300">
+            <p className="truncate text-[10px] leading-none text-white/60">
               {communeName ?? "Administration"}
             </p>
           </div>

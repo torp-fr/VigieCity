@@ -8,107 +8,81 @@
 // You should NOT make any changes in this file as it will be overwritten.
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
+// ── Imports racine ────────────────────────────────────────────────────────────
 import { Route as rootRouteImport } from './routes/__root'
-import { Route as UrgencesRouteImport } from './routes/urgences'
-import { Route as SignalerRouteImport } from './routes/signaler'
-import { Route as ServicesRouteImport } from './routes/services'
-import { Route as ResetPasswordRouteImport } from './routes/reset-password'
-import { Route as RadioRouteImport } from './routes/radio'
-import { Route as ProfilRouteImport } from './routes/profil'
-import { Route as OnboardingRouteImport } from './routes/onboarding'
+
+// ── Routes citoyens ───────────────────────────────────────────────────────────
+import { Route as IndexRouteImport } from './routes/index'
+import { Route as ActualitesRouteImport } from './routes/actualites'
+import { Route as AuthRouteImport } from './routes/auth'
+import { Route as CarteRouteImport } from './routes/carte'
+import { Route as FilRouteImport } from './routes/fil'
+import { Route as ForgotPasswordRouteImport } from './routes/forgot-password'
 import { Route as MessagerieRouteImport } from './routes/messagerie'
 import { Route as MesSignalementsRouteImport } from './routes/mes-signalements'
-import { Route as MentionsLegalesRouteImport } from './routes/mentions-legales'
-import { Route as LoginRouteImport } from './routes/login'
+import { Route as OnboardingRouteImport } from './routes/onboarding'
+import { Route as ProfilRouteImport } from './routes/profil'
+import { Route as ResetPasswordRouteImport } from './routes/reset-password'
+import { Route as ServicesRouteImport } from './routes/services'
+import { Route as SignalerRouteImport } from './routes/signaler'
+import { Route as UrgencesRouteImport } from './routes/urgences'
+import { Route as RadioRouteImport } from './routes/radio'
 import { Route as LandingRouteImport } from './routes/landing'
-import { Route as ForgotPasswordRouteImport } from './routes/forgot-password'
-import { Route as FilRouteImport } from './routes/fil'
-import { Route as ConfidentialiteRouteImport } from './routes/confidentialite'
-import { Route as CguRouteImport } from './routes/cgu'
-import { Route as CgsRouteImport } from './routes/cgs'
-import { Route as CarteRouteImport } from './routes/carte'
-import { Route as AuthRouteImport } from './routes/auth'
-import { Route as ActualitesRouteImport } from './routes/actualites'
-import { Route as AccueilRouteImport } from './routes/accueil'
-import { Route as IndexRouteImport } from './routes/index'
-import { Route as ServicesIndexRouteImport } from './routes/services/index'
-import { Route as PlatformIndexRouteImport } from './routes/platform/index'
-import { Route as AdminIndexRouteImport } from './routes/admin/index'
-import { Route as PlatformUsersRouteImport } from './routes/platform/users'
-import { Route as PlatformTrialsRouteImport } from './routes/platform/trials'
-import { Route as PlatformTarificationRouteImport } from './routes/platform/tarification'
-import { Route as PlatformSupportRouteImport } from './routes/platform/support'
-import { Route as PlatformStatsRouteImport } from './routes/platform/stats'
-import { Route as PlatformSettingsRouteImport } from './routes/platform/settings'
-import { Route as PlatformRssRouteImport } from './routes/platform/rss'
-import { Route as PlatformRetentionRouteImport } from './routes/platform/retention'
-import { Route as PlatformPublishersRouteImport } from './routes/platform/publishers'
-import { Route as PlatformPlansRouteImport } from './routes/platform/plans'
-import { Route as PlatformOnboardingRouteImport } from './routes/platform/onboarding'
-import { Route as PlatformModulesRouteImport } from './routes/platform/modules'
-import { Route as PlatformLicencesRouteImport } from './routes/platform/licences'
-import { Route as PlatformKnowledgeRouteImport } from './routes/platform/knowledge'
-import { Route as PlatformFeaturesRouteImport } from './routes/platform/features'
-import { Route as PlatformFacturationRouteImport } from './routes/platform/facturation'
-import { Route as PlatformCommunesRouteImport } from './routes/platform/communes'
-import { Route as PlatformCollectivitesRouteImport } from './routes/platform/collectivites'
-import { Route as PlatformAnalyticsRouteImport } from './routes/platform/analytics'
-import { Route as AdminVoisinsRouteImport } from './routes/admin/voisins'
-import { Route as AdminUrgencesRouteImport } from './routes/admin/urgences'
-import { Route as AdminStatsRouteImport } from './routes/admin/stats'
-import { Route as AdminSosRouteImport } from './routes/admin/sos'
-import { Route as AdminSignalementsRouteImport } from './routes/admin/signalements'
-import { Route as AdminSettingsRouteImport } from './routes/admin/settings'
-import { Route as AdminServicesRouteImport } from './routes/admin/services'
-import { Route as AdminRoutageRouteImport } from './routes/admin/routage'
-import { Route as AdminResetPasswordRouteImport } from './routes/admin/reset-password'
-import { Route as AdminRadioRouteImport } from './routes/admin/radio'
-import { Route as AdminPublicationsRouteImport } from './routes/admin/publications'
-import { Route as AdminParametresRouteImport } from './routes/admin/parametres'
-import { Route as AdminMessagerieRouteImport } from './routes/admin/messagerie'
-import { Route as AdminLoginRouteImport } from './routes/admin/login'
-import { Route as AdminEvenementsRouteImport } from './routes/admin/evenements'
-import { Route as AdminEpciRouteImport } from './routes/admin/epci'
-import { Route as AdminAnalyticsRouteImport } from './routes/admin/analytics'
-import { Route as AdminAlertesRouteImport } from './routes/admin/alertes'
-import { Route as AdminAgentsRouteImport } from './routes/admin/agents'
-import { Route as AdminTerrainIndexRouteImport } from './routes/admin/terrain/index'
-import { Route as ServicesSignalementIdRouteImport } from './routes/services/signalement.$id'
-import { Route as AdminTerrainTraitesRouteImport } from './routes/admin/terrain/traites'
 
-const UrgencesRoute = UrgencesRouteImport.update({
-  id: '/urgences',
-  path: '/urgences',
+// ── Routes admin ──────────────────────────────────────────────────────────────
+import { Route as AdminLoginRouteImport } from './routes/admin/login'
+import { Route as AdminIndexRouteImport } from './routes/admin/index'
+import { Route as AdminAlertesRouteImport } from './routes/admin/alertes'
+import { Route as AdminEpciRouteImport } from './routes/admin/epci'
+import { Route as AdminMessagerieRouteImport } from './routes/admin/messagerie'
+import { Route as AdminPublicationsRouteImport } from './routes/admin/publications'
+import { Route as AdminSignalementsRouteImport } from './routes/admin/signalements'
+import { Route as AdminEvenementsRouteImport } from './routes/admin/evenements'
+import { Route as AdminServicesRouteImport } from './routes/admin/services'
+import { Route as AdminUrgencesRouteImport } from './routes/admin/urgences'
+import { Route as AdminRadioRouteImport } from './routes/admin/radio'
+
+// ── Routes plateforme (backoffice opérateur) ──────────────────────────────────
+import { Route as PlatformIndexRouteImport } from './routes/platform/index'
+import { Route as PlatformCollectivitesRouteImport } from './routes/platform/collectivites'
+import { Route as PlatformUsersRouteImport } from './routes/platform/users'
+import { Route as PlatformRssRouteImport } from './routes/platform/rss'
+import { Route as PlatformPublishersRouteImport } from './routes/platform/publishers'
+import { Route as PlatformSettingsRouteImport } from './routes/platform/settings'
+import { Route as PlatformKnowledgeRouteImport } from './routes/platform/knowledge'
+import { Route as PlatformModulesRouteImport } from './routes/platform/modules'
+import { Route as PlatformOnboardingRouteImport } from './routes/platform/onboarding'
+import { Route as PlatformRetentionRouteImport } from './routes/platform/retention'
+
+// ── Déclarations de routes ────────────────────────────────────────────────────
+const IndexRoute = IndexRouteImport.update({
+  id: '/',
+  path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
-const SignalerRoute = SignalerRouteImport.update({
-  id: '/signaler',
-  path: '/signaler',
+const ActualitesRoute = ActualitesRouteImport.update({
+  id: '/actualites',
+  path: '/actualites',
   getParentRoute: () => rootRouteImport,
 } as any)
-const ServicesRoute = ServicesRouteImport.update({
-  id: '/services',
-  path: '/services',
+const AuthRoute = AuthRouteImport.update({
+  id: '/auth',
+  path: '/auth',
   getParentRoute: () => rootRouteImport,
 } as any)
-const ResetPasswordRoute = ResetPasswordRouteImport.update({
-  id: '/reset-password',
-  path: '/reset-password',
+const CarteRoute = CarteRouteImport.update({
+  id: '/carte',
+  path: '/carte',
   getParentRoute: () => rootRouteImport,
 } as any)
-const RadioRoute = RadioRouteImport.update({
-  id: '/radio',
-  path: '/radio',
+const FilRoute = FilRouteImport.update({
+  id: '/fil',
+  path: '/fil',
   getParentRoute: () => rootRouteImport,
 } as any)
-const ProfilRoute = ProfilRouteImport.update({
-  id: '/profil',
-  path: '/profil',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const OnboardingRoute = OnboardingRouteImport.update({
-  id: '/onboarding',
-  path: '/onboarding',
+const ForgotPasswordRoute = ForgotPasswordRouteImport.update({
+  id: '/forgot-password',
+  path: '/forgot-password',
   getParentRoute: () => rootRouteImport,
 } as any)
 const MessagerieRoute = MessagerieRouteImport.update({
@@ -121,14 +95,39 @@ const MesSignalementsRoute = MesSignalementsRouteImport.update({
   path: '/mes-signalements',
   getParentRoute: () => rootRouteImport,
 } as any)
-const MentionsLegalesRoute = MentionsLegalesRouteImport.update({
-  id: '/mentions-legales',
-  path: '/mentions-legales',
+const OnboardingRoute = OnboardingRouteImport.update({
+  id: '/onboarding',
+  path: '/onboarding',
   getParentRoute: () => rootRouteImport,
 } as any)
-const LoginRoute = LoginRouteImport.update({
-  id: '/login',
-  path: '/login',
+const ProfilRoute = ProfilRouteImport.update({
+  id: '/profil',
+  path: '/profil',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ResetPasswordRoute = ResetPasswordRouteImport.update({
+  id: '/reset-password',
+  path: '/reset-password',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ServicesRoute = ServicesRouteImport.update({
+  id: '/services',
+  path: '/services',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const SignalerRoute = SignalerRouteImport.update({
+  id: '/signaler',
+  path: '/signaler',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const UrgencesRoute = UrgencesRouteImport.update({
+  id: '/urgences',
+  path: '/urgences',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const RadioRoute = RadioRouteImport.update({
+  id: '/radio',
+  path: '/radio',
   getParentRoute: () => rootRouteImport,
 } as any)
 const LandingRoute = LandingRouteImport.update({
@@ -136,64 +135,10 @@ const LandingRoute = LandingRouteImport.update({
   path: '/landing',
   getParentRoute: () => rootRouteImport,
 } as any)
-const ForgotPasswordRoute = ForgotPasswordRouteImport.update({
-  id: '/forgot-password',
-  path: '/forgot-password',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const FilRoute = FilRouteImport.update({
-  id: '/fil',
-  path: '/fil',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const ConfidentialiteRoute = ConfidentialiteRouteImport.update({
-  id: '/confidentialite',
-  path: '/confidentialite',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const CguRoute = CguRouteImport.update({
-  id: '/cgu',
-  path: '/cgu',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const CgsRoute = CgsRouteImport.update({
-  id: '/cgs',
-  path: '/cgs',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const CarteRoute = CarteRouteImport.update({
-  id: '/carte',
-  path: '/carte',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const AuthRoute = AuthRouteImport.update({
-  id: '/auth',
-  path: '/auth',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const ActualitesRoute = ActualitesRouteImport.update({
-  id: '/actualites',
-  path: '/actualites',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const AccueilRoute = AccueilRouteImport.update({
-  id: '/accueil',
-  path: '/accueil',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const IndexRoute = IndexRouteImport.update({
-  id: '/',
-  path: '/',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const ServicesIndexRoute = ServicesIndexRouteImport.update({
-  id: '/',
-  path: '/',
-  getParentRoute: () => ServicesRoute,
-} as any)
-const PlatformIndexRoute = PlatformIndexRouteImport.update({
-  id: '/platform/',
-  path: '/platform/',
+
+const AdminLoginRoute = AdminLoginRouteImport.update({
+  id: '/admin/login',
+  path: '/admin/login',
   getParentRoute: () => rootRouteImport,
 } as any)
 const AdminIndexRoute = AdminIndexRouteImport.update({
@@ -201,174 +146,9 @@ const AdminIndexRoute = AdminIndexRouteImport.update({
   path: '/admin/',
   getParentRoute: () => rootRouteImport,
 } as any)
-const PlatformUsersRoute = PlatformUsersRouteImport.update({
-  id: '/platform/users',
-  path: '/platform/users',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const PlatformTrialsRoute = PlatformTrialsRouteImport.update({
-  id: '/platform/trials',
-  path: '/platform/trials',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const PlatformTarificationRoute = PlatformTarificationRouteImport.update({
-  id: '/platform/tarification',
-  path: '/platform/tarification',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const PlatformSupportRoute = PlatformSupportRouteImport.update({
-  id: '/platform/support',
-  path: '/platform/support',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const PlatformStatsRoute = PlatformStatsRouteImport.update({
-  id: '/platform/stats',
-  path: '/platform/stats',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const PlatformSettingsRoute = PlatformSettingsRouteImport.update({
-  id: '/platform/settings',
-  path: '/platform/settings',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const PlatformRssRoute = PlatformRssRouteImport.update({
-  id: '/platform/rss',
-  path: '/platform/rss',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const PlatformRetentionRoute = PlatformRetentionRouteImport.update({
-  id: '/platform/retention',
-  path: '/platform/retention',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const PlatformPublishersRoute = PlatformPublishersRouteImport.update({
-  id: '/platform/publishers',
-  path: '/platform/publishers',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const PlatformPlansRoute = PlatformPlansRouteImport.update({
-  id: '/platform/plans',
-  path: '/platform/plans',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const PlatformOnboardingRoute = PlatformOnboardingRouteImport.update({
-  id: '/platform/onboarding',
-  path: '/platform/onboarding',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const PlatformModulesRoute = PlatformModulesRouteImport.update({
-  id: '/platform/modules',
-  path: '/platform/modules',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const PlatformLicencesRoute = PlatformLicencesRouteImport.update({
-  id: '/platform/licences',
-  path: '/platform/licences',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const PlatformKnowledgeRoute = PlatformKnowledgeRouteImport.update({
-  id: '/platform/knowledge',
-  path: '/platform/knowledge',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const PlatformFeaturesRoute = PlatformFeaturesRouteImport.update({
-  id: '/platform/features',
-  path: '/platform/features',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const PlatformFacturationRoute = PlatformFacturationRouteImport.update({
-  id: '/platform/facturation',
-  path: '/platform/facturation',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const PlatformCommunesRoute = PlatformCommunesRouteImport.update({
-  id: '/platform/communes',
-  path: '/platform/communes',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const PlatformCollectivitesRoute = PlatformCollectivitesRouteImport.update({
-  id: '/platform/collectivites',
-  path: '/platform/collectivites',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const PlatformAnalyticsRoute = PlatformAnalyticsRouteImport.update({
-  id: '/platform/analytics',
-  path: '/platform/analytics',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const AdminVoisinsRoute = AdminVoisinsRouteImport.update({
-  id: '/admin/voisins',
-  path: '/admin/voisins',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const AdminUrgencesRoute = AdminUrgencesRouteImport.update({
-  id: '/admin/urgences',
-  path: '/admin/urgences',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const AdminStatsRoute = AdminStatsRouteImport.update({
-  id: '/admin/stats',
-  path: '/admin/stats',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const AdminSosRoute = AdminSosRouteImport.update({
-  id: '/admin/sos',
-  path: '/admin/sos',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const AdminSignalementsRoute = AdminSignalementsRouteImport.update({
-  id: '/admin/signalements',
-  path: '/admin/signalements',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const AdminSettingsRoute = AdminSettingsRouteImport.update({
-  id: '/admin/settings',
-  path: '/admin/settings',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const AdminServicesRoute = AdminServicesRouteImport.update({
-  id: '/admin/services',
-  path: '/admin/services',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const AdminRoutageRoute = AdminRoutageRouteImport.update({
-  id: '/admin/routage',
-  path: '/admin/routage',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const AdminResetPasswordRoute = AdminResetPasswordRouteImport.update({
-  id: '/admin/reset-password',
-  path: '/admin/reset-password',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const AdminRadioRoute = AdminRadioRouteImport.update({
-  id: '/admin/radio',
-  path: '/admin/radio',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const AdminPublicationsRoute = AdminPublicationsRouteImport.update({
-  id: '/admin/publications',
-  path: '/admin/publications',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const AdminParametresRoute = AdminParametresRouteImport.update({
-  id: '/admin/parametres',
-  path: '/admin/parametres',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const AdminMessagerieRoute = AdminMessagerieRouteImport.update({
-  id: '/admin/messagerie',
-  path: '/admin/messagerie',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const AdminLoginRoute = AdminLoginRouteImport.update({
-  id: '/admin/login',
-  path: '/admin/login',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const AdminEvenementsRoute = AdminEvenementsRouteImport.update({
-  id: '/admin/evenements',
-  path: '/admin/evenements',
+const AdminAlertesRoute = AdminAlertesRouteImport.update({
+  id: '/admin/alertes',
+  path: '/admin/alertes',
   getParentRoute: () => rootRouteImport,
 } as any)
 const AdminEpciRoute = AdminEpciRouteImport.update({
@@ -376,259 +156,224 @@ const AdminEpciRoute = AdminEpciRouteImport.update({
   path: '/admin/epci',
   getParentRoute: () => rootRouteImport,
 } as any)
-const AdminAnalyticsRoute = AdminAnalyticsRouteImport.update({
-  id: '/admin/analytics',
-  path: '/admin/analytics',
+const AdminMessagerieRoute = AdminMessagerieRouteImport.update({
+  id: '/admin/messagerie',
+  path: '/admin/messagerie',
   getParentRoute: () => rootRouteImport,
 } as any)
-const AdminAlertesRoute = AdminAlertesRouteImport.update({
-  id: '/admin/alertes',
-  path: '/admin/alertes',
+const AdminPublicationsRoute = AdminPublicationsRouteImport.update({
+  id: '/admin/publications',
+  path: '/admin/publications',
   getParentRoute: () => rootRouteImport,
 } as any)
-const AdminAgentsRoute = AdminAgentsRouteImport.update({
-  id: '/admin/agents',
-  path: '/admin/agents',
+const AdminSignalementsRoute = AdminSignalementsRouteImport.update({
+  id: '/admin/signalements',
+  path: '/admin/signalements',
   getParentRoute: () => rootRouteImport,
 } as any)
-const AdminTerrainIndexRoute = AdminTerrainIndexRouteImport.update({
-  id: '/admin/terrain/',
-  path: '/admin/terrain/',
+const AdminEvenementsRoute = AdminEvenementsRouteImport.update({
+  id: '/admin/evenements',
+  path: '/admin/evenements',
   getParentRoute: () => rootRouteImport,
 } as any)
-const ServicesSignalementIdRoute = ServicesSignalementIdRouteImport.update({
-  id: '/signalement/$id',
-  path: '/signalement/$id',
-  getParentRoute: () => ServicesRoute,
+const AdminServicesRoute = AdminServicesRouteImport.update({
+  id: '/admin/services',
+  path: '/admin/services',
+  getParentRoute: () => rootRouteImport,
 } as any)
-const AdminTerrainTraitesRoute = AdminTerrainTraitesRouteImport.update({
-  id: '/admin/terrain/traites',
-  path: '/admin/terrain/traites',
+const AdminUrgencesRoute = AdminUrgencesRouteImport.update({
+  id: '/admin/urgences',
+  path: '/admin/urgences',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AdminRadioRoute = AdminRadioRouteImport.update({
+  id: '/admin/radio',
+  path: '/admin/radio',
   getParentRoute: () => rootRouteImport,
 } as any)
 
+const PlatformIndexRoute = PlatformIndexRouteImport.update({
+  id: '/platform/',
+  path: '/platform/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const PlatformCollectivitesRoute = PlatformCollectivitesRouteImport.update({
+  id: '/platform/collectivites',
+  path: '/platform/collectivites',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const PlatformUsersRoute = PlatformUsersRouteImport.update({
+  id: '/platform/users',
+  path: '/platform/users',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const PlatformRssRoute = PlatformRssRouteImport.update({
+  id: '/platform/rss',
+  path: '/platform/rss',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const PlatformPublishersRoute = PlatformPublishersRouteImport.update({
+  id: '/platform/publishers',
+  path: '/platform/publishers',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const PlatformSettingsRoute = PlatformSettingsRouteImport.update({
+  id: '/platform/settings',
+  path: '/platform/settings',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const PlatformKnowledgeRoute = PlatformKnowledgeRouteImport.update({
+  id: '/platform/knowledge',
+  path: '/platform/knowledge',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const PlatformModulesRoute = PlatformModulesRouteImport.update({
+  id: '/platform/modules',
+  path: '/platform/modules',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const PlatformOnboardingRoute = PlatformOnboardingRouteImport.update({
+  id: '/platform/onboarding',
+  path: '/platform/onboarding',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const PlatformRetentionRoute = PlatformRetentionRouteImport.update({
+  id: '/platform/retention',
+  path: '/platform/retention',
+  getParentRoute: () => rootRouteImport,
+} as any)
+
+// ── Interfaces de types ───────────────────────────────────────────────────────
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
-  '/accueil': typeof AccueilRoute
   '/actualites': typeof ActualitesRoute
   '/auth': typeof AuthRoute
   '/carte': typeof CarteRoute
-  '/cgs': typeof CgsRoute
-  '/cgu': typeof CguRoute
-  '/confidentialite': typeof ConfidentialiteRoute
   '/fil': typeof FilRoute
   '/forgot-password': typeof ForgotPasswordRoute
   '/landing': typeof LandingRoute
-  '/login': typeof LoginRoute
-  '/mentions-legales': typeof MentionsLegalesRoute
-  '/mes-signalements': typeof MesSignalementsRoute
   '/messagerie': typeof MessagerieRoute
+  '/mes-signalements': typeof MesSignalementsRoute
   '/onboarding': typeof OnboardingRoute
   '/profil': typeof ProfilRoute
   '/radio': typeof RadioRoute
   '/reset-password': typeof ResetPasswordRoute
-  '/services': typeof ServicesRouteWithChildren
+  '/services': typeof ServicesRoute
   '/signaler': typeof SignalerRoute
   '/urgences': typeof UrgencesRoute
-  '/admin/agents': typeof AdminAgentsRoute
+  '/admin/login': typeof AdminLoginRoute
+  '/admin/': typeof AdminIndexRoute
   '/admin/alertes': typeof AdminAlertesRoute
-  '/admin/analytics': typeof AdminAnalyticsRoute
   '/admin/epci': typeof AdminEpciRoute
   '/admin/evenements': typeof AdminEvenementsRoute
-  '/admin/login': typeof AdminLoginRoute
   '/admin/messagerie': typeof AdminMessagerieRoute
-  '/admin/parametres': typeof AdminParametresRoute
   '/admin/publications': typeof AdminPublicationsRoute
   '/admin/radio': typeof AdminRadioRoute
-  '/admin/reset-password': typeof AdminResetPasswordRoute
-  '/admin/routage': typeof AdminRoutageRoute
   '/admin/services': typeof AdminServicesRoute
-  '/admin/settings': typeof AdminSettingsRoute
   '/admin/signalements': typeof AdminSignalementsRoute
-  '/admin/sos': typeof AdminSosRoute
-  '/admin/stats': typeof AdminStatsRoute
   '/admin/urgences': typeof AdminUrgencesRoute
-  '/admin/voisins': typeof AdminVoisinsRoute
-  '/platform/analytics': typeof PlatformAnalyticsRoute
+  '/platform/': typeof PlatformIndexRoute
   '/platform/collectivites': typeof PlatformCollectivitesRoute
-  '/platform/communes': typeof PlatformCommunesRoute
-  '/platform/facturation': typeof PlatformFacturationRoute
-  '/platform/features': typeof PlatformFeaturesRoute
+  '/platform/users': typeof PlatformUsersRoute
+  '/platform/rss': typeof PlatformRssRoute
+  '/platform/publishers': typeof PlatformPublishersRoute
+  '/platform/settings': typeof PlatformSettingsRoute
   '/platform/knowledge': typeof PlatformKnowledgeRoute
-  '/platform/licences': typeof PlatformLicencesRoute
   '/platform/modules': typeof PlatformModulesRoute
   '/platform/onboarding': typeof PlatformOnboardingRoute
-  '/platform/plans': typeof PlatformPlansRoute
-  '/platform/publishers': typeof PlatformPublishersRoute
   '/platform/retention': typeof PlatformRetentionRoute
-  '/platform/rss': typeof PlatformRssRoute
-  '/platform/settings': typeof PlatformSettingsRoute
-  '/platform/stats': typeof PlatformStatsRoute
-  '/platform/support': typeof PlatformSupportRoute
-  '/platform/tarification': typeof PlatformTarificationRoute
-  '/platform/trials': typeof PlatformTrialsRoute
-  '/platform/users': typeof PlatformUsersRoute
-  '/admin/': typeof AdminIndexRoute
-  '/platform/': typeof PlatformIndexRoute
-  '/services/': typeof ServicesIndexRoute
-  '/admin/terrain/traites': typeof AdminTerrainTraitesRoute
-  '/services/signalement/$id': typeof ServicesSignalementIdRoute
-  '/admin/terrain/': typeof AdminTerrainIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
-  '/accueil': typeof AccueilRoute
   '/actualites': typeof ActualitesRoute
   '/auth': typeof AuthRoute
   '/carte': typeof CarteRoute
-  '/cgs': typeof CgsRoute
-  '/cgu': typeof CguRoute
-  '/confidentialite': typeof ConfidentialiteRoute
   '/fil': typeof FilRoute
   '/forgot-password': typeof ForgotPasswordRoute
   '/landing': typeof LandingRoute
-  '/login': typeof LoginRoute
-  '/mentions-legales': typeof MentionsLegalesRoute
-  '/mes-signalements': typeof MesSignalementsRoute
   '/messagerie': typeof MessagerieRoute
+  '/mes-signalements': typeof MesSignalementsRoute
   '/onboarding': typeof OnboardingRoute
   '/profil': typeof ProfilRoute
   '/radio': typeof RadioRoute
   '/reset-password': typeof ResetPasswordRoute
+  '/services': typeof ServicesRoute
   '/signaler': typeof SignalerRoute
   '/urgences': typeof UrgencesRoute
-  '/admin/agents': typeof AdminAgentsRoute
+  '/admin/login': typeof AdminLoginRoute
+  '/admin': typeof AdminIndexRoute
   '/admin/alertes': typeof AdminAlertesRoute
-  '/admin/analytics': typeof AdminAnalyticsRoute
   '/admin/epci': typeof AdminEpciRoute
   '/admin/evenements': typeof AdminEvenementsRoute
-  '/admin/login': typeof AdminLoginRoute
   '/admin/messagerie': typeof AdminMessagerieRoute
-  '/admin/parametres': typeof AdminParametresRoute
   '/admin/publications': typeof AdminPublicationsRoute
   '/admin/radio': typeof AdminRadioRoute
-  '/admin/reset-password': typeof AdminResetPasswordRoute
-  '/admin/routage': typeof AdminRoutageRoute
   '/admin/services': typeof AdminServicesRoute
-  '/admin/settings': typeof AdminSettingsRoute
   '/admin/signalements': typeof AdminSignalementsRoute
-  '/admin/sos': typeof AdminSosRoute
-  '/admin/stats': typeof AdminStatsRoute
   '/admin/urgences': typeof AdminUrgencesRoute
-  '/admin/voisins': typeof AdminVoisinsRoute
-  '/platform/analytics': typeof PlatformAnalyticsRoute
+  '/platform': typeof PlatformIndexRoute
   '/platform/collectivites': typeof PlatformCollectivitesRoute
-  '/platform/communes': typeof PlatformCommunesRoute
-  '/platform/facturation': typeof PlatformFacturationRoute
-  '/platform/features': typeof PlatformFeaturesRoute
+  '/platform/users': typeof PlatformUsersRoute
+  '/platform/rss': typeof PlatformRssRoute
+  '/platform/publishers': typeof PlatformPublishersRoute
+  '/platform/settings': typeof PlatformSettingsRoute
   '/platform/knowledge': typeof PlatformKnowledgeRoute
-  '/platform/licences': typeof PlatformLicencesRoute
   '/platform/modules': typeof PlatformModulesRoute
   '/platform/onboarding': typeof PlatformOnboardingRoute
-  '/platform/plans': typeof PlatformPlansRoute
-  '/platform/publishers': typeof PlatformPublishersRoute
   '/platform/retention': typeof PlatformRetentionRoute
-  '/platform/rss': typeof PlatformRssRoute
-  '/platform/settings': typeof PlatformSettingsRoute
-  '/platform/stats': typeof PlatformStatsRoute
-  '/platform/support': typeof PlatformSupportRoute
-  '/platform/tarification': typeof PlatformTarificationRoute
-  '/platform/trials': typeof PlatformTrialsRoute
-  '/platform/users': typeof PlatformUsersRoute
-  '/admin': typeof AdminIndexRoute
-  '/platform': typeof PlatformIndexRoute
-  '/services': typeof ServicesIndexRoute
-  '/admin/terrain/traites': typeof AdminTerrainTraitesRoute
-  '/services/signalement/$id': typeof ServicesSignalementIdRoute
-  '/admin/terrain': typeof AdminTerrainIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
-  '/accueil': typeof AccueilRoute
   '/actualites': typeof ActualitesRoute
   '/auth': typeof AuthRoute
   '/carte': typeof CarteRoute
-  '/cgs': typeof CgsRoute
-  '/cgu': typeof CguRoute
-  '/confidentialite': typeof ConfidentialiteRoute
   '/fil': typeof FilRoute
   '/forgot-password': typeof ForgotPasswordRoute
   '/landing': typeof LandingRoute
-  '/login': typeof LoginRoute
-  '/mentions-legales': typeof MentionsLegalesRoute
-  '/mes-signalements': typeof MesSignalementsRoute
   '/messagerie': typeof MessagerieRoute
+  '/mes-signalements': typeof MesSignalementsRoute
   '/onboarding': typeof OnboardingRoute
   '/profil': typeof ProfilRoute
   '/radio': typeof RadioRoute
   '/reset-password': typeof ResetPasswordRoute
-  '/services': typeof ServicesRouteWithChildren
+  '/services': typeof ServicesRoute
   '/signaler': typeof SignalerRoute
   '/urgences': typeof UrgencesRoute
-  '/admin/agents': typeof AdminAgentsRoute
+  '/admin/login': typeof AdminLoginRoute
+  '/admin/': typeof AdminIndexRoute
   '/admin/alertes': typeof AdminAlertesRoute
-  '/admin/analytics': typeof AdminAnalyticsRoute
   '/admin/epci': typeof AdminEpciRoute
   '/admin/evenements': typeof AdminEvenementsRoute
-  '/admin/login': typeof AdminLoginRoute
   '/admin/messagerie': typeof AdminMessagerieRoute
-  '/admin/parametres': typeof AdminParametresRoute
   '/admin/publications': typeof AdminPublicationsRoute
   '/admin/radio': typeof AdminRadioRoute
-  '/admin/reset-password': typeof AdminResetPasswordRoute
-  '/admin/routage': typeof AdminRoutageRoute
   '/admin/services': typeof AdminServicesRoute
-  '/admin/settings': typeof AdminSettingsRoute
   '/admin/signalements': typeof AdminSignalementsRoute
-  '/admin/sos': typeof AdminSosRoute
-  '/admin/stats': typeof AdminStatsRoute
   '/admin/urgences': typeof AdminUrgencesRoute
-  '/admin/voisins': typeof AdminVoisinsRoute
-  '/platform/analytics': typeof PlatformAnalyticsRoute
+  '/platform/': typeof PlatformIndexRoute
   '/platform/collectivites': typeof PlatformCollectivitesRoute
-  '/platform/communes': typeof PlatformCommunesRoute
-  '/platform/facturation': typeof PlatformFacturationRoute
-  '/platform/features': typeof PlatformFeaturesRoute
+  '/platform/users': typeof PlatformUsersRoute
+  '/platform/rss': typeof PlatformRssRoute
+  '/platform/publishers': typeof PlatformPublishersRoute
+  '/platform/settings': typeof PlatformSettingsRoute
   '/platform/knowledge': typeof PlatformKnowledgeRoute
-  '/platform/licences': typeof PlatformLicencesRoute
   '/platform/modules': typeof PlatformModulesRoute
   '/platform/onboarding': typeof PlatformOnboardingRoute
-  '/platform/plans': typeof PlatformPlansRoute
-  '/platform/publishers': typeof PlatformPublishersRoute
   '/platform/retention': typeof PlatformRetentionRoute
-  '/platform/rss': typeof PlatformRssRoute
-  '/platform/settings': typeof PlatformSettingsRoute
-  '/platform/stats': typeof PlatformStatsRoute
-  '/platform/support': typeof PlatformSupportRoute
-  '/platform/tarification': typeof PlatformTarificationRoute
-  '/platform/trials': typeof PlatformTrialsRoute
-  '/platform/users': typeof PlatformUsersRoute
-  '/admin/': typeof AdminIndexRoute
-  '/platform/': typeof PlatformIndexRoute
-  '/services/': typeof ServicesIndexRoute
-  '/admin/terrain/traites': typeof AdminTerrainTraitesRoute
-  '/services/signalement/$id': typeof ServicesSignalementIdRoute
-  '/admin/terrain/': typeof AdminTerrainIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
     | '/'
-    | '/accueil'
     | '/actualites'
     | '/auth'
     | '/carte'
-    | '/cgs'
-    | '/cgu'
-    | '/confidentialite'
     | '/fil'
     | '/forgot-password'
     | '/landing'
-    | '/login'
-    | '/mentions-legales'
-    | '/mes-signalements'
     | '/messagerie'
+    | '/mes-signalements'
     | '/onboarding'
     | '/profil'
     | '/radio'
@@ -636,134 +381,77 @@ export interface FileRouteTypes {
     | '/services'
     | '/signaler'
     | '/urgences'
-    | '/admin/agents'
+    | '/admin/login'
+    | '/admin/'
     | '/admin/alertes'
-    | '/admin/analytics'
     | '/admin/epci'
     | '/admin/evenements'
-    | '/admin/login'
     | '/admin/messagerie'
-    | '/admin/parametres'
     | '/admin/publications'
     | '/admin/radio'
-    | '/admin/reset-password'
-    | '/admin/routage'
     | '/admin/services'
-    | '/admin/settings'
     | '/admin/signalements'
-    | '/admin/sos'
-    | '/admin/stats'
     | '/admin/urgences'
-    | '/admin/voisins'
-    | '/platform/analytics'
+    | '/platform/'
     | '/platform/collectivites'
-    | '/platform/communes'
-    | '/platform/facturation'
-    | '/platform/features'
+    | '/platform/users'
+    | '/platform/rss'
+    | '/platform/publishers'
+    | '/platform/settings'
     | '/platform/knowledge'
-    | '/platform/licences'
     | '/platform/modules'
     | '/platform/onboarding'
-    | '/platform/plans'
-    | '/platform/publishers'
     | '/platform/retention'
-    | '/platform/rss'
-    | '/platform/settings'
-    | '/platform/stats'
-    | '/platform/support'
-    | '/platform/tarification'
-    | '/platform/trials'
-    | '/platform/users'
-    | '/admin/'
-    | '/platform/'
-    | '/services/'
-    | '/admin/terrain/traites'
-    | '/services/signalement/$id'
-    | '/admin/terrain/'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
-    | '/accueil'
     | '/actualites'
     | '/auth'
     | '/carte'
-    | '/cgs'
-    | '/cgu'
-    | '/confidentialite'
     | '/fil'
     | '/forgot-password'
     | '/landing'
-    | '/login'
-    | '/mentions-legales'
-    | '/mes-signalements'
     | '/messagerie'
+    | '/mes-signalements'
     | '/onboarding'
     | '/profil'
     | '/radio'
     | '/reset-password'
+    | '/services'
     | '/signaler'
     | '/urgences'
-    | '/admin/agents'
+    | '/admin/login'
+    | '/admin'
     | '/admin/alertes'
-    | '/admin/analytics'
     | '/admin/epci'
     | '/admin/evenements'
-    | '/admin/login'
     | '/admin/messagerie'
-    | '/admin/parametres'
     | '/admin/publications'
     | '/admin/radio'
-    | '/admin/reset-password'
-    | '/admin/routage'
     | '/admin/services'
-    | '/admin/settings'
     | '/admin/signalements'
-    | '/admin/sos'
-    | '/admin/stats'
     | '/admin/urgences'
-    | '/admin/voisins'
-    | '/platform/analytics'
+    | '/platform'
     | '/platform/collectivites'
-    | '/platform/communes'
-    | '/platform/facturation'
-    | '/platform/features'
+    | '/platform/users'
+    | '/platform/rss'
+    | '/platform/publishers'
+    | '/platform/settings'
     | '/platform/knowledge'
-    | '/platform/licences'
     | '/platform/modules'
     | '/platform/onboarding'
-    | '/platform/plans'
-    | '/platform/publishers'
     | '/platform/retention'
-    | '/platform/rss'
-    | '/platform/settings'
-    | '/platform/stats'
-    | '/platform/support'
-    | '/platform/tarification'
-    | '/platform/trials'
-    | '/platform/users'
-    | '/admin'
-    | '/platform'
-    | '/services'
-    | '/admin/terrain/traites'
-    | '/services/signalement/$id'
-    | '/admin/terrain'
   id:
     | '__root__'
     | '/'
-    | '/accueil'
     | '/actualites'
     | '/auth'
     | '/carte'
-    | '/cgs'
-    | '/cgu'
-    | '/confidentialite'
     | '/fil'
     | '/forgot-password'
     | '/landing'
-    | '/login'
-    | '/mentions-legales'
-    | '/mes-signalements'
     | '/messagerie'
+    | '/mes-signalements'
     | '/onboarding'
     | '/profil'
     | '/radio'
@@ -771,168 +459,118 @@ export interface FileRouteTypes {
     | '/services'
     | '/signaler'
     | '/urgences'
-    | '/admin/agents'
+    | '/admin/login'
+    | '/admin/'
     | '/admin/alertes'
-    | '/admin/analytics'
     | '/admin/epci'
     | '/admin/evenements'
-    | '/admin/login'
     | '/admin/messagerie'
-    | '/admin/parametres'
     | '/admin/publications'
     | '/admin/radio'
-    | '/admin/reset-password'
-    | '/admin/routage'
     | '/admin/services'
-    | '/admin/settings'
     | '/admin/signalements'
-    | '/admin/sos'
-    | '/admin/stats'
     | '/admin/urgences'
-    | '/admin/voisins'
-    | '/platform/analytics'
+    | '/platform/'
     | '/platform/collectivites'
-    | '/platform/communes'
-    | '/platform/facturation'
-    | '/platform/features'
+    | '/platform/users'
+    | '/platform/rss'
+    | '/platform/publishers'
+    | '/platform/settings'
     | '/platform/knowledge'
-    | '/platform/licences'
     | '/platform/modules'
     | '/platform/onboarding'
-    | '/platform/plans'
-    | '/platform/publishers'
     | '/platform/retention'
-    | '/platform/rss'
-    | '/platform/settings'
-    | '/platform/stats'
-    | '/platform/support'
-    | '/platform/tarification'
-    | '/platform/trials'
-    | '/platform/users'
-    | '/admin/'
-    | '/platform/'
-    | '/services/'
-    | '/admin/terrain/traites'
-    | '/services/signalement/$id'
-    | '/admin/terrain/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
-  AccueilRoute: typeof AccueilRoute
   ActualitesRoute: typeof ActualitesRoute
   AuthRoute: typeof AuthRoute
   CarteRoute: typeof CarteRoute
-  CgsRoute: typeof CgsRoute
-  CguRoute: typeof CguRoute
-  ConfidentialiteRoute: typeof ConfidentialiteRoute
   FilRoute: typeof FilRoute
   ForgotPasswordRoute: typeof ForgotPasswordRoute
   LandingRoute: typeof LandingRoute
-  LoginRoute: typeof LoginRoute
-  MentionsLegalesRoute: typeof MentionsLegalesRoute
-  MesSignalementsRoute: typeof MesSignalementsRoute
   MessagerieRoute: typeof MessagerieRoute
+  MesSignalementsRoute: typeof MesSignalementsRoute
   OnboardingRoute: typeof OnboardingRoute
   ProfilRoute: typeof ProfilRoute
   RadioRoute: typeof RadioRoute
   ResetPasswordRoute: typeof ResetPasswordRoute
-  ServicesRoute: typeof ServicesRouteWithChildren
+  ServicesRoute: typeof ServicesRoute
   SignalerRoute: typeof SignalerRoute
   UrgencesRoute: typeof UrgencesRoute
-  AdminAgentsRoute: typeof AdminAgentsRoute
+  AdminLoginRoute: typeof AdminLoginRoute
+  AdminIndexRoute: typeof AdminIndexRoute
   AdminAlertesRoute: typeof AdminAlertesRoute
-  AdminAnalyticsRoute: typeof AdminAnalyticsRoute
   AdminEpciRoute: typeof AdminEpciRoute
   AdminEvenementsRoute: typeof AdminEvenementsRoute
-  AdminLoginRoute: typeof AdminLoginRoute
   AdminMessagerieRoute: typeof AdminMessagerieRoute
-  AdminParametresRoute: typeof AdminParametresRoute
   AdminPublicationsRoute: typeof AdminPublicationsRoute
   AdminRadioRoute: typeof AdminRadioRoute
-  AdminResetPasswordRoute: typeof AdminResetPasswordRoute
-  AdminRoutageRoute: typeof AdminRoutageRoute
   AdminServicesRoute: typeof AdminServicesRoute
-  AdminSettingsRoute: typeof AdminSettingsRoute
   AdminSignalementsRoute: typeof AdminSignalementsRoute
-  AdminSosRoute: typeof AdminSosRoute
-  AdminStatsRoute: typeof AdminStatsRoute
   AdminUrgencesRoute: typeof AdminUrgencesRoute
-  AdminVoisinsRoute: typeof AdminVoisinsRoute
-  PlatformAnalyticsRoute: typeof PlatformAnalyticsRoute
+  PlatformIndexRoute: typeof PlatformIndexRoute
   PlatformCollectivitesRoute: typeof PlatformCollectivitesRoute
-  PlatformCommunesRoute: typeof PlatformCommunesRoute
-  PlatformFacturationRoute: typeof PlatformFacturationRoute
-  PlatformFeaturesRoute: typeof PlatformFeaturesRoute
+  PlatformUsersRoute: typeof PlatformUsersRoute
+  PlatformRssRoute: typeof PlatformRssRoute
+  PlatformPublishersRoute: typeof PlatformPublishersRoute
+  PlatformSettingsRoute: typeof PlatformSettingsRoute
   PlatformKnowledgeRoute: typeof PlatformKnowledgeRoute
-  PlatformLicencesRoute: typeof PlatformLicencesRoute
   PlatformModulesRoute: typeof PlatformModulesRoute
   PlatformOnboardingRoute: typeof PlatformOnboardingRoute
-  PlatformPlansRoute: typeof PlatformPlansRoute
-  PlatformPublishersRoute: typeof PlatformPublishersRoute
   PlatformRetentionRoute: typeof PlatformRetentionRoute
-  PlatformRssRoute: typeof PlatformRssRoute
-  PlatformSettingsRoute: typeof PlatformSettingsRoute
-  PlatformStatsRoute: typeof PlatformStatsRoute
-  PlatformSupportRoute: typeof PlatformSupportRoute
-  PlatformTarificationRoute: typeof PlatformTarificationRoute
-  PlatformTrialsRoute: typeof PlatformTrialsRoute
-  PlatformUsersRoute: typeof PlatformUsersRoute
-  AdminIndexRoute: typeof AdminIndexRoute
-  PlatformIndexRoute: typeof PlatformIndexRoute
-  AdminTerrainTraitesRoute: typeof AdminTerrainTraitesRoute
-  AdminTerrainIndexRoute: typeof AdminTerrainIndexRoute
 }
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
-    '/urgences': {
-      id: '/urgences'
-      path: '/urgences'
-      fullPath: '/urgences'
-      preLoaderRoute: typeof UrgencesRouteImport
+    '/': {
+      id: '/'
+      path: '/'
+      fullPath: '/'
+      preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/signaler': {
-      id: '/signaler'
-      path: '/signaler'
-      fullPath: '/signaler'
-      preLoaderRoute: typeof SignalerRouteImport
+    '/actualites': {
+      id: '/actualites'
+      path: '/actualites'
+      fullPath: '/actualites'
+      preLoaderRoute: typeof ActualitesRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/services': {
-      id: '/services'
-      path: '/services'
-      fullPath: '/services'
-      preLoaderRoute: typeof ServicesRouteImport
+    '/auth': {
+      id: '/auth'
+      path: '/auth'
+      fullPath: '/auth'
+      preLoaderRoute: typeof AuthRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/reset-password': {
-      id: '/reset-password'
-      path: '/reset-password'
-      fullPath: '/reset-password'
-      preLoaderRoute: typeof ResetPasswordRouteImport
+    '/carte': {
+      id: '/carte'
+      path: '/carte'
+      fullPath: '/carte'
+      preLoaderRoute: typeof CarteRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/radio': {
-      id: '/radio'
-      path: '/radio'
-      fullPath: '/radio'
-      preLoaderRoute: typeof RadioRouteImport
+    '/fil': {
+      id: '/fil'
+      path: '/fil'
+      fullPath: '/fil'
+      preLoaderRoute: typeof FilRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/profil': {
-      id: '/profil'
-      path: '/profil'
-      fullPath: '/profil'
-      preLoaderRoute: typeof ProfilRouteImport
+    '/forgot-password': {
+      id: '/forgot-password'
+      path: '/forgot-password'
+      fullPath: '/forgot-password'
+      preLoaderRoute: typeof ForgotPasswordRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/onboarding': {
-      id: '/onboarding'
-      path: '/onboarding'
-      fullPath: '/onboarding'
-      preLoaderRoute: typeof OnboardingRouteImport
+    '/landing': {
+      id: '/landing'
+      path: '/landing'
+      fullPath: '/landing'
+      preLoaderRoute: typeof LandingRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/messagerie': {
@@ -949,340 +587,53 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof MesSignalementsRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/mentions-legales': {
-      id: '/mentions-legales'
-      path: '/mentions-legales'
-      fullPath: '/mentions-legales'
-      preLoaderRoute: typeof MentionsLegalesRouteImport
+    '/onboarding': {
+      id: '/onboarding'
+      path: '/onboarding'
+      fullPath: '/onboarding'
+      preLoaderRoute: typeof OnboardingRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/login': {
-      id: '/login'
-      path: '/login'
-      fullPath: '/login'
-      preLoaderRoute: typeof LoginRouteImport
+    '/profil': {
+      id: '/profil'
+      path: '/profil'
+      fullPath: '/profil'
+      preLoaderRoute: typeof ProfilRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/landing': {
-      id: '/landing'
-      path: '/landing'
-      fullPath: '/landing'
-      preLoaderRoute: typeof LandingRouteImport
+    '/reset-password': {
+      id: '/reset-password'
+      path: '/reset-password'
+      fullPath: '/reset-password'
+      preLoaderRoute: typeof ResetPasswordRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/forgot-password': {
-      id: '/forgot-password'
-      path: '/forgot-password'
-      fullPath: '/forgot-password'
-      preLoaderRoute: typeof ForgotPasswordRouteImport
+    '/services': {
+      id: '/services'
+      path: '/services'
+      fullPath: '/services'
+      preLoaderRoute: typeof ServicesRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/fil': {
-      id: '/fil'
-      path: '/fil'
-      fullPath: '/fil'
-      preLoaderRoute: typeof FilRouteImport
+    '/signaler': {
+      id: '/signaler'
+      path: '/signaler'
+      fullPath: '/signaler'
+      preLoaderRoute: typeof SignalerRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/confidentialite': {
-      id: '/confidentialite'
-      path: '/confidentialite'
-      fullPath: '/confidentialite'
-      preLoaderRoute: typeof ConfidentialiteRouteImport
+    '/urgences': {
+      id: '/urgences'
+      path: '/urgences'
+      fullPath: '/urgences'
+      preLoaderRoute: typeof UrgencesRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/cgu': {
-      id: '/cgu'
-      path: '/cgu'
-      fullPath: '/cgu'
-      preLoaderRoute: typeof CguRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/cgs': {
-      id: '/cgs'
-      path: '/cgs'
-      fullPath: '/cgs'
-      preLoaderRoute: typeof CgsRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/carte': {
-      id: '/carte'
-      path: '/carte'
-      fullPath: '/carte'
-      preLoaderRoute: typeof CarteRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/auth': {
-      id: '/auth'
-      path: '/auth'
-      fullPath: '/auth'
-      preLoaderRoute: typeof AuthRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/actualites': {
-      id: '/actualites'
-      path: '/actualites'
-      fullPath: '/actualites'
-      preLoaderRoute: typeof ActualitesRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/accueil': {
-      id: '/accueil'
-      path: '/accueil'
-      fullPath: '/accueil'
-      preLoaderRoute: typeof AccueilRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/': {
-      id: '/'
-      path: '/'
-      fullPath: '/'
-      preLoaderRoute: typeof IndexRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/services/': {
-      id: '/services/'
-      path: '/'
-      fullPath: '/services/'
-      preLoaderRoute: typeof ServicesIndexRouteImport
-      parentRoute: typeof ServicesRoute
-    }
-    '/platform/': {
-      id: '/platform/'
-      path: '/platform'
-      fullPath: '/platform/'
-      preLoaderRoute: typeof PlatformIndexRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/admin/': {
-      id: '/admin/'
-      path: '/admin'
-      fullPath: '/admin/'
-      preLoaderRoute: typeof AdminIndexRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/platform/users': {
-      id: '/platform/users'
-      path: '/platform/users'
-      fullPath: '/platform/users'
-      preLoaderRoute: typeof PlatformUsersRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/platform/trials': {
-      id: '/platform/trials'
-      path: '/platform/trials'
-      fullPath: '/platform/trials'
-      preLoaderRoute: typeof PlatformTrialsRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/platform/tarification': {
-      id: '/platform/tarification'
-      path: '/platform/tarification'
-      fullPath: '/platform/tarification'
-      preLoaderRoute: typeof PlatformTarificationRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/platform/support': {
-      id: '/platform/support'
-      path: '/platform/support'
-      fullPath: '/platform/support'
-      preLoaderRoute: typeof PlatformSupportRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/platform/stats': {
-      id: '/platform/stats'
-      path: '/platform/stats'
-      fullPath: '/platform/stats'
-      preLoaderRoute: typeof PlatformStatsRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/platform/settings': {
-      id: '/platform/settings'
-      path: '/platform/settings'
-      fullPath: '/platform/settings'
-      preLoaderRoute: typeof PlatformSettingsRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/platform/rss': {
-      id: '/platform/rss'
-      path: '/platform/rss'
-      fullPath: '/platform/rss'
-      preLoaderRoute: typeof PlatformRssRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/platform/retention': {
-      id: '/platform/retention'
-      path: '/platform/retention'
-      fullPath: '/platform/retention'
-      preLoaderRoute: typeof PlatformRetentionRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/platform/publishers': {
-      id: '/platform/publishers'
-      path: '/platform/publishers'
-      fullPath: '/platform/publishers'
-      preLoaderRoute: typeof PlatformPublishersRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/platform/plans': {
-      id: '/platform/plans'
-      path: '/platform/plans'
-      fullPath: '/platform/plans'
-      preLoaderRoute: typeof PlatformPlansRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/platform/onboarding': {
-      id: '/platform/onboarding'
-      path: '/platform/onboarding'
-      fullPath: '/platform/onboarding'
-      preLoaderRoute: typeof PlatformOnboardingRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/platform/modules': {
-      id: '/platform/modules'
-      path: '/platform/modules'
-      fullPath: '/platform/modules'
-      preLoaderRoute: typeof PlatformModulesRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/platform/licences': {
-      id: '/platform/licences'
-      path: '/platform/licences'
-      fullPath: '/platform/licences'
-      preLoaderRoute: typeof PlatformLicencesRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/platform/knowledge': {
-      id: '/platform/knowledge'
-      path: '/platform/knowledge'
-      fullPath: '/platform/knowledge'
-      preLoaderRoute: typeof PlatformKnowledgeRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/platform/features': {
-      id: '/platform/features'
-      path: '/platform/features'
-      fullPath: '/platform/features'
-      preLoaderRoute: typeof PlatformFeaturesRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/platform/facturation': {
-      id: '/platform/facturation'
-      path: '/platform/facturation'
-      fullPath: '/platform/facturation'
-      preLoaderRoute: typeof PlatformFacturationRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/platform/communes': {
-      id: '/platform/communes'
-      path: '/platform/communes'
-      fullPath: '/platform/communes'
-      preLoaderRoute: typeof PlatformCommunesRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/platform/collectivites': {
-      id: '/platform/collectivites'
-      path: '/platform/collectivites'
-      fullPath: '/platform/collectivites'
-      preLoaderRoute: typeof PlatformCollectivitesRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/platform/analytics': {
-      id: '/platform/analytics'
-      path: '/platform/analytics'
-      fullPath: '/platform/analytics'
-      preLoaderRoute: typeof PlatformAnalyticsRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/admin/voisins': {
-      id: '/admin/voisins'
-      path: '/admin/voisins'
-      fullPath: '/admin/voisins'
-      preLoaderRoute: typeof AdminVoisinsRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/admin/urgences': {
-      id: '/admin/urgences'
-      path: '/admin/urgences'
-      fullPath: '/admin/urgences'
-      preLoaderRoute: typeof AdminUrgencesRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/admin/stats': {
-      id: '/admin/stats'
-      path: '/admin/stats'
-      fullPath: '/admin/stats'
-      preLoaderRoute: typeof AdminStatsRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/admin/sos': {
-      id: '/admin/sos'
-      path: '/admin/sos'
-      fullPath: '/admin/sos'
-      preLoaderRoute: typeof AdminSosRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/admin/signalements': {
-      id: '/admin/signalements'
-      path: '/admin/signalements'
-      fullPath: '/admin/signalements'
-      preLoaderRoute: typeof AdminSignalementsRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/admin/settings': {
-      id: '/admin/settings'
-      path: '/admin/settings'
-      fullPath: '/admin/settings'
-      preLoaderRoute: typeof AdminSettingsRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/admin/services': {
-      id: '/admin/services'
-      path: '/admin/services'
-      fullPath: '/admin/services'
-      preLoaderRoute: typeof AdminServicesRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/admin/routage': {
-      id: '/admin/routage'
-      path: '/admin/routage'
-      fullPath: '/admin/routage'
-      preLoaderRoute: typeof AdminRoutageRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/admin/reset-password': {
-      id: '/admin/reset-password'
-      path: '/admin/reset-password'
-      fullPath: '/admin/reset-password'
-      preLoaderRoute: typeof AdminResetPasswordRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/admin/radio': {
-      id: '/admin/radio'
-      path: '/admin/radio'
-      fullPath: '/admin/radio'
-      preLoaderRoute: typeof AdminRadioRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/admin/publications': {
-      id: '/admin/publications'
-      path: '/admin/publications'
-      fullPath: '/admin/publications'
-      preLoaderRoute: typeof AdminPublicationsRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/admin/parametres': {
-      id: '/admin/parametres'
-      path: '/admin/parametres'
-      fullPath: '/admin/parametres'
-      preLoaderRoute: typeof AdminParametresRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/admin/messagerie': {
-      id: '/admin/messagerie'
-      path: '/admin/messagerie'
-      fullPath: '/admin/messagerie'
-      preLoaderRoute: typeof AdminMessagerieRouteImport
+    '/radio': {
+      id: '/radio'
+      path: '/radio'
+      fullPath: '/radio'
+      preLoaderRoute: typeof RadioRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/admin/login': {
@@ -1292,25 +643,11 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminLoginRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/admin/evenements': {
-      id: '/admin/evenements'
-      path: '/admin/evenements'
-      fullPath: '/admin/evenements'
-      preLoaderRoute: typeof AdminEvenementsRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/admin/epci': {
-      id: '/admin/epci'
-      path: '/admin/epci'
-      fullPath: '/admin/epci'
-      preLoaderRoute: typeof AdminEpciRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/admin/analytics': {
-      id: '/admin/analytics'
-      path: '/admin/analytics'
-      fullPath: '/admin/analytics'
-      preLoaderRoute: typeof AdminAnalyticsRouteImport
+    '/admin/': {
+      id: '/admin/'
+      path: '/admin'
+      fullPath: '/admin/'
+      preLoaderRoute: typeof AdminIndexRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/admin/alertes': {
@@ -1320,117 +657,176 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminAlertesRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/admin/agents': {
-      id: '/admin/agents'
-      path: '/admin/agents'
-      fullPath: '/admin/agents'
-      preLoaderRoute: typeof AdminAgentsRouteImport
+    '/admin/epci': {
+      id: '/admin/epci'
+      path: '/admin/epci'
+      fullPath: '/admin/epci'
+      preLoaderRoute: typeof AdminEpciRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/admin/terrain/': {
-      id: '/admin/terrain/'
-      path: '/admin/terrain'
-      fullPath: '/admin/terrain/'
-      preLoaderRoute: typeof AdminTerrainIndexRouteImport
+    '/admin/evenements': {
+      id: '/admin/evenements'
+      path: '/admin/evenements'
+      fullPath: '/admin/evenements'
+      preLoaderRoute: typeof AdminEvenementsRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/services/signalement/$id': {
-      id: '/services/signalement/$id'
-      path: '/signalement/$id'
-      fullPath: '/services/signalement/$id'
-      preLoaderRoute: typeof ServicesSignalementIdRouteImport
-      parentRoute: typeof ServicesRoute
+    '/admin/messagerie': {
+      id: '/admin/messagerie'
+      path: '/admin/messagerie'
+      fullPath: '/admin/messagerie'
+      preLoaderRoute: typeof AdminMessagerieRouteImport
+      parentRoute: typeof rootRouteImport
     }
-    '/admin/terrain/traites': {
-      id: '/admin/terrain/traites'
-      path: '/admin/terrain/traites'
-      fullPath: '/admin/terrain/traites'
-      preLoaderRoute: typeof AdminTerrainTraitesRouteImport
+    '/admin/services': {
+      id: '/admin/services'
+      path: '/admin/services'
+      fullPath: '/admin/services'
+      preLoaderRoute: typeof AdminServicesRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/admin/publications': {
+      id: '/admin/publications'
+      path: '/admin/publications'
+      fullPath: '/admin/publications'
+      preLoaderRoute: typeof AdminPublicationsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/admin/signalements': {
+      id: '/admin/signalements'
+      path: '/admin/signalements'
+      fullPath: '/admin/signalements'
+      preLoaderRoute: typeof AdminSignalementsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/admin/urgences': {
+      id: '/admin/urgences'
+      path: '/admin/urgences'
+      fullPath: '/admin/urgences'
+      preLoaderRoute: typeof AdminUrgencesRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/admin/radio': {
+      id: '/admin/radio'
+      path: '/admin/radio'
+      fullPath: '/admin/radio'
+      preLoaderRoute: typeof AdminRadioRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/platform/': {
+      id: '/platform/'
+      path: '/platform'
+      fullPath: '/platform/'
+      preLoaderRoute: typeof PlatformIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/platform/collectivites': {
+      id: '/platform/collectivites'
+      path: '/platform/collectivites'
+      fullPath: '/platform/collectivites'
+      preLoaderRoute: typeof PlatformCollectivitesRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/platform/users': {
+      id: '/platform/users'
+      path: '/platform/users'
+      fullPath: '/platform/users'
+      preLoaderRoute: typeof PlatformUsersRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/platform/rss': {
+      id: '/platform/rss'
+      path: '/platform/rss'
+      fullPath: '/platform/rss'
+      preLoaderRoute: typeof PlatformRssRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/platform/publishers': {
+      id: '/platform/publishers'
+      path: '/platform/publishers'
+      fullPath: '/platform/publishers'
+      preLoaderRoute: typeof PlatformPublishersRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/platform/settings': {
+      id: '/platform/settings'
+      path: '/platform/settings'
+      fullPath: '/platform/settings'
+      preLoaderRoute: typeof PlatformSettingsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/platform/knowledge': {
+      id: '/platform/knowledge'
+      path: '/platform/knowledge'
+      fullPath: '/platform/knowledge'
+      preLoaderRoute: typeof PlatformKnowledgeRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/platform/modules': {
+      id: '/platform/modules'
+      path: '/platform/modules'
+      fullPath: '/platform/modules'
+      preLoaderRoute: typeof PlatformModulesRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/platform/onboarding': {
+      id: '/platform/onboarding'
+      path: '/platform/onboarding'
+      fullPath: '/platform/onboarding'
+      preLoaderRoute: typeof PlatformOnboardingRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/platform/retention': {
+      id: '/platform/retention'
+      path: '/platform/retention'
+      fullPath: '/platform/retention'
+      preLoaderRoute: typeof PlatformRetentionRouteImport
       parentRoute: typeof rootRouteImport
     }
   }
 }
 
-interface ServicesRouteChildren {
-  ServicesIndexRoute: typeof ServicesIndexRoute
-  ServicesSignalementIdRoute: typeof ServicesSignalementIdRoute
-}
-
-const ServicesRouteChildren: ServicesRouteChildren = {
-  ServicesIndexRoute: ServicesIndexRoute,
-  ServicesSignalementIdRoute: ServicesSignalementIdRoute,
-}
-
-const ServicesRouteWithChildren = ServicesRoute._addFileChildren(
-  ServicesRouteChildren,
-)
-
+// ── Arbre de routes ───────────────────────────────────────────────────────────
 const rootRouteChildren: RootRouteChildren = {
-  IndexRoute: IndexRoute,
-  AccueilRoute: AccueilRoute,
-  ActualitesRoute: ActualitesRoute,
-  AuthRoute: AuthRoute,
-  CarteRoute: CarteRoute,
-  CgsRoute: CgsRoute,
-  CguRoute: CguRoute,
-  ConfidentialiteRoute: ConfidentialiteRoute,
-  FilRoute: FilRoute,
-  ForgotPasswordRoute: ForgotPasswordRoute,
-  LandingRoute: LandingRoute,
-  LoginRoute: LoginRoute,
-  MentionsLegalesRoute: MentionsLegalesRoute,
-  MesSignalementsRoute: MesSignalementsRoute,
-  MessagerieRoute: MessagerieRoute,
-  OnboardingRoute: OnboardingRoute,
-  ProfilRoute: ProfilRoute,
-  RadioRoute: RadioRoute,
-  ResetPasswordRoute: ResetPasswordRoute,
-  ServicesRoute: ServicesRouteWithChildren,
-  SignalerRoute: SignalerRoute,
-  UrgencesRoute: UrgencesRoute,
-  AdminAgentsRoute: AdminAgentsRoute,
-  AdminAlertesRoute: AdminAlertesRoute,
-  AdminAnalyticsRoute: AdminAnalyticsRoute,
-  AdminEpciRoute: AdminEpciRoute,
-  AdminEvenementsRoute: AdminEvenementsRoute,
-  AdminLoginRoute: AdminLoginRoute,
-  AdminMessagerieRoute: AdminMessagerieRoute,
-  AdminParametresRoute: AdminParametresRoute,
-  AdminPublicationsRoute: AdminPublicationsRoute,
-  AdminRadioRoute: AdminRadioRoute,
-  AdminResetPasswordRoute: AdminResetPasswordRoute,
-  AdminRoutageRoute: AdminRoutageRoute,
-  AdminServicesRoute: AdminServicesRoute,
-  AdminSettingsRoute: AdminSettingsRoute,
-  AdminSignalementsRoute: AdminSignalementsRoute,
-  AdminSosRoute: AdminSosRoute,
-  AdminStatsRoute: AdminStatsRoute,
-  AdminUrgencesRoute: AdminUrgencesRoute,
-  AdminVoisinsRoute: AdminVoisinsRoute,
-  PlatformAnalyticsRoute: PlatformAnalyticsRoute,
-  PlatformCollectivitesRoute: PlatformCollectivitesRoute,
-  PlatformCommunesRoute: PlatformCommunesRoute,
-  PlatformFacturationRoute: PlatformFacturationRoute,
-  PlatformFeaturesRoute: PlatformFeaturesRoute,
-  PlatformKnowledgeRoute: PlatformKnowledgeRoute,
-  PlatformLicencesRoute: PlatformLicencesRoute,
-  PlatformModulesRoute: PlatformModulesRoute,
-  PlatformOnboardingRoute: PlatformOnboardingRoute,
-  PlatformPlansRoute: PlatformPlansRoute,
-  PlatformPublishersRoute: PlatformPublishersRoute,
-  PlatformRetentionRoute: PlatformRetentionRoute,
-  PlatformRssRoute: PlatformRssRoute,
-  PlatformSettingsRoute: PlatformSettingsRoute,
-  PlatformStatsRoute: PlatformStatsRoute,
-  PlatformSupportRoute: PlatformSupportRoute,
-  PlatformTarificationRoute: PlatformTarificationRoute,
-  PlatformTrialsRoute: PlatformTrialsRoute,
-  PlatformUsersRoute: PlatformUsersRoute,
-  AdminIndexRoute: AdminIndexRoute,
-  PlatformIndexRoute: PlatformIndexRoute,
-  AdminTerrainTraitesRoute: AdminTerrainTraitesRoute,
-  AdminTerrainIndexRoute: AdminTerrainIndexRoute,
+  IndexRoute,
+  ActualitesRoute,
+  AuthRoute,
+  CarteRoute,
+  FilRoute,
+  ForgotPasswordRoute,
+  LandingRoute,
+  MessagerieRoute,
+  MesSignalementsRoute,
+  OnboardingRoute,
+  ProfilRoute,
+  RadioRoute,
+  ResetPasswordRoute,
+  ServicesRoute,
+  SignalerRoute,
+  UrgencesRoute,
+  AdminLoginRoute,
+  AdminIndexRoute,
+  AdminAlertesRoute,
+  AdminEpciRoute,
+  AdminEvenementsRoute,
+  AdminMessagerieRoute,
+  AdminPublicationsRoute,
+  AdminRadioRoute,
+  AdminServicesRoute,
+  AdminSignalementsRoute,
+  AdminUrgencesRoute,
+  PlatformIndexRoute,
+  PlatformCollectivitesRoute,
+  PlatformUsersRoute,
+  PlatformRssRoute,
+  PlatformPublishersRoute,
+  PlatformSettingsRoute,
+  PlatformKnowledgeRoute,
+  PlatformModulesRoute,
+  PlatformOnboardingRoute,
+  PlatformRetentionRoute,
 }
+
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
