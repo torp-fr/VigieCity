@@ -9,7 +9,7 @@ echo OK
 
 echo [2/3] Git add + commit...
 git add -A
-git commit -m "feat: J11 — Monitoring & Ops (health-check EF, rss-health-alert cron, RUNBOOK.md)"
+git commit -m "feat: J12 — Search, CSV export & skeleton loaders (signalements, actualites, accueil)"
 git push
 
 echo.

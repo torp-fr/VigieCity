@@ -12,7 +12,6 @@ import {
   Radio,
   MapPin,
   Wind,
-  Loader2,
 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { SosButton } from "@/components/SosButton";
@@ -172,9 +171,7 @@ function Home() {
           {/* Widget météo */}
           <div className="ml-3 shrink-0">
             {!geoError && weatherLoading && !weather && (
-              <div className="flex h-16 w-16 items-center justify-center rounded-2xl bg-white/10">
-                <Loader2 className="h-5 w-5 animate-spin text-white/80" />
-              </div>
+              <div className="h-16 w-16 animate-pulse rounded-2xl bg-white/10" />
             )}
             {weather && wmo && (
               <div className="flex flex-col items-center rounded-2xl bg-white/15 px-3 py-2 backdrop-blur-sm">

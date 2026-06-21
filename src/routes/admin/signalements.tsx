@@ -11,6 +11,8 @@ import {
   MapPin,
   MessageSquare,
   X,
+  Search,
+  Download,
 } from "lucide-react";
 // Note: Lock import removed — AdminShell gère l'auth guard
 import { toast } from "sonner";
@@ -77,7 +79,8 @@ function SignalementsAdmin() {
   const [userId, setUserId] = useState<string | null>(null);
   const [collectivityId, setCollectivityId] = useState<string | null>(null);
   const [activeTab, setActiveTab] = useState<StatusFilter>("pending");
-  const [modal, setModal] = useState<ModalState>(null);
+  const [modal, setModal]   = useState<ModalState>(null);
+  const [search, setSearch] = useState("");
 
   useEffect(() => {
     supabase.auth.getUser().then(async ({ data }) => {
@@ -184,6 +187,41 @@ function SignalementsAdmin() {
     onError: (e: Error) => toast.error(e.message),
   });
 
+  // ── Filtrage client-side ───────────────────────────────────────────────────
+  const term = search.trim().toLowerCase();
+  const visible = reports?.filter((r) =>
+    !term ||
+    r.description.toLowerCase().includes(term) ||
+    r.approximate_address?.toLowerCase().includes(term) ||
+    r.category.toLowerCase().includes(term)
+  ) ?? [];
+
+  // ── Export CSV ─────────────────────────────────────────────────────────────
+  function exportCSV() {
+    const rows = visible.map((r) => [
+      new Date(r.created_at).toLocaleString("fr-FR"),
+      categoryLabel(r.category),
+      r.severity,
+      `"${r.description.replace(/"/g, '""')}"`,
+      `"${(r.approximate_address ?? "").replace(/"/g, '""')}"`,
+      r.status,
+      r.is_anonymous ? "Oui" : "Non",
+    ]);
+    const header = ["Date", "Catégorie", "Sévérité", "Description", "Adresse", "Statut", "Anonyme"];
+    const csv = [header, ...rows].map((row) => row.join(";")).join("\r\n");
+    // BOM UTF-8 pour Excel
+    const blob = new Blob(["﻿" + csv], { type: "text/csv;charset=utf-8;" });
+    const url  = URL.createObjectURL(blob);
+    const a    = document.createElement("a");
+    a.href     = url;
+    a.download = `signalements-${activeTab}-${new Date().toISOString().slice(0, 10)}.csv`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+    toast.success(`${visible.length} signalement(s) exporté(s)`);
+  }
+
   function openModal(report: Report, action: StatusAction) {
     setModal({ report, action, comment: "" });
   }
@@ -214,7 +252,7 @@ function SignalementsAdmin() {
             <button
               key={tab.filter}
               type="button"
-              onClick={() => setActiveTab(tab.filter)}
+              onClick={() => { setActiveTab(tab.filter); setSearch(""); }}
               className={`shrink-0 rounded-full px-4 py-2 text-xs font-semibold transition ${
                 activeTab === tab.filter
                   ? "bg-primary text-primary-foreground shadow-sm"
@@ -226,21 +264,57 @@ function SignalementsAdmin() {
           ))}
         </div>
 
+        {/* Barre de recherche + export */}
+        <div className="flex items-center gap-2 px-4">
+          <div className="relative flex-1">
+            <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+            <input
+              type="search"
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+              placeholder="Rechercher dans les signalements…"
+              className="w-full rounded-xl border border-input bg-muted/40 py-2.5 pl-9 pr-3 text-sm outline-none ring-ring placeholder:text-muted-foreground focus:ring-2"
+            />
+          </div>
+          {reports && reports.length > 0 && (
+            <button
+              type="button"
+              onClick={exportCSV}
+              title="Exporter en CSV"
+              className="flex shrink-0 items-center gap-1.5 rounded-xl border border-border bg-muted px-3 py-2.5 text-xs font-semibold text-foreground hover:bg-muted/80 transition"
+            >
+              <Download className="h-3.5 w-3.5" />
+              CSV
+            </button>
+          )}
+        </div>
+
+        {/* Résultats count si recherche active */}
+        {term && (
+          <p className="px-4 text-xs text-muted-foreground">
+            {visible.length} résultat{visible.length !== 1 ? "s" : ""} pour «{search}»
+          </p>
+        )}
+
         {/* Liste */}
         <div className="px-4">
           {isLoading ? (
-            <div className="flex justify-center py-10">
-              <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
-            </div>
-          ) : !reports?.length ? (
+            <ul className="space-y-3">
+              {[1, 2, 3].map((n) => (
+                <ReportSkeleton key={n} />
+              ))}
+            </ul>
+          ) : !visible.length ? (
             <div className="rounded-2xl border border-dashed border-border bg-card p-8 text-center text-sm text-muted-foreground">
-              {activeTab === "pending"
-                ? "Aucun signalement en attente. Beau travail !"
-                : "Aucun signalement ici."}
+              {term
+                ? "Aucun signalement ne correspond à votre recherche."
+                : activeTab === "pending"
+                  ? "Aucun signalement en attente. Beau travail !"
+                  : "Aucun signalement ici."}
             </div>
           ) : (
             <ul className="space-y-3">
-              {reports.map((r) => (
+              {visible.map((r) => (
                 <ReportCard
                   key={r.id}
                   report={r}
@@ -265,6 +339,35 @@ function SignalementsAdmin() {
       )}
     </>
     </AdminShell>
+  );
+}
+
+// ── ReportSkeleton ────────────────────────────────────────────────────────────
+
+function ReportSkeleton() {
+  return (
+    <li className="animate-pulse space-y-3 rounded-2xl border border-border bg-card p-4 shadow-card">
+      <div className="flex items-start gap-3">
+        <div className="h-10 w-10 shrink-0 rounded-full bg-muted" />
+        <div className="flex-1 space-y-2">
+          <div className="flex gap-2">
+            <div className="h-4 w-24 rounded-full bg-muted" />
+            <div className="h-4 w-16 rounded-full bg-muted" />
+          </div>
+          <div className="h-3 w-full rounded bg-muted" />
+          <div className="h-3 w-3/4 rounded bg-muted" />
+          <div className="flex gap-3">
+            <div className="h-3 w-20 rounded bg-muted" />
+            <div className="h-3 w-16 rounded bg-muted" />
+          </div>
+        </div>
+      </div>
+      <div className="grid grid-cols-4 gap-2">
+        {[1, 2, 3, 4].map((n) => (
+          <div key={n} className="h-8 rounded-xl bg-muted" />
+        ))}
+      </div>
+    </li>
   );
 }
 

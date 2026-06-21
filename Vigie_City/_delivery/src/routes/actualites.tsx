@@ -3,7 +3,7 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useState } from "react";
 import {
   Newspaper, ExternalLink, RefreshCw, Globe, Shield,
-  Calendar, Tag, Loader2, AlertCircle, ChevronRight,
+  Calendar, Tag, AlertCircle, ChevronRight,
 } from "lucide-react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
@@ -170,9 +170,10 @@ function ActualitesPage() {
 
         {/* Loading */}
         {isLoading && (
-          <div className="flex flex-col items-center gap-3 py-16 text-muted-foreground">
-            <Loader2 className="h-7 w-7 animate-spin" />
-            <p className="text-sm">Chargement des actualités…</p>
+          <div className="space-y-3">
+            {[1, 2, 3, 4].map((n) => (
+              <ArticleSkeleton key={n} />
+            ))}
           </div>
         )}
 
@@ -226,6 +227,29 @@ function ActualitesPage() {
             </p>
           </div>
         )}
+      </div>
+    </div>
+  );
+}
+
+// ── Squelette article ─────────────────────────────────────────────────────────
+
+function ArticleSkeleton() {
+  return (
+    <div className="flex animate-pulse gap-3 rounded-2xl border border-border bg-card p-3">
+      {/* Image placeholder */}
+      <div className="h-20 w-20 shrink-0 rounded-xl bg-muted" />
+      {/* Contenu placeholder */}
+      <div className="flex flex-1 flex-col gap-2 py-0.5">
+        <div className="flex gap-2">
+          <div className="h-3 w-20 rounded-full bg-muted" />
+          <div className="h-3 w-12 rounded-full bg-muted" />
+        </div>
+        <div className="h-4 w-full rounded bg-muted" />
+        <div className="h-4 w-4/5 rounded bg-muted" />
+        <div className="h-3 w-full rounded bg-muted" />
+        <div className="h-3 w-2/3 rounded bg-muted" />
+        <div className="mt-auto h-3 w-16 rounded bg-muted" />
       </div>
     </div>
   );
