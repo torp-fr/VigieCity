@@ -30,6 +30,7 @@ import { Route as RadioRouteImport } from './routes/radio'
 import { Route as LandingRouteImport } from './routes/landing'
 import { Route as EvenementsRouteImport } from './routes/evenements'
 import { Route as ConsultationsRouteImport } from './routes/consultations'
+import { Route as VoisinsRouteImport } from './routes/voisins'
 
 // ── Routes admin ──────────────────────────────────────────────────────────────
 import { Route as AdminLoginRouteImport } from './routes/admin/login'
@@ -44,6 +45,7 @@ import { Route as AdminServicesRouteImport } from './routes/admin/services'
 import { Route as AdminUrgencesRouteImport } from './routes/admin/urgences'
 import { Route as AdminRadioRouteImport } from './routes/admin/radio'
 import { Route as AdminConsultationsRouteImport } from './routes/admin/consultations'
+import { Route as AdminVoisinsRouteImport } from './routes/admin/voisins'
 
 // ── Routes plateforme (backoffice opérateur) ──────────────────────────────────
 import { Route as PlatformIndexRouteImport } from './routes/platform/index'
@@ -148,6 +150,11 @@ const ConsultationsRoute = ConsultationsRouteImport.update({
   path: '/consultations',
   getParentRoute: () => rootRouteImport,
 } as any)
+const VoisinsRoute = VoisinsRouteImport.update({
+  id: '/voisins',
+  path: '/voisins',
+  getParentRoute: () => rootRouteImport,
+} as any)
 
 const AdminLoginRoute = AdminLoginRouteImport.update({
   id: '/admin/login',
@@ -209,6 +216,11 @@ const AdminConsultationsRoute = AdminConsultationsRouteImport.update({
   path: '/admin/consultations',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AdminVoisinsRoute = AdminVoisinsRouteImport.update({
+  id: '/admin/voisins',
+  path: '/admin/voisins',
+  getParentRoute: () => rootRouteImport,
+} as any)
 
 const PlatformIndexRoute = PlatformIndexRouteImport.update({
   id: '/platform/',
@@ -268,6 +280,7 @@ export interface FileRoutesByFullPath {
   '/auth': typeof AuthRoute
   '/carte': typeof CarteRoute
   '/consultations': typeof ConsultationsRoute
+  '/voisins': typeof VoisinsRoute
   '/evenements': typeof EvenementsRoute
   '/fil': typeof FilRoute
   '/forgot-password': typeof ForgotPasswordRoute
@@ -285,6 +298,7 @@ export interface FileRoutesByFullPath {
   '/admin/': typeof AdminIndexRoute
   '/admin/alertes': typeof AdminAlertesRoute
   '/admin/consultations': typeof AdminConsultationsRoute
+  '/admin/voisins': typeof AdminVoisinsRoute
   '/admin/epci': typeof AdminEpciRoute
   '/admin/evenements': typeof AdminEvenementsRoute
   '/admin/messagerie': typeof AdminMessagerieRoute
@@ -322,10 +336,12 @@ export interface FileRoutesByTo {
   '/services': typeof ServicesRoute
   '/signaler': typeof SignalerRoute
   '/urgences': typeof UrgencesRoute
+  '/voisins': typeof VoisinsRoute
   '/admin/login': typeof AdminLoginRoute
   '/admin': typeof AdminIndexRoute
   '/admin/alertes': typeof AdminAlertesRoute
   '/admin/consultations': typeof AdminConsultationsRoute
+  '/admin/voisins': typeof AdminVoisinsRoute
   '/admin/epci': typeof AdminEpciRoute
   '/admin/evenements': typeof AdminEvenementsRoute
   '/admin/messagerie': typeof AdminMessagerieRoute
@@ -364,10 +380,12 @@ export interface FileRoutesById {
   '/services': typeof ServicesRoute
   '/signaler': typeof SignalerRoute
   '/urgences': typeof UrgencesRoute
+  '/voisins': typeof VoisinsRoute
   '/admin/login': typeof AdminLoginRoute
   '/admin/': typeof AdminIndexRoute
   '/admin/alertes': typeof AdminAlertesRoute
   '/admin/consultations': typeof AdminConsultationsRoute
+  '/admin/voisins': typeof AdminVoisinsRoute
   '/admin/epci': typeof AdminEpciRoute
   '/admin/evenements': typeof AdminEvenementsRoute
   '/admin/messagerie': typeof AdminMessagerieRoute
@@ -395,6 +413,7 @@ export interface FileRouteTypes {
     | '/auth'
     | '/carte'
     | '/consultations'
+    | '/voisins'
     | '/evenements'
     | '/fil'
     | '/forgot-password'
@@ -412,6 +431,7 @@ export interface FileRouteTypes {
     | '/admin/'
     | '/admin/alertes'
     | '/admin/consultations'
+    | '/admin/voisins'
     | '/admin/epci'
     | '/admin/evenements'
     | '/admin/messagerie'
@@ -436,6 +456,8 @@ export interface FileRouteTypes {
     | '/actualites'
     | '/auth'
     | '/carte'
+    | '/consultations'
+    | '/voisins'
     | '/evenements'
     | '/fil'
     | '/forgot-password'
@@ -453,6 +475,7 @@ export interface FileRouteTypes {
     | '/admin'
     | '/admin/alertes'
     | '/admin/consultations'
+    | '/admin/voisins'
     | '/admin/epci'
     | '/admin/evenements'
     | '/admin/messagerie'
@@ -478,6 +501,7 @@ export interface FileRouteTypes {
     | '/auth'
     | '/carte'
     | '/consultations'
+    | '/voisins'
     | '/evenements'
     | '/fil'
     | '/forgot-password'
@@ -495,6 +519,7 @@ export interface FileRouteTypes {
     | '/admin/'
     | '/admin/alertes'
     | '/admin/consultations'
+    | '/admin/voisins'
     | '/admin/epci'
     | '/admin/evenements'
     | '/admin/messagerie'
@@ -521,6 +546,7 @@ export interface RootRouteChildren {
   AuthRoute: typeof AuthRoute
   CarteRoute: typeof CarteRoute
   ConsultationsRoute: typeof ConsultationsRoute
+  VoisinsRoute: typeof VoisinsRoute
   EvenementsRoute: typeof EvenementsRoute
   FilRoute: typeof FilRoute
   ForgotPasswordRoute: typeof ForgotPasswordRoute
@@ -538,6 +564,7 @@ export interface RootRouteChildren {
   AdminIndexRoute: typeof AdminIndexRoute
   AdminAlertesRoute: typeof AdminAlertesRoute
   AdminConsultationsRoute: typeof AdminConsultationsRoute
+  AdminVoisinsRoute: typeof AdminVoisinsRoute
   AdminEpciRoute: typeof AdminEpciRoute
   AdminEvenementsRoute: typeof AdminEvenementsRoute
   AdminMessagerieRoute: typeof AdminMessagerieRoute
@@ -593,6 +620,13 @@ declare module '@tanstack/react-router' {
       path: '/consultations'
       fullPath: '/consultations'
       preLoaderRoute: typeof ConsultationsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/voisins': {
+      id: '/voisins'
+      path: '/voisins'
+      fullPath: '/voisins'
+      preLoaderRoute: typeof VoisinsRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/evenements': {
@@ -712,6 +746,13 @@ declare module '@tanstack/react-router' {
       path: '/admin/consultations'
       fullPath: '/admin/consultations'
       preLoaderRoute: typeof AdminConsultationsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/admin/voisins': {
+      id: '/admin/voisins'
+      path: '/admin/voisins'
+      fullPath: '/admin/voisins'
+      preLoaderRoute: typeof AdminVoisinsRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/admin/epci': {
@@ -850,6 +891,7 @@ const rootRouteChildren: RootRouteChildren = {
   AuthRoute,
   CarteRoute,
   ConsultationsRoute,
+  VoisinsRoute,
   EvenementsRoute,
   FilRoute,
   ForgotPasswordRoute,
@@ -867,6 +909,7 @@ const rootRouteChildren: RootRouteChildren = {
   AdminIndexRoute,
   AdminAlertesRoute,
   AdminConsultationsRoute,
+  AdminVoisinsRoute,
   AdminEpciRoute,
   AdminEvenementsRoute,
   AdminMessagerieRoute,

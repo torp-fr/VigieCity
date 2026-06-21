@@ -18,6 +18,7 @@ import {
   Tablet,
   BarChart3,
   BarChart2,
+  ShieldAlert,
   Settings,
 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
@@ -38,8 +39,9 @@ const BASE_NAV = [
   { icon: Phone,           label: "Urgences",         path: "/admin/urgences"     },
   { icon: Radio,           label: "Radio locale",     path: "/admin/radio"        },
   { icon: Megaphone,       label: "Alertes",          path: "/admin/alertes"       },
-  { icon: BarChart2,       label: "Consultations",    path: "/admin/consultations" },
-  { icon: Tablet,          label: "Mode terrain",     path: "/admin/terrain"       },
+  { icon: BarChart2,       label: "Consultations",    path: "/admin/consultations"  },
+  { icon: ShieldAlert,     label: "Voisins vigilants", path: "/admin/voisins"       },
+  { icon: Tablet,          label: "Mode terrain",     path: "/admin/terrain"        },
   { icon: BarChart3,       label: "Analytics",         path: "/admin/analytics"    },
   { icon: Settings,        label: "Paramètres",        path: "/admin/settings"     },
 ] as const;

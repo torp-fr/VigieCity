@@ -13,6 +13,7 @@ import {
   FileText,
   Calendar,
   BarChart2,
+  ShieldAlert,
 } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
 import { useEffect, useState } from "react";
@@ -35,8 +36,9 @@ const DRAWER_ITEMS = [
   { to: "/evenements",  label: "Agenda",     icon: Calendar,      color: "text-indigo-600"  },
   { to: "/fil",         label: "Fil Quartier", icon: FileText,    color: "text-emerald-600" },
   { to: "/carte",          label: "Carte",         icon: Map,      color: "text-purple-600"  },
-  { to: "/consultations",  label: "Consultations", icon: BarChart2, color: "text-teal-600"   },
-  { to: "/profil",         label: "Mon Profil",    icon: User,     color: "text-slate-600"   },
+  { to: "/consultations",  label: "Consultations",   icon: BarChart2,   color: "text-teal-600"   },
+  { to: "/voisins",        label: "Voisins vigilants", icon: ShieldAlert, color: "text-rose-600"   },
+  { to: "/profil",         label: "Mon Profil",      icon: User,        color: "text-slate-600"   },
 ] as const;
 
 // Hauteur approximative de la barre de navigation (px) — pour le padding-bottom du tiroir

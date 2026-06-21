@@ -9,7 +9,7 @@ echo OK
 
 echo [2/3] Git add + commit...
 git add -A
-git commit -m "feat: J8.3 — consultations citoyennes (sondages + votes) + gestion admin polls"
+git commit -m "feat: J8.4 — voisins vigilants (signalements citoyens anonymisés + modération admin)"
 git push
 
 echo.
