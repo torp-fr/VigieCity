@@ -1,8 +1,62 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
 import { useEffect, useState } from "react";
-import { Phone, ShieldAlert, Loader2, AlertTriangle } from "lucide-react";
+import { Phone, ShieldAlert, Loader2, AlertTriangle, CloudLightning } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
+
+// ─── Types vigilance ──────────────────────────────────────────────────────────
+type Vigilance = {
+  id: string;
+  department_code: string;
+  color_id: number;
+  phenomenon: string;
+  valid_from: string;
+  valid_to: string | null;
+};
+
+const VIGILANCE_CONFIG: Record<number, { label: string; bg: string; border: string; text: string; dot: string }> = {
+  1: { label: "Vert",   bg: "bg-green-50",  border: "border-green-300/50",  text: "text-green-800",  dot: "bg-green-500"  },
+  2: { label: "Jaune",  bg: "bg-yellow-50", border: "border-yellow-300/50", text: "text-yellow-800", dot: "bg-yellow-500" },
+  3: { label: "Orange", bg: "bg-orange-50", border: "border-orange-400/60", text: "text-orange-900", dot: "bg-orange-500" },
+  4: { label: "Rouge",  bg: "bg-red-50",    border: "border-red-400/60",    text: "text-red-900",    dot: "bg-red-600"    },
+};
+
+function VigilanceBanner({ vigilances }: { vigilances: Vigilance[] }) {
+  // Afficher uniquement jaune, orange, rouge — grouper par couleur max
+  const relevant = vigilances.filter((v) => v.color_id >= 2);
+  if (!relevant.length) return null;
+
+  const maxColor = Math.max(...relevant.map((v) => v.color_id));
+  const cfg = VIGILANCE_CONFIG[maxColor] ?? VIGILANCE_CONFIG[2];
+
+  return (
+    <div className={`rounded-2xl border ${cfg.border} ${cfg.bg} p-4`}>
+      <div className="flex items-start gap-3">
+        <CloudLightning className={`mt-0.5 h-5 w-5 shrink-0 ${cfg.text}`} />
+        <div className="flex-1">
+          <p className={`text-sm font-bold ${cfg.text}`}>
+            Vigilance météo {cfg.label}
+          </p>
+          <ul className="mt-1.5 space-y-1">
+            {relevant.map((v) => {
+              const c = VIGILANCE_CONFIG[v.color_id];
+              return (
+                <li key={v.id} className="flex items-center gap-2 text-xs text-muted-foreground">
+                  <span className={`h-2 w-2 shrink-0 rounded-full ${c.dot}`} />
+                  <span className="font-medium">{v.phenomenon}</span>
+                  <span className="text-[11px] opacity-70">— Département {v.department_code}</span>
+                </li>
+              );
+            })}
+          </ul>
+          <p className="mt-2 text-[11px] text-muted-foreground">
+            Source : Météo-France · Actualisé toutes les heures
+          </p>
+        </div>
+      </div>
+    </div>
+  );
+}
 
 export const Route = createFileRoute("/urgences")({
   head: () => ({
@@ -50,9 +104,10 @@ function catIcon(cat: string) {
 
 // ─── Composant ────────────────────────────────────────────────────────────────
 function UrgencesPage() {
-  const [collectivityId, setCollectivityId] = useState<string | null>(null);
-  const [ready, setReady] = useState(false);
-  const [callTarget, setCallTarget] = useState<Contact | null>(null);
+  const [collectivityId, setCollectivityId]   = useState<string | null>(null);
+  const [departmentCode, setDepartmentCode]   = useState<string | null>(null);
+  const [ready, setReady]                     = useState(false);
+  const [callTarget, setCallTarget]           = useState<Contact | null>(null);
 
   useEffect(() => {
     supabase.auth.getUser().then(async ({ data }) => {
@@ -62,11 +117,38 @@ function UrgencesPage() {
           .select("collectivity_id")
           .eq("id", data.user.id)
           .single();
-        setCollectivityId(profile?.collectivity_id ?? null);
+        const collId = profile?.collectivity_id ?? null;
+        setCollectivityId(collId);
+
+        if (collId) {
+          const { data: coll } = await supabase
+            .from("collectivities")
+            .select("department_code")
+            .eq("id", collId)
+            .single();
+          setDepartmentCode(coll?.department_code ?? null);
+        }
       }
       setReady(true);
     });
   }, []);
+
+  // Vigilances météo pour le département
+  const { data: vigilances = [] } = useQuery({
+    queryKey: ["meteo-vigilances", departmentCode],
+    enabled:  !!departmentCode,
+    staleTime: 30 * 60 * 1000, // 30 min
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("meteo_vigilances")
+        .select("id, department_code, color_id, phenomenon, valid_from, valid_to")
+        .eq("department_code", departmentCode!)
+        .gte("color_id", 2)
+        .order("color_id", { ascending: false });
+      if (error) throw error;
+      return data as Vigilance[];
+    },
+  });
 
   // Nationaux
   const { data: nationals = [], isLoading: loadNat } = useQuery({
@@ -122,6 +204,9 @@ function UrgencesPage() {
           <p className="text-sm text-muted-foreground">Appuyer pour appeler directement</p>
         </div>
       </header>
+
+      {/* Vigilance météo */}
+      {vigilances.length > 0 && <VigilanceBanner vigilances={vigilances} />}
 
       {isLoading && (
         <div className="flex justify-center pt-8">

@@ -13,6 +13,7 @@ import {
   EyeOff,
   X,
   Loader2,
+  Users,
 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
@@ -45,12 +46,14 @@ type Event = {
   end_at: string | null;
   location: string | null;
   image_url: string | null;
+  max_capacity: number | null;
   is_published: boolean;
   created_at: string;
 };
 
 type EventForm = Omit<Event, "id" | "collectivity_id" | "created_at" | "image_url"> & {
   image_url: string;
+  max_capacity: string; // champ texte dans le form
 };
 
 const EMPTY_FORM: EventForm = {
@@ -61,6 +64,7 @@ const EMPTY_FORM: EventForm = {
   end_at: "",
   location: "",
   image_url: "",
+  max_capacity: "",
   is_published: false,
 };
 
@@ -128,6 +132,26 @@ function AdminEvenementsPage() {
     },
   });
 
+  // Comptage inscriptions par événement
+  const { data: regCounts = {} } = useQuery({
+    queryKey: ["admin-event-reg-counts", collectivityId],
+    enabled: !!collectivityId && !!events?.length,
+    staleTime: 60_000,
+    queryFn: async () => {
+      if (!events?.length) return {};
+      const ids = events.map((e) => e.id);
+      const { data } = await supabase
+        .from("event_registration_counts")
+        .select("event_id, registration_count")
+        .in("event_id", ids);
+      const map: Record<string, number> = {};
+      (data ?? []).forEach((r: { event_id: string; registration_count: number }) => {
+        map[r.event_id] = r.registration_count;
+      });
+      return map;
+    },
+  });
+
   // ── Helpers formulaire ─────────────────────────────────────────────────────
   function toLocalDatetime(iso: string | null | undefined) {
     if (!iso) return "";
@@ -151,6 +175,7 @@ function AdminEvenementsPage() {
       end_at:       toLocalDatetime(evt.end_at),
       location:     evt.location ?? "",
       image_url:    evt.image_url ?? "",
+      max_capacity: evt.max_capacity != null ? String(evt.max_capacity) : "",
       is_published: evt.is_published,
     });
     setDialogOpen(true);
@@ -177,6 +202,7 @@ function AdminEvenementsPage() {
         end_at:          form.end_at   ? new Date(form.end_at).toISOString()   : null,
         location:        form.location?.trim() || null,
         image_url:       form.image_url?.trim() || null,
+        max_capacity:    form.max_capacity ? parseInt(form.max_capacity, 10) : null,
         is_published:    form.is_published,
       };
 
@@ -191,6 +217,7 @@ function AdminEvenementsPage() {
       }
 
       await qc.invalidateQueries({ queryKey: ["admin-events", collectivityId] });
+      await qc.invalidateQueries({ queryKey: ["admin-event-reg-counts", collectivityId] });
       closeDialog();
     } catch (err: unknown) {
       const message = err instanceof Error ? err.message : "Erreur inattendue";
@@ -271,6 +298,7 @@ function AdminEvenementsPage() {
             </h2>
             <EventList
               events={upcoming}
+              regCounts={regCounts}
               onEdit={openEdit}
               onToggle={(e) => togglePublished.mutate(e)}
               onDelete={(id) => setDeleteId(id)}
@@ -287,6 +315,7 @@ function AdminEvenementsPage() {
             <EventList
               events={past}
               past
+              regCounts={regCounts}
               onEdit={openEdit}
               onToggle={(e) => togglePublished.mutate(e)}
               onDelete={(id) => setDeleteId(id)}
@@ -393,16 +422,30 @@ function AdminEvenementsPage() {
                 </div>
               </div>
 
-              {/* Lieu */}
-              <div className="space-y-1.5">
-                <Label htmlFor="ev-location">Lieu</Label>
-                <Input
-                  id="ev-location"
-                  value={form.location ?? ""}
-                  onChange={(e) => setForm((f) => ({ ...f, location: e.target.value }))}
-                  placeholder="Salle des fêtes, Stade municipal…"
-                  disabled={saving}
-                />
+              {/* Lieu + Capacité */}
+              <div className="grid grid-cols-2 gap-3">
+                <div className="space-y-1.5 col-span-1">
+                  <Label htmlFor="ev-location">Lieu</Label>
+                  <Input
+                    id="ev-location"
+                    value={form.location ?? ""}
+                    onChange={(e) => setForm((f) => ({ ...f, location: e.target.value }))}
+                    placeholder="Salle des fêtes…"
+                    disabled={saving}
+                  />
+                </div>
+                <div className="space-y-1.5 col-span-1">
+                  <Label htmlFor="ev-capacity">Places max</Label>
+                  <Input
+                    id="ev-capacity"
+                    type="number"
+                    min="1"
+                    value={form.max_capacity}
+                    onChange={(e) => setForm((f) => ({ ...f, max_capacity: e.target.value }))}
+                    placeholder="Illimité"
+                    disabled={saving}
+                  />
+                </div>
               </div>
 
               {/* Image URL */}
@@ -486,12 +529,14 @@ function AdminEvenementsPage() {
 function EventList({
   events,
   past = false,
+  regCounts = {},
   onEdit,
   onToggle,
   onDelete,
 }: {
   events: Event[];
   past?: boolean;
+  regCounts?: Record<string, number>;
   onEdit: (e: Event) => void;
   onToggle: (e: { id: string; is_published: boolean }) => void;
   onDelete: (id: string) => void;
@@ -548,8 +593,19 @@ function EventList({
                 )}
               </div>
 
-              <div className="mt-1 text-[11px] text-muted-foreground">
-                {cat.emoji} {cat.label}
+              <div className="mt-1 flex items-center gap-2 text-[11px] text-muted-foreground">
+                <span>{cat.emoji} {cat.label}</span>
+                {(regCounts[evt.id] !== undefined || evt.max_capacity) && (
+                  <span className={`inline-flex items-center gap-1 rounded-full px-1.5 py-0.5 text-[10px] font-medium ${
+                    evt.max_capacity && (regCounts[evt.id] ?? 0) >= evt.max_capacity
+                      ? "bg-red-100 text-red-700"
+                      : "bg-blue-50 text-blue-700"
+                  }`}>
+                    <Users className="h-2.5 w-2.5" />
+                    {regCounts[evt.id] ?? 0}
+                    {evt.max_capacity ? ` / ${evt.max_capacity}` : ""}
+                  </span>
+                )}
               </div>
             </div>
 

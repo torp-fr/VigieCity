@@ -9,7 +9,7 @@ echo OK
 
 echo [2/3] Git add + commit...
 git add -A
-git commit -m "feat: J7 email templates Resend white-label — send-email v3 (user_id+collectivity_id auto-resolve), report_updated trigger signalements"
+git commit -m "feat: J8.1+J8.5 — météo vigilance EF+widget, agenda citoyen inscriptions+iCal+push J-1, admin max_capacity"
 git push
 
 echo.

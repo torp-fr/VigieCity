@@ -11,6 +11,7 @@ import {
   User,
   Map,
   FileText,
+  Calendar,
 } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
 import { useEffect, useState } from "react";
@@ -27,12 +28,13 @@ const TABS = [
 
 /** Items dans le tiroir de navigation */
 const DRAWER_ITEMS = [
-  { to: "/urgences", label: "Urgences", icon: PhoneCall, color: "text-red-600" },
-  { to: "/signaler", label: "Signaler", icon: AlertCircle, color: "text-orange-500" },
-  { to: "/messagerie", label: "Messagerie", icon: MessageSquare, color: "text-blue-600" },
-  { to: "/fil", label: "Fil Quartier", icon: FileText, color: "text-emerald-600" },
-  { to: "/carte", label: "Carte", icon: Map, color: "text-purple-600" },
-  { to: "/profil", label: "Mon Profil", icon: User, color: "text-slate-600" },
+  { to: "/urgences",    label: "Urgences",   icon: PhoneCall,     color: "text-red-600"     },
+  { to: "/signaler",    label: "Signaler",   icon: AlertCircle,   color: "text-orange-500"  },
+  { to: "/messagerie",  label: "Messagerie", icon: MessageSquare, color: "text-blue-600"    },
+  { to: "/evenements",  label: "Agenda",     icon: Calendar,      color: "text-indigo-600"  },
+  { to: "/fil",         label: "Fil Quartier", icon: FileText,    color: "text-emerald-600" },
+  { to: "/carte",       label: "Carte",      icon: Map,           color: "text-purple-600"  },
+  { to: "/profil",      label: "Mon Profil", icon: User,          color: "text-slate-600"   },
 ] as const;
 
 // Hauteur approximative de la barre de navigation (px) — pour le padding-bottom du tiroir

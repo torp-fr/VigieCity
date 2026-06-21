@@ -28,6 +28,7 @@ import { Route as SignalerRouteImport } from './routes/signaler'
 import { Route as UrgencesRouteImport } from './routes/urgences'
 import { Route as RadioRouteImport } from './routes/radio'
 import { Route as LandingRouteImport } from './routes/landing'
+import { Route as EvenementsRouteImport } from './routes/evenements'
 
 // ── Routes admin ──────────────────────────────────────────────────────────────
 import { Route as AdminLoginRouteImport } from './routes/admin/login'
@@ -133,6 +134,11 @@ const RadioRoute = RadioRouteImport.update({
 const LandingRoute = LandingRouteImport.update({
   id: '/landing',
   path: '/landing',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const EvenementsRoute = EvenementsRouteImport.update({
+  id: '/evenements',
+  path: '/evenements',
   getParentRoute: () => rootRouteImport,
 } as any)
 
@@ -249,6 +255,7 @@ export interface FileRoutesByFullPath {
   '/actualites': typeof ActualitesRoute
   '/auth': typeof AuthRoute
   '/carte': typeof CarteRoute
+  '/evenements': typeof EvenementsRoute
   '/fil': typeof FilRoute
   '/forgot-password': typeof ForgotPasswordRoute
   '/landing': typeof LandingRoute
@@ -288,6 +295,7 @@ export interface FileRoutesByTo {
   '/actualites': typeof ActualitesRoute
   '/auth': typeof AuthRoute
   '/carte': typeof CarteRoute
+  '/evenements': typeof EvenementsRoute
   '/fil': typeof FilRoute
   '/forgot-password': typeof ForgotPasswordRoute
   '/landing': typeof LandingRoute
@@ -327,6 +335,7 @@ export interface FileRoutesById {
   '/': typeof IndexRoute
   '/actualites': typeof ActualitesRoute
   '/auth': typeof AuthRoute
+  '/evenements': typeof EvenementsRoute
   '/carte': typeof CarteRoute
   '/fil': typeof FilRoute
   '/forgot-password': typeof ForgotPasswordRoute
@@ -369,6 +378,7 @@ export interface FileRouteTypes {
     | '/actualites'
     | '/auth'
     | '/carte'
+    | '/evenements'
     | '/fil'
     | '/forgot-password'
     | '/landing'
@@ -408,6 +418,7 @@ export interface FileRouteTypes {
     | '/actualites'
     | '/auth'
     | '/carte'
+    | '/evenements'
     | '/fil'
     | '/forgot-password'
     | '/landing'
@@ -447,6 +458,7 @@ export interface FileRouteTypes {
     | '/actualites'
     | '/auth'
     | '/carte'
+    | '/evenements'
     | '/fil'
     | '/forgot-password'
     | '/landing'
@@ -487,6 +499,7 @@ export interface RootRouteChildren {
   ActualitesRoute: typeof ActualitesRoute
   AuthRoute: typeof AuthRoute
   CarteRoute: typeof CarteRoute
+  EvenementsRoute: typeof EvenementsRoute
   FilRoute: typeof FilRoute
   ForgotPasswordRoute: typeof ForgotPasswordRoute
   LandingRoute: typeof LandingRoute
@@ -550,6 +563,13 @@ declare module '@tanstack/react-router' {
       path: '/carte'
       fullPath: '/carte'
       preLoaderRoute: typeof CarteRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/evenements': {
+      id: '/evenements'
+      path: '/evenements'
+      fullPath: '/evenements'
+      preLoaderRoute: typeof EvenementsRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/fil': {
@@ -792,6 +812,7 @@ const rootRouteChildren: RootRouteChildren = {
   ActualitesRoute,
   AuthRoute,
   CarteRoute,
+  EvenementsRoute,
   FilRoute,
   ForgotPasswordRoute,
   LandingRoute,
