@@ -1,23 +1,48 @@
-// VigieCity Service Worker — v3
-// Gère : offline cache shell + Web Push notifications
+// VigieCity Service Worker — v4
+// Gère : multi-stratégie cache + offline shell + Web Push notifications
 // rebuild: 2026-06-21
 
-const CACHE_NAME    = 'vigiecity-v3';
-const PRECACHE_URLS = [
+// ── Cache names ────────────────────────────────────────────────────────────────
+const V             = 'v4';
+const CACHE_STATIC  = `vigiecity-${V}-static`;   // JS/CSS/fonts — cache-first
+const CACHE_PAGES   = `vigiecity-${V}-pages`;    // HTML navigation — stale-while-revalidate
+const CACHE_IMAGES  = `vigiecity-${V}-images`;   // Images/icons   — cache-first
+const ALL_CACHES    = [CACHE_STATIC, CACHE_PAGES, CACHE_IMAGES];
+
+// ── Precache : shell critique garantie offline ─────────────────────────────────
+const PRECACHE_PAGES = [
   '/',
   '/accueil',
   '/urgences',
+  '/signaler',
+  '/services',
+  '/actualites',
+  '/offline.html',
   '/manifest.webmanifest',
 ];
+
+// ── Helpers ───────────────────────────────────────────────────────────────────
+
+/** Ouvre un cache et met l'item dedans (sans throw) */
+async function putInCache(cacheName, request, response) {
+  if (!response || !response.ok) return;
+  try {
+    const cache = await caches.open(cacheName);
+    await cache.put(request, response);
+  } catch { /* quota exceeded — ignore */ }
+}
 
 // ── Installation ──────────────────────────────────────────────────────────────
 self.addEventListener('install', (event) => {
   event.waitUntil(
-    caches.open(CACHE_NAME).then((cache) =>
-      cache.addAll(PRECACHE_URLS).catch(() => {
-        // Ignore les erreurs de précache (routes SPA peuvent échouer offline)
-      })
-    )
+    caches.open(CACHE_PAGES).then(async (cache) => {
+      // Précache individuel pour ne pas bloquer si une URL échoue offline
+      await Promise.allSettled(
+        PRECACHE_PAGES.map((url) =>
+          cache.add(url).catch(() => { /* SPA shell peut 404 en dev */ })
+        )
+      );
+    })
   );
   self.skipWaiting();
 });
@@ -27,62 +52,119 @@ self.addEventListener('activate', (event) => {
   event.waitUntil(
     caches.keys().then((keys) =>
       Promise.all(
-        keys.filter((k) => k !== CACHE_NAME).map((k) => caches.delete(k))
+        keys
+          .filter((k) => !ALL_CACHES.includes(k))
+          .map((k) => caches.delete(k))
       )
     )
   );
   self.clients.claim();
 });
 
-// ── Fetch — Network-first avec fallback cache ─────────────────────────────────
+// ── Fetch ──────────────────────────────────────────────────────────────────────
 self.addEventListener('fetch', (event) => {
   const { request } = event;
   const url = new URL(request.url);
 
-  // Skip non-GET, cross-origin, Supabase API, PostHog, Chrome extensions
+  // ── Bypass : non-GET, cross-origin externes, APIs tierces ─────────────────
   if (
     request.method !== 'GET' ||
     url.protocol === 'chrome-extension:' ||
-    url.hostname.includes('supabase.co') ||
-    url.hostname.includes('posthog.com') ||
+    url.hostname.includes('supabase.co')  ||
+    url.hostname.includes('posthog.com')  ||
     url.hostname.includes('open-meteo.com') ||
-    (url.hostname !== self.location.hostname &&
-     url.hostname !== 'localhost' &&
-     url.hostname !== '127.0.0.1')
+    url.hostname.includes('nominatim.openstreetmap.org') ||
+    url.hostname.includes('overpass-api.de') ||
+    (
+      url.hostname !== self.location.hostname &&
+      url.hostname !== 'localhost' &&
+      url.hostname !== '127.0.0.1'
+    )
   ) {
+    return; // Laisse le browser gérer
+  }
+
+  const path = url.pathname;
+
+  // ── 1. Static assets — Cache-first (JS/CSS/fonts/manifest) ───────────────
+  if (/\.(js|css|woff2?|ttf|otf|webmanifest)$/.test(path)) {
+    event.respondWith(cacheFirst(request, CACHE_STATIC));
     return;
   }
 
-  event.respondWith(
-    fetch(request)
-      .then((response) => {
-        // Cache navigation + static assets on success
-        if (
-          response.ok &&
-          (request.mode === 'navigate' ||
-           /\.(js|css|png|svg|ico|webmanifest|woff2?)$/.test(url.pathname))
-        ) {
-          const clone = response.clone();
-          caches.open(CACHE_NAME).then((cache) => cache.put(request, clone));
-        }
-        return response;
-      })
-      .catch(() =>
-        // Offline fallback: try cache, then root shell
-        caches.match(request).then((cached) => {
-          if (cached) return cached;
-          if (request.mode === 'navigate') {
-            return caches.match('/') ??
-              new Response('<h1>Hors ligne</h1><p>Reconnectez-vous à Internet.</p>', {
-                status: 503,
-                headers: { 'Content-Type': 'text/html; charset=utf-8' },
-              });
-          }
-          return new Response('Hors ligne', { status: 503 });
-        })
-      )
-  );
+  // ── 2. Images / icônes — Cache-first ──────────────────────────────────────
+  if (/\.(png|svg|ico|jpg|jpeg|webp|gif|avif)$/.test(path)) {
+    event.respondWith(cacheFirst(request, CACHE_IMAGES));
+    return;
+  }
+
+  // ── 3. Navigation HTML — Stale-while-revalidate ───────────────────────────
+  if (request.mode === 'navigate') {
+    event.respondWith(staleWhileRevalidate(request));
+    return;
+  }
+
+  // ── 4. Tout le reste (fetch XHR locaux) — Network-first ──────────────────
+  event.respondWith(networkFirst(request));
 });
+
+// ── Stratégie : Cache-first ───────────────────────────────────────────────────
+async function cacheFirst(request, cacheName) {
+  const cached = await caches.match(request, { cacheName });
+  if (cached) return cached;
+
+  try {
+    const response = await fetch(request);
+    putInCache(cacheName, request, response.clone());
+    return response;
+  } catch {
+    return new Response('Ressource non disponible hors ligne.', {
+      status: 503,
+      headers: { 'Content-Type': 'text/plain; charset=utf-8' },
+    });
+  }
+}
+
+// ── Stratégie : Stale-while-revalidate (navigation) ──────────────────────────
+async function staleWhileRevalidate(request) {
+  const cached = await caches.match(request);
+
+  // Lance la mise à jour en arrière-plan
+  const networkPromise = fetch(request)
+    .then((response) => {
+      putInCache(CACHE_PAGES, request, response.clone());
+      return response;
+    })
+    .catch(() => null);
+
+  // Retourne immédiatement le cache si dispo
+  if (cached) return cached;
+
+  // Sinon attend le réseau
+  const response = await networkPromise;
+  if (response) return response;
+
+  // Fallback offline.html
+  const offline = await caches.match('/offline.html');
+  if (offline) return offline;
+
+  return new Response(
+    '<!DOCTYPE html><html lang="fr"><body><h1>Hors ligne</h1><p>Reconnectez-vous à Internet.</p></body></html>',
+    { status: 503, headers: { 'Content-Type': 'text/html; charset=utf-8' } }
+  );
+}
+
+// ── Stratégie : Network-first ─────────────────────────────────────────────────
+async function networkFirst(request) {
+  try {
+    const response = await fetch(request);
+    return response;
+  } catch {
+    const cached = await caches.match(request);
+    if (cached) return cached;
+    return new Response('Hors ligne', { status: 503 });
+  }
+}
 
 // ── Push — réception notification ─────────────────────────────────────────────
 self.addEventListener('push', (event) => {
@@ -107,7 +189,7 @@ self.addEventListener('push', (event) => {
       data:     { url },
       vibrate:  [200, 100, 200],
       actions: [
-        { action: 'open',    title: 'Voir' },
+        { action: 'open',    title: 'Voir'    },
         { action: 'dismiss', title: 'Ignorer' },
       ],
     })
@@ -126,14 +208,12 @@ self.addEventListener('notificationclick', (event) => {
     self.clients
       .matchAll({ type: 'window', includeUncontrolled: true })
       .then((windowClients) => {
-        // Focus/navigate an existing window if possible
         for (const client of windowClients) {
           if ('focus' in client) {
             client.navigate?.(targetUrl);
             return client.focus();
           }
         }
-        // Open new window
         if (self.clients.openWindow) {
           return self.clients.openWindow(targetUrl);
         }

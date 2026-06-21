@@ -148,6 +148,19 @@ function RootShell({ children }: { children: ReactNode }) {
     <html lang="fr">
       <head>
         <HeadContent />
+        {/* J10 — Performance: preconnect aux origines critiques */}
+        <link rel="preconnect" href="https://xfhkngecpbvmlstjymfy.supabase.co" />
+        <link rel="preconnect" href="https://eu.i.posthog.com" crossOrigin="anonymous" />
+        <link rel="dns-prefetch" href="https://api.open-meteo.com" />
+        <link rel="dns-prefetch" href="https://overpass-api.de" />
+        {/* J10 — theme-color dark/light pour iOS Safari */}
+        <meta name="theme-color" media="(prefers-color-scheme: light)" content="#1e3a8a" />
+        <meta name="theme-color" media="(prefers-color-scheme: dark)"  content="#1e3a8a" />
+        {/* J10 — iOS PWA meta */}
+        <meta name="apple-mobile-web-app-capable"        content="yes" />
+        <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+        <meta name="apple-mobile-web-app-title"          content="VigieCity" />
+        <link rel="apple-touch-icon" href="/icons/icon-192.png" />
       </head>
       <body>
         {children}

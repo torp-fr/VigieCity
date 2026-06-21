@@ -1,132 +1,216 @@
-// VigieCity Service Worker — v2
-// Gère : offline cache + Web Push notifications
+// VigieCity Service Worker — v4
+// Gère : multi-stratégie cache + offline shell + Web Push notifications
+// rebuild: 2026-06-21
 
-const CACHE_NAME = 'vigiecity-v2';
+// ── Cache names ────────────────────────────────────────────────────────────────
+const V             = 'v4';
+const CACHE_STATIC  = `vigiecity-${V}-static`;   // JS/CSS/fonts — cache-first
+const CACHE_PAGES   = `vigiecity-${V}-pages`;    // HTML navigation — stale-while-revalidate
+const CACHE_IMAGES  = `vigiecity-${V}-images`;   // Images/icons   — cache-first
+const ALL_CACHES    = [CACHE_STATIC, CACHE_PAGES, CACHE_IMAGES];
 
-// Assets statiques à précacher
-const PRECACHE_URLS = [
+// ── Precache : shell critique garantie offline ─────────────────────────────────
+const PRECACHE_PAGES = [
   '/',
+  '/accueil',
   '/urgences',
+  '/signaler',
+  '/services',
+  '/actualites',
+  '/offline.html',
   '/manifest.webmanifest',
 ];
 
-// ── Installation ────────────────────────────────────────────────────────────
+// ── Helpers ───────────────────────────────────────────────────────────────────
+
+/** Ouvre un cache et met l'item dedans (sans throw) */
+async function putInCache(cacheName, request, response) {
+  if (!response || !response.ok) return;
+  try {
+    const cache = await caches.open(cacheName);
+    await cache.put(request, response);
+  } catch { /* quota exceeded — ignore */ }
+}
+
+// ── Installation ──────────────────────────────────────────────────────────────
 self.addEventListener('install', (event) => {
   event.waitUntil(
-    caches.open(CACHE_NAME).then((cache) =>
-      cache.addAll(PRECACHE_URLS).catch(() => {
-        // Ignore les erreurs de précache (routes SSR peuvent échouer offline)
-      })
-    )
+    caches.open(CACHE_PAGES).then(async (cache) => {
+      await Promise.allSettled(
+        PRECACHE_PAGES.map((url) =>
+          cache.add(url).catch(() => { /* SPA shell peut 404 en dev */ })
+        )
+      );
+    })
   );
   self.skipWaiting();
 });
 
-// ── Activation — nettoyage des anciens caches ────────────────────────────────
+// ── Activation — nettoyage des anciens caches ─────────────────────────────────
 self.addEventListener('activate', (event) => {
   event.waitUntil(
     caches.keys().then((keys) =>
       Promise.all(
         keys
-          .filter((key) => key !== CACHE_NAME)
-          .map((key) => caches.delete(key))
+          .filter((k) => !ALL_CACHES.includes(k))
+          .map((k) => caches.delete(k))
       )
     )
   );
   self.clients.claim();
 });
 
-// ── Fetch — stratégie Network-first avec fallback cache ──────────────────────
+// ── Fetch ──────────────────────────────────────────────────────────────────────
 self.addEventListener('fetch', (event) => {
   const { request } = event;
   const url = new URL(request.url);
 
-  // Ne pas intercepter :
-  // - Requêtes non-GET
-  // - API Supabase / externe
-  // - Flux audio (radio)
+  // ── Bypass : non-GET, cross-origin externes, APIs tierces ─────────────────
   if (
     request.method !== 'GET' ||
-    url.origin !== self.location.origin ||
-    url.pathname.startsWith('/api/') ||
-    url.pathname.startsWith('/_server') ||
-    request.headers.get('Accept')?.includes('audio/')
+    url.protocol === 'chrome-extension:' ||
+    url.hostname.includes('supabase.co')  ||
+    url.hostname.includes('posthog.com')  ||
+    url.hostname.includes('open-meteo.com') ||
+    url.hostname.includes('nominatim.openstreetmap.org') ||
+    url.hostname.includes('overpass-api.de') ||
+    (
+      url.hostname !== self.location.hostname &&
+      url.hostname !== 'localhost' &&
+      url.hostname !== '127.0.0.1'
+    )
   ) {
     return;
   }
 
-  // Assets statiques (.js, .css, .svg, .png, .woff2) → Cache-first
-  const isStaticAsset = /\.(js|css|svg|png|jpg|webp|woff2|ico|webmanifest)(\?.*)?$/.test(url.pathname);
+  const path = url.pathname;
 
-  if (isStaticAsset) {
-    event.respondWith(
-      caches.match(request).then(
-        (cached) =>
-          cached ||
-          fetch(request).then((response) => {
-            if (response.ok) {
-              const clone = response.clone();
-              caches.open(CACHE_NAME).then((cache) => cache.put(request, clone));
-            }
-            return response;
-          })
-      )
-    );
+  // ── 1. Static assets — Cache-first (JS/CSS/fonts/manifest) ───────────────
+  if (/\.(js|css|woff2?|ttf|otf|webmanifest)$/.test(path)) {
+    event.respondWith(cacheFirst(request, CACHE_STATIC));
     return;
   }
 
-  // Pages HTML → Network-first, fallback vers cache
-  event.respondWith(
-    fetch(request)
-      .then((response) => {
-        if (response.ok) {
-          const clone = response.clone();
-          caches.open(CACHE_NAME).then((cache) => cache.put(request, clone));
-        }
-        return response;
-      })
-      .catch(() => caches.match(request).then((cached) => cached || caches.match('/')))
-  );
-});
-
-// ── Web Push ─────────────────────────────────────────────────────────────────
-self.addEventListener('push', (event) => {
-  if (!event.data) return;
-
-  let payload;
-  try {
-    payload = event.data.json();
-  } catch {
-    payload = { title: 'VigieCity', body: event.data.text() };
+  // ── 2. Images / icônes — Cache-first ──────────────────────────────────────
+  if (/\.(png|svg|ico|jpg|jpeg|webp|gif|avif)$/.test(path)) {
+    event.respondWith(cacheFirst(request, CACHE_IMAGES));
+    return;
   }
 
-  const { title = 'VigieCity', body = '', url = '/', icon, badge } = payload;
+  // ── 3. Navigation HTML — Stale-while-revalidate ───────────────────────────
+  if (request.mode === 'navigate') {
+    event.respondWith(staleWhileRevalidate(request));
+    return;
+  }
+
+  // ── 4. Tout le reste — Network-first ─────────────────────────────────────
+  event.respondWith(networkFirst(request));
+});
+
+// ── Stratégie : Cache-first ───────────────────────────────────────────────────
+async function cacheFirst(request, cacheName) {
+  const cached = await caches.match(request, { cacheName });
+  if (cached) return cached;
+
+  try {
+    const response = await fetch(request);
+    putInCache(cacheName, request, response.clone());
+    return response;
+  } catch {
+    return new Response('Ressource non disponible hors ligne.', {
+      status: 503,
+      headers: { 'Content-Type': 'text/plain; charset=utf-8' },
+    });
+  }
+}
+
+// ── Stratégie : Stale-while-revalidate (navigation) ──────────────────────────
+async function staleWhileRevalidate(request) {
+  const cached = await caches.match(request);
+
+  const networkPromise = fetch(request)
+    .then((response) => {
+      putInCache(CACHE_PAGES, request, response.clone());
+      return response;
+    })
+    .catch(() => null);
+
+  if (cached) return cached;
+
+  const response = await networkPromise;
+  if (response) return response;
+
+  const offline = await caches.match('/offline.html');
+  if (offline) return offline;
+
+  return new Response(
+    '<!DOCTYPE html><html lang="fr"><body><h1>Hors ligne</h1><p>Reconnectez-vous à Internet.</p></body></html>',
+    { status: 503, headers: { 'Content-Type': 'text/html; charset=utf-8' } }
+  );
+}
+
+// ── Stratégie : Network-first ─────────────────────────────────────────────────
+async function networkFirst(request) {
+  try {
+    return await fetch(request);
+  } catch {
+    const cached = await caches.match(request);
+    if (cached) return cached;
+    return new Response('Hors ligne', { status: 503 });
+  }
+}
+
+// ── Push — réception notification ─────────────────────────────────────────────
+self.addEventListener('push', (event) => {
+  let payload = {};
+  try {
+    payload = event.data?.json() ?? {};
+  } catch {
+    payload = { title: 'VigieCity', message: event.data?.text() ?? '' };
+  }
+
+  const title   = payload.title   ?? 'VigieCity';
+  const body    = payload.message ?? payload.body ?? '';
+  const url     = payload.url     ?? '/accueil';
 
   event.waitUntil(
     self.registration.showNotification(title, {
       body,
-      icon: icon || '/icons/icon.svg',
-      badge: badge || '/icons/icon.svg',
-      data: { url },
-      vibrate: [100, 50, 100],
+      icon:     '/icons/icon-192.png',
+      badge:    '/icons/icon-192.png',
+      tag:      'vigiecity-push',
+      renotify: true,
+      data:     { url },
+      vibrate:  [200, 100, 200],
+      actions: [
+        { action: 'open',    title: 'Voir'    },
+        { action: 'dismiss', title: 'Ignorer' },
+      ],
     })
   );
 });
 
+// ── Notification click — ouvrir l'URL cible ───────────────────────────────────
 self.addEventListener('notificationclick', (event) => {
   event.notification.close();
-  const targetUrl = event.notification.data?.url || '/';
+
+  if (event.action === 'dismiss') return;
+
+  const targetUrl = event.notification.data?.url ?? '/accueil';
+
   event.waitUntil(
-    clients
+    self.clients
       .matchAll({ type: 'window', includeUncontrolled: true })
       .then((windowClients) => {
         for (const client of windowClients) {
-          if (client.url.includes(self.location.origin) && 'focus' in client) {
-            client.navigate(targetUrl);
+          if ('focus' in client) {
+            client.navigate?.(targetUrl);
             return client.focus();
           }
         }
-        if (clients.openWindow) return clients.openWindow(targetUrl);
+        if (self.clients.openWindow) {
+          return self.clients.openWindow(targetUrl);
+        }
       })
   );
 });
