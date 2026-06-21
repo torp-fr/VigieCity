@@ -9,7 +9,7 @@ echo OK
 
 echo [2/3] Git add + commit...
 git add -A
-git commit -m "feat: J4 messagerie Realtime — trigger unread counters, fix useEffect import, badges BottomNav + AdminShell Realtime"
+git commit -m "feat: J6 pages légales RGPD — mentions-legales, confidentialite, cgu, CookieBanner PostHog, SHELL_FREE_ROUTES, footer links"
 git push
 
 echo.

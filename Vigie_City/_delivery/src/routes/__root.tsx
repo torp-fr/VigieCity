@@ -34,19 +34,21 @@ if (POSTHOG_KEY) {
 
 import { AppHeader } from "../components/AppHeader";
 import { BottomNav } from "../components/BottomNav";
+import { CookieBanner } from "../components/CookieBanner";
 import { Toaster } from "../components/ui/sonner";
 import { supabase } from "@/integrations/supabase/client";
 
 // Routes that don't require onboarding check
 const SKIP_ONBOARDING_ROUTES = [
   "/auth", "/onboarding", "/profil", "/mentions-legales",
-  "/confidentialite", "/admin/login",
+  "/confidentialite", "/cgu", "/admin/login",
 ];
 const ADMIN_ROLES = ["commune_admin", "interco_admin", "super_admin"] as const;
 
 // Routes rendered without the app shell (header / bottom nav)
 const SHELL_FREE_ROUTES = [
   "/", "/landing", "/admin/login", "/admin/reset-password", "/admin/accept-invite",
+  "/mentions-legales", "/confidentialite", "/cgu",
 ];
 
 // ── 404 ───────────────────────────────────────────────────────────────────────
@@ -264,6 +266,7 @@ function RootComponent() {
         </div>
       )}
       <Toaster />
+      <CookieBanner />
     </QueryClientProvider>
   );
 }

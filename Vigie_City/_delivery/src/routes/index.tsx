@@ -1321,18 +1321,24 @@ function LandingPage() {
               >
                 Connexion habitants
               </Link>
-              <a
-                href="#"
+              <Link
+                to="/mentions-legales"
                 className="text-sm text-slate-400 transition hover:text-white"
               >
                 Mentions légales
-              </a>
-              <a
-                href="#"
+              </Link>
+              <Link
+                to="/confidentialite"
                 className="text-sm text-slate-400 transition hover:text-white"
               >
                 Confidentialité
-              </a>
+              </Link>
+              <Link
+                to="/cgu"
+                className="text-sm text-slate-400 transition hover:text-white"
+              >
+                CGU
+              </Link>
             </div>
           </div>
           <div className="mt-6 border-t border-slate-800 pt-6 text-center text-xs text-slate-600">
