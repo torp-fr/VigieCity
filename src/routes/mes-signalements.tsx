@@ -1,5 +1,5 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { useState } from "react";
+import { useState, type ComponentType } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { useAppAuth } from "@/hooks/useAppAuth";
 import {
@@ -11,6 +11,12 @@ import {
   ShieldOff,
   Loader2,
   FileText,
+  CheckCircle2,
+  AlertCircle,
+  XCircle,
+  Archive,
+  ArrowRightLeft,
+  Send,
 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { categoryIcon, categoryLabel } from "@/lib/categories";
@@ -50,20 +56,29 @@ type HistoryEntry = {
 
 // ── Status config ─────────────────────────────────────────────────────────────
 
-const STATUS_CONFIG: Record<string, { label: string; cls: string }> = {
-  pending:     { label: "En attente",  cls: "bg-muted text-muted-foreground border-border" },
-  published:   { label: "Publié",      cls: "bg-success/15 text-success border-success/30" },
-  rejected:    { label: "Rejeté",      cls: "bg-sos/15 text-sos border-sos/30" },
-  archived:    { label: "Archivé",     cls: "bg-muted text-muted-foreground border-border" },
-  transferred: { label: "Transféré",   cls: "bg-primary/15 text-primary border-primary/30" },
+type StatusKey = "pending" | "published" | "rejected" | "archived" | "transferred" | "creation";
+
+const STATUS_CONFIG: Record<StatusKey, {
+  label: string;
+  badge: string;
+  dot: string;
+  Icon: ComponentType<{ className?: string }>;
+}> = {
+  pending:     { label: "En attente",  badge: "bg-amber-50  text-amber-700  border-amber-200",   dot: "bg-amber-400",   Icon: Clock         },
+  published:   { label: "Publié",      badge: "bg-emerald-50 text-emerald-700 border-emerald-200", dot: "bg-emerald-500", Icon: CheckCircle2  },
+  rejected:    { label: "Rejeté",      badge: "bg-red-50    text-red-700    border-red-200",      dot: "bg-red-500",     Icon: XCircle       },
+  archived:    { label: "Archivé",     badge: "bg-slate-100 text-slate-500  border-slate-200",    dot: "bg-slate-400",   Icon: Archive       },
+  transferred: { label: "Transféré",   badge: "bg-blue-50   text-blue-700   border-blue-200",     dot: "bg-blue-500",    Icon: ArrowRightLeft},
+  creation:    { label: "Soumis",      badge: "bg-slate-100 text-slate-500  border-slate-200",    dot: "bg-slate-500",   Icon: Send          },
 };
 
 function StatusBadge({ status }: { status: string }) {
-  const cfg = STATUS_CONFIG[status] ?? STATUS_CONFIG.pending;
+  const cfg = STATUS_CONFIG[status as StatusKey] ?? STATUS_CONFIG.pending;
   return (
     <span
-      className={`rounded-full border px-2.5 py-0.5 text-[11px] font-semibold uppercase tracking-wide ${cfg.cls}`}
+      className={`inline-flex items-center gap-1 rounded-full border px-2.5 py-0.5 text-[11px] font-semibold uppercase tracking-wide ${cfg.badge}`}
     >
+      <cfg.Icon className="h-3 w-3" />
       {cfg.label}
     </span>
   );
@@ -120,7 +135,7 @@ function MesSignalementsPage() {
         .from("report_status_history")
         .select("id, new_status, comment, changed_at")
         .eq("report_id", id)
-        .order("changed_at", { ascending: false });
+        .order("changed_at", { ascending: true });
       setHistory((prev) => ({ ...prev, [id]: (data ?? []) as HistoryEntry[] }));
       setLoadingHist((prev) => {
         const s = new Set(prev);
@@ -242,38 +257,18 @@ function MesSignalementsPage() {
                   )}
                 </button>
 
-                {/* History panel */}
+                {/* History panel — visual timeline */}
                 {isOpen && (
-                  <div className="border-t border-border bg-muted/30 px-4 py-3">
+                  <div className="border-t border-border bg-muted/20 px-4 py-4">
                     {histLoading ? (
                       <div className="flex items-center justify-center py-4">
                         <Loader2 className="h-4 w-4 animate-spin text-muted-foreground" />
                       </div>
-                    ) : !hist?.length ? (
-                      <p className="py-2 text-center text-xs text-muted-foreground">
-                        Aucun changement de statut enregistré.
-                      </p>
                     ) : (
-                      <ul className="space-y-3">
-                        {hist.map((h) => (
-                          <li key={h.id} className="flex items-start gap-3">
-                            <div className="mt-1.5 h-2 w-2 shrink-0 rounded-full bg-primary/50" />
-                            <div>
-                              <div className="flex flex-wrap items-center gap-2">
-                                <StatusBadge status={h.new_status} />
-                                <span className="text-[11px] text-muted-foreground">
-                                  {timeAgo(h.changed_at)}
-                                </span>
-                              </div>
-                              {h.comment && (
-                                <p className="mt-1 text-xs italic text-foreground/80">
-                                  "{h.comment}"
-                                </p>
-                              )}
-                            </div>
-                          </li>
-                        ))}
-                      </ul>
+                      <StatusTimeline
+                        entries={hist ?? []}
+                        createdAt={r.created_at}
+                      />
                     )}
                   </div>
                 )}
@@ -282,6 +277,75 @@ function MesSignalementsPage() {
           })}
         </ul>
       )}
+    </div>
+  );
+}
+
+// ── StatusTimeline ─────────────────────────────────────────────────────────────
+
+function StatusTimeline({
+  entries,
+  createdAt,
+}: {
+  entries: HistoryEntry[];
+  createdAt: string;
+}) {
+  // Build chronological list: creation first, then history entries
+  type TimelineItem =
+    | { kind: "creation"; at: string }
+    | { kind: "change"; entry: HistoryEntry };
+
+  const items: TimelineItem[] = [
+    { kind: "creation", at: createdAt },
+    ...entries.map((e) => ({ kind: "change" as const, entry: e })),
+  ];
+
+  return (
+    <div className="relative">
+      {items.map((item, idx) => {
+        const isLast = idx === items.length - 1;
+        const status: StatusKey =
+          item.kind === "creation" ? "creation" : (item.kind === "change" ? item.entry.new_status as StatusKey : "pending");
+        const cfg = STATUS_CONFIG[status] ?? STATUS_CONFIG.pending;
+        const at = item.kind === "creation" ? item.at : item.entry.changed_at;
+        const comment = item.kind === "change" ? item.entry.comment : null;
+
+        return (
+          <div key={idx} className="relative flex gap-4">
+            {/* Line + dot column */}
+            <div className="flex flex-col items-center">
+              {/* Dot */}
+              <div
+                className={`relative z-10 mt-0.5 flex h-7 w-7 shrink-0 items-center justify-center rounded-full border-2 border-background shadow-sm ${cfg.dot}`}
+              >
+                <cfg.Icon className="h-3.5 w-3.5 text-white" />
+              </div>
+              {/* Connecting line (not on last item) */}
+              {!isLast && (
+                <div className="mt-1 w-0.5 flex-1 bg-border" style={{ minHeight: "1.5rem" }} />
+              )}
+            </div>
+
+            {/* Content */}
+            <div className={`pb-4 ${isLast ? "pb-0" : ""}`}>
+              <div className="flex flex-wrap items-center gap-2">
+                <StatusBadge status={status} />
+                <span className="text-[11px] text-muted-foreground">{timeAgo(at)}</span>
+              </div>
+              {comment && (
+                <p className="mt-1 text-xs italic text-foreground/70">« {comment} »</p>
+              )}
+              {item.kind === "creation" && (
+                <p className="mt-0.5 text-[11px] text-muted-foreground">
+                  {new Date(at).toLocaleDateString("fr-FR", {
+                    weekday: "short", day: "numeric", month: "long", year: "numeric",
+                  })}
+                </p>
+              )}
+            </div>
+          </div>
+        );
+      })}
     </div>
   );
 }

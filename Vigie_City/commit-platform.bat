@@ -9,7 +9,7 @@ echo OK
 
 echo [2/3] Git add + commit...
 git add -A
-git commit -m "feat: J8.1+J8.5 — météo vigilance EF+widget, agenda citoyen inscriptions+iCal+push J-1, admin max_capacity"
+git commit -m "feat: J8.6 — timeline visuelle mes-signalements (dots colorés par statut + ligne connectante + entrée Soumission)"
 git push
 
 echo.
