@@ -78,7 +78,23 @@ export function BottomNav() {
     refetchInterval: 60_000,
   });
 
+  // Nombre de messages citoyens non lus (badge messagerie)
+  const { data: msgUnread } = useQuery({
+    queryKey: ["messagerie-unread", userId],
+    enabled: !!userId && pathname !== "/messagerie",
+    queryFn: async () => {
+      const { data } = await supabase
+        .from("conversations")
+        .select("unread_citizen")
+        .eq("citizen_id", userId!)
+        .gt("unread_citizen", 0);
+      return (data ?? []).reduce((s, c) => s + (c.unread_citizen ?? 0), 0);
+    },
+    refetchInterval: 30_000,
+  });
+
   const hasNew = (newCount ?? 0) > 0 && pathname !== "/fil";
+  const hasMsgUnread = (msgUnread ?? 0) > 0 && pathname !== "/messagerie";
 
   return (
     <>
@@ -118,6 +134,7 @@ export function BottomNav() {
         <div className="grid grid-cols-3 gap-3 px-5 py-3">
           {DRAWER_ITEMS.map(({ to, label, icon: Icon, color }) => {
             const active = pathname === to;
+            const isMsgItem = to === "/messagerie";
             return (
               <Link
                 key={to}
@@ -128,7 +145,14 @@ export function BottomNav() {
                     : "bg-muted/60 text-foreground hover:bg-muted"
                 }`}
               >
-                <Icon className={`h-6 w-6 ${active ? "text-primary" : color}`} />
+                <div className="relative">
+                  <Icon className={`h-6 w-6 ${active ? "text-primary" : color}`} />
+                  {isMsgItem && hasMsgUnread && (
+                    <span className="absolute -right-2 -top-2 flex h-4 w-4 items-center justify-center rounded-full bg-primary text-[9px] font-bold text-white">
+                      {(msgUnread ?? 0) > 9 ? "9+" : msgUnread}
+                    </span>
+                  )}
+                </div>
                 {label}
               </Link>
             );
@@ -170,9 +194,12 @@ export function BottomNav() {
               ) : (
                 <Menu className="h-5 w-5" />
               )}
-              {hasNew && !drawerOpen && (
+              {(hasNew || hasMsgUnread) && !drawerOpen && (
                 <span className="absolute -right-1.5 -top-1.5 flex h-4 w-4 items-center justify-center rounded-full bg-red-600 text-[9px] font-bold text-white">
-                  {(newCount ?? 0) > 9 ? "9+" : newCount}
+                  {hasMsgUnread
+                    ? ((msgUnread ?? 0) > 9 ? "9+" : msgUnread)
+                    : ((newCount ?? 0) > 9 ? "9+" : newCount)
+                  }
                 </span>
               )}
             </div>

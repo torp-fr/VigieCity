@@ -56,13 +56,15 @@ export interface AdminShellProps {
 
 export function AdminShell({ activePath, children }: AdminShellProps) {
   const navigate = useNavigate();
-  const [authReady,     setAuthReady]     = useState(false);
-  const [authError,     setAuthError]     = useState(false);
-  const [communeName,   setCommuneName]   = useState<string | null>(null);
-  const [hasEpci,       setHasEpci]       = useState(false);
-  const [logoUrl,       setLogoUrl]       = useState<string | null>(null);
-  const [primaryColor,  setPrimaryColor]  = useState(DEFAULT_PRIMARY);
-  const [secondaryColor,setSecondaryColor]= useState(DEFAULT_SECONDARY);
+  const [authReady,      setAuthReady]      = useState(false);
+  const [authError,      setAuthError]      = useState(false);
+  const [communeName,    setCommuneName]    = useState<string | null>(null);
+  const [hasEpci,        setHasEpci]        = useState(false);
+  const [logoUrl,        setLogoUrl]        = useState<string | null>(null);
+  const [primaryColor,   setPrimaryColor]   = useState(DEFAULT_PRIMARY);
+  const [secondaryColor, setSecondaryColor] = useState(DEFAULT_SECONDARY);
+  const [collectivityId, setCollectivityId] = useState<string | null>(null);
+  const [msgUnread,      setMsgUnread]      = useState(0);
 
   useEffect(() => {
     const timeout = setTimeout(() => setAuthError(true), 10_000);
@@ -110,8 +112,22 @@ export function AdminShell({ activePath, children }: AdminShellProps) {
         setLogoUrl(coll?.logo_url   ?? null);
         setPrimaryColor(pc);
         setSecondaryColor(sc);
+        setCollectivityId(profile?.collectivity_id ?? null);
         clearTimeout(timeout);
         setAuthReady(true);
+
+        // Charge le badge messagerie initial
+        if (profile?.collectivity_id) {
+          supabase
+            .from("conversations")
+            .select("unread_admin")
+            .eq("collectivity_id", profile.collectivity_id)
+            .eq("status", "open")
+            .gt("unread_admin", 0)
+            .then(({ data }) => {
+              setMsgUnread((data ?? []).reduce((s, c) => s + (c.unread_admin ?? 0), 0));
+            });
+        }
       } catch {
         clearTimeout(timeout);
         setAuthError(true);
@@ -120,6 +136,28 @@ export function AdminShell({ activePath, children }: AdminShellProps) {
 
     return () => clearTimeout(timeout);
   }, [navigate]);
+
+  // Realtime: met à jour le badge messagerie en temps réel
+  useEffect(() => {
+    if (!collectivityId) return;
+    const ch = supabase
+      .channel(`admin-shell-convs-${collectivityId}`)
+      .on(
+        "postgres_changes",
+        { event: "*", schema: "public", table: "conversations", filter: `collectivity_id=eq.${collectivityId}` },
+        async () => {
+          const { data } = await supabase
+            .from("conversations")
+            .select("unread_admin")
+            .eq("collectivity_id", collectivityId)
+            .eq("status", "open")
+            .gt("unread_admin", 0);
+          setMsgUnread((data ?? []).reduce((s, c) => s + (c.unread_admin ?? 0), 0));
+        },
+      )
+      .subscribe();
+    return () => { supabase.removeChannel(ch); };
+  }, [collectivityId]);
 
   async function handleSignOut() {
     await supabase.auth.signOut();
@@ -196,6 +234,11 @@ export function AdminShell({ activePath, children }: AdminShellProps) {
               >
                 <Icon className="h-4 w-4 shrink-0" />
                 <span className="flex-1 text-left">{label}</span>
+                {path === "/admin/messagerie" && msgUnread > 0 && !isActive && (
+                  <span className="flex h-5 min-w-[20px] items-center justify-center rounded-full bg-white/30 px-1 text-[10px] font-bold text-white">
+                    {msgUnread > 9 ? "9+" : msgUnread}
+                  </span>
+                )}
                 {isActive && <ChevronRight className="h-3.5 w-3.5 opacity-60" />}
               </button>
             );
