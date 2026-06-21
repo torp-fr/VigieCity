@@ -254,7 +254,7 @@ function KnowledgePlatform() {
 
       {/* Liste */}
       {isLoading ? (
-        <ul className="space-y-2">
+        <ul className="grid grid-cols-1 gap-3 md:grid-cols-2">
           {Array.from({ length: 4 }).map((_, i) => (
             <li key={i} className="h-20 animate-pulse rounded-2xl bg-muted" />
           ))}
@@ -276,7 +276,7 @@ function KnowledgePlatform() {
           )}
         </div>
       ) : (
-        <ul className="space-y-2">
+        <ul className="grid grid-cols-1 gap-3 md:grid-cols-2">
           {filtered.map((a) => {
             const meta = catMeta(a.category);
             return (

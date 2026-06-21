@@ -9,7 +9,7 @@ echo OK
 
 echo [2/3] Git add + commit...
 git add -A
-git commit -m "feat: session 9 — PlatformShell sur 4 pages orphelines, settings avec données réelles, fix onboarding nav"
+git commit -m "feat: session 10 — collectivites pagination serveur + CRM modal, layout 2-3 cols plans/knowledge"
 git push
 
 echo.

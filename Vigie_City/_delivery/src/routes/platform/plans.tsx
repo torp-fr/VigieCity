@@ -159,17 +159,18 @@ function PlansPage() {
           <Loader2 className="h-6 w-6 animate-spin text-blue-600" />
         </div>
       ) : (
-        <div className="space-y-4">
+        <div className="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-3">
           {plans.map((plan) =>
             editingId === plan.id && editDraft ? (
-              <PlanEditCard
-                key={plan.id}
-                draft={editDraft}
-                onChange={setEditDraft}
-                onSave={() => updateMut.mutate(editDraft)}
-                onCancel={cancelEdit}
-                isPending={updateMut.isPending}
-              />
+              <div key={plan.id} className="col-span-full">
+                <PlanEditCard
+                  draft={editDraft}
+                  onChange={setEditDraft}
+                  onSave={() => updateMut.mutate(editDraft)}
+                  onCancel={cancelEdit}
+                  isPending={updateMut.isPending}
+                />
+              </div>
             ) : (
               <PlanViewCard
                 key={plan.id}
