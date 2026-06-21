@@ -1,6 +1,7 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useEffect, useState } from "react";
+import { NotificationBanner } from "@/components/NotificationBanner";
 import {
   PhoneCall,
   AlertCircle,
@@ -150,6 +151,9 @@ function Home() {
 
   return (
     <div className="space-y-6 px-4 pt-5">
+      {/* Bandeau demande notifications push */}
+      <NotificationBanner userId={userId ?? null} />
+
       {/* Hero avec météo intégrée */}
       <section className="relative overflow-hidden rounded-3xl bg-gradient-civic p-5 text-primary-foreground shadow-card">
         <div className="flex items-start justify-between">

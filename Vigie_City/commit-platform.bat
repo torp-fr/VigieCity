@@ -9,7 +9,7 @@ echo OK
 
 echo [2/3] Git add + commit...
 git add -A
-git commit -m "feat: J2 invitation admin commune — commune_invites table, EF invite-commune, send-email invite_admin template, accept-invite route, CRM modal tabs"
+git commit -m "feat: J3 push notifications E2E — sw.js v3 offline+push, send-push-notification EF, NotificationBanner accueil, SW registration root, accept-invite shell-free"
 git push
 
 echo.

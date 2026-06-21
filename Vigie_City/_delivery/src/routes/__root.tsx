@@ -22,26 +22,34 @@ import { reportLovableError } from "../lib/lovable-error-reporting";
 const POSTHOG_KEY = (import.meta.env.VITE_POSTHOG_KEY as string) ?? "";
 if (POSTHOG_KEY) {
   posthog.init(POSTHOG_KEY, {
-    api_host:             "https://eu.i.posthog.com",
-    ui_host:              "https://eu.posthog.com",
-    person_profiles:      "identified_only",
-    capture_pageview:     true,   // track toutes les navigations
-    capture_pageleave:    true,   // track temps passé
-    autocapture:          false,  // on capture manuellement (plus propre)
-    session_recording:    { maskAllInputs: true },
+    api_host:          "https://eu.i.posthog.com",
+    ui_host:           "https://eu.posthog.com",
+    person_profiles:   "identified_only",
+    capture_pageview:  true,
+    capture_pageleave: true,
+    autocapture:       false,
+    session_recording: { maskAllInputs: true },
   });
 }
+
 import { AppHeader } from "../components/AppHeader";
 import { BottomNav } from "../components/BottomNav";
 import { Toaster } from "../components/ui/sonner";
 import { supabase } from "@/integrations/supabase/client";
 
 // Routes that don't require onboarding check
-const SKIP_ONBOARDING_ROUTES = ["/auth", "/onboarding", "/profil", "/mentions-legales", "/confidentialite", "/admin/login"];
+const SKIP_ONBOARDING_ROUTES = [
+  "/auth", "/onboarding", "/profil", "/mentions-legales",
+  "/confidentialite", "/admin/login",
+];
 const ADMIN_ROLES = ["commune_admin", "interco_admin", "super_admin"] as const;
 
-// Routes rendered without the app shell (header / bottom nav / padding)
-const SHELL_FREE_ROUTES = ["/", "/landing", "/admin/login", "/admin/reset-password"];
+// Routes rendered without the app shell (header / bottom nav)
+const SHELL_FREE_ROUTES = [
+  "/", "/landing", "/admin/login", "/admin/reset-password", "/admin/accept-invite",
+];
+
+// ── 404 ───────────────────────────────────────────────────────────────────────
 
 function NotFoundComponent() {
   return (
@@ -65,6 +73,8 @@ function NotFoundComponent() {
   );
 }
 
+// ── Error boundary ────────────────────────────────────────────────────────────
+
 function ErrorComponent({ error, reset }: { error: Error; reset: () => void }) {
   console.error(error);
   const router = useRouter();
@@ -81,10 +91,7 @@ function ErrorComponent({ error, reset }: { error: Error; reset: () => void }) {
         </p>
         <div className="mt-6 flex flex-wrap justify-center gap-2">
           <button
-            onClick={() => {
-              router.invalidate();
-              reset();
-            }}
+            onClick={() => { router.invalidate(); reset(); }}
             className="inline-flex items-center justify-center rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground hover:bg-primary/90"
           >
             Réessayer
@@ -101,6 +108,8 @@ function ErrorComponent({ error, reset }: { error: Error; reset: () => void }) {
   );
 }
 
+// ── Route definition ──────────────────────────────────────────────────────────
+
 export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()({
   head: () => ({
     meta: [
@@ -110,27 +119,27 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       { title: "VigieCity — Sécurité de proximité" },
       {
         name: "description",
-        content:
-          "VigieCity : numéros d'urgence, alerte SOS, signalement et fil de quartier pour habitants et voisins vigilants.",
+        content: "VigieCity : numéros d'urgence, alerte SOS, signalement et fil de quartier pour habitants et voisins vigilants.",
       },
-      { property: "og:title", content: "VigieCity — Sécurité de proximité" },
-      {
-        property: "og:description",
-        content: "L'app citoyenne de sécurité de proximité, en lien avec votre commune.",
-      },
-      { property: "og:type", content: "website" },
-      { name: "twitter:card", content: "summary" },
+      { property: "og:title",       content: "VigieCity — Sécurité de proximité" },
+      { property: "og:description", content: "L'app citoyenne de sécurité de proximité, en lien avec votre commune." },
+      { property: "og:type",        content: "website" },
+      { name: "twitter:card",       content: "summary" },
     ],
     links: [
-      { rel: "stylesheet", href: appCss },
-      { rel: "icon", type: "image/svg+xml", href: "/icons/icon.svg" },
+      { rel: "stylesheet",       href: appCss },
+      { rel: "icon",             type: "image/svg+xml",  href: "/icons/icon.svg" },
+      { rel: "manifest",         href: "/manifest.webmanifest" },
+      { rel: "apple-touch-icon", href: "/icons/icon-192.png" },
     ],
   }),
-  shellComponent: RootShell,
-  component: RootComponent,
+  shellComponent:    RootShell,
+  component:         RootComponent,
   notFoundComponent: NotFoundComponent,
-  errorComponent: ErrorComponent,
+  errorComponent:    ErrorComponent,
 });
+
+// ── HTML shell ────────────────────────────────────────────────────────────────
 
 function RootShell({ children }: { children: ReactNode }) {
   return (
@@ -146,39 +155,59 @@ function RootShell({ children }: { children: ReactNode }) {
   );
 }
 
+// ── Root component ────────────────────────────────────────────────────────────
+
 function RootComponent() {
   const { queryClient } = Route.useRouteContext();
-  const router = useRouter();
+  const router   = useRouter();
   const navigate = useNavigate();
   const pathname = useRouterState({ select: (s) => s.location.pathname });
 
-  const isShellFree  = SHELL_FREE_ROUTES.includes(pathname);
-  // Admin & platform : pas de shell citoyen, pas de check onboarding
+  const isShellFree  = SHELL_FREE_ROUTES.some((r) => pathname === r || pathname.startsWith(r + "/"));
   const isAdminRoute = pathname.startsWith("/admin") || pathname.startsWith("/platform");
 
+  // ── Register Service Worker (J3.1) ────────────────────────────────────────
+  useEffect(() => {
+    if ("serviceWorker" in navigator) {
+      navigator.serviceWorker
+        .register("/sw.js", { scope: "/" })
+        .then((reg) => {
+          console.log("[SW] Registered, scope:", reg.scope);
+          reg.update();
+        })
+        .catch((err) => console.warn("[SW] Registration failed:", err));
+    }
+  }, []);
+
+  // ── Auth state → PostHog identify + onboarding redirect ──────────────────
   useEffect(() => {
     const { data } = supabase.auth.onAuthStateChange(async (event, session) => {
-      if (event !== "SIGNED_IN" && event !== "SIGNED_OUT" && event !== "USER_UPDATED") return;
+      if (
+        event !== "SIGNED_IN" &&
+        event !== "SIGNED_OUT" &&
+        event !== "USER_UPDATED"
+      ) return;
+
       router.invalidate();
       if (event !== "SIGNED_OUT") queryClient.invalidateQueries();
 
-      // PostHog — reset à la déconnexion
       if (event === "SIGNED_OUT") {
         posthog.reset();
+        return;
       }
 
-      // After sign-in: PostHog identify + onboarding check (1 seul fetch profil)
       if (event === "SIGNED_IN" && session?.user) {
         if (SKIP_ONBOARDING_ROUTES.includes(pathname)) return;
-        // Délai court : laisse la DB propager le profil auto-créé par le trigger
+
         await new Promise((r) => setTimeout(r, 500));
+
         const { data: profile } = await supabase
           .from("profiles")
           .select("collectivity_id, role")
           .eq("id", session.user.id)
           .single();
 
-        // PostHog — identifier avec rôle + commune pour filtrage par commune dans analytics
+        // PostHog identify avec commune pour filtrage analytics
         if (profile?.collectivity_id) {
           const { data: coll } = await supabase
             .from("collectivities")
@@ -189,9 +218,9 @@ function RootComponent() {
             email:           session.user.email,
             role:            profile.role ?? "citizen",
             collectivity_id: profile.collectivity_id,
-            commune:         coll?.name,
-            department:      coll?.department_code,
-            region:          coll?.region,
+            commune:         coll?.name ?? null,
+            department:      coll?.department_code ?? null,
+            region:          coll?.region ?? null,
           });
         } else {
           posthog.identify(session.user.id, {
@@ -200,66 +229,41 @@ function RootComponent() {
           });
         }
 
-        // Onboarding check — les admins gèrent leur propre navigation
-        if (ADMIN_ROLES.includes(profile?.role as typeof ADMIN_ROLES[number])) return;
+        // Admin roles → redirect to /admin/dashboard
+        const role = profile?.role as string;
+        if (ADMIN_ROLES.includes(role as typeof ADMIN_ROLES[number])) {
+          if (!pathname.startsWith("/admin") && !pathname.startsWith("/platform")) {
+            navigate({ to: "/admin/dashboard" });
+          }
+          return;
+        }
+
+        // Citoyen sans commune → onboarding
         if (!profile?.collectivity_id) {
           navigate({ to: "/onboarding" });
-        } else if (pathname === "/") {
-          navigate({ to: "/accueil" });
         }
       }
     });
+
     return () => data.subscription.unsubscribe();
-  }, [router, queryClient, navigate, pathname]);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
-  // On mount, check if logged-in user needs onboarding
-  useEffect(() => {
-    if (SKIP_ONBOARDING_ROUTES.includes(pathname)) return;
-    if (isShellFree) return;  // pages marketing
-    if (isAdminRoute) return; // pages admin gèrent leur propre auth
-    supabase.auth.getSession().then(async ({ data: { session } }) => {
-      if (!session?.user) return;
-      // Retry once after 600ms to avoid a write-after-signup race (DB propagation delay)
-      const checkOnboarding = async (isRetry = false): Promise<void> => {
-        const { data: profile } = await supabase
-          .from("profiles")
-          .select("collectivity_id, role")
-          .eq("id", session.user.id)
-          .single();
-        // Double garde : les admins ne passent jamais par l'onboarding citoyen
-        if (ADMIN_ROLES.includes(profile?.role as typeof ADMIN_ROLES[number])) return;
-        if (!profile?.collectivity_id) {
-          if (!isRetry) {
-            await new Promise((r) => setTimeout(r, 600));
-            return checkOnboarding(true);
-          }
-          navigate({ to: "/onboarding" });
-        }
-      };
-      await checkOnboarding();
-    });
-  }, []); // eslint-disable-line react-hooks/exhaustive-deps
-
-  // ── Pages sans shell citoyen : marketing + admin/platform ─────────────────
-  if (isShellFree || isAdminRoute) {
-    return (
-      <QueryClientProvider client={queryClient}>
-        <Outlet />
-        <Toaster richColors position="top-center" />
-      </QueryClientProvider>
-    );
-  }
-
+  // ── Render ────────────────────────────────────────────────────────────────
   return (
     <QueryClientProvider client={queryClient}>
-      <div className="mx-auto flex min-h-screen max-w-2xl flex-col bg-background">
-        <AppHeader />
-        <main className="flex-1 pb-4">
-          <Outlet />
-        </main>
-        <BottomNav />
-      </div>
-      <Toaster richColors position="top-center" />
+      {isShellFree || isAdminRoute ? (
+        <Outlet />
+      ) : (
+        <div className="flex min-h-[100dvh] flex-col bg-background pb-[calc(4rem+env(safe-area-inset-bottom))]">
+          <AppHeader />
+          <main className="flex-1">
+            <Outlet />
+          </main>
+          <BottomNav />
+        </div>
+      )}
+      <Toaster />
     </QueryClientProvider>
   );
 }
