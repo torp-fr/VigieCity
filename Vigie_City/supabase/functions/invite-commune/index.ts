@@ -62,10 +62,10 @@ Deno.serve(async (req) => {
       );
     }
 
-    // Récupérer les infos de la commune
+    // Récupérer les infos de la commune (incluant logo + couleur pour white-label)
     const { data: coll } = await supabase
       .from("collectivities")
-      .select("name, department_code")
+      .select("name, department_code, logo_url, primary_color")
       .eq("id", collectivity_id)
       .single();
 
@@ -103,16 +103,18 @@ Deno.serve(async (req) => {
       day: "numeric", month: "long", year: "numeric", hour: "2-digit", minute: "2-digit",
     });
 
-    // Envoyer l'email via send-email EF
+    // Envoyer l'email via send-email EF (white-label)
     await supabase.functions.invoke("send-email", {
       body: {
         template: "invite_admin",
         to:       email,
         data: {
-          commune:     coll.name,
-          department:  coll.department_code ?? "",
-          invite_url:  inviteUrl,
-          expires:     expiresDate,
+          commune:       coll.name,
+          department:    coll.department_code ?? "",
+          invite_url:    inviteUrl,
+          expires:       expiresDate,
+          logo_url:      coll.logo_url ?? "",
+          primary_color: coll.primary_color ?? "#1e3a8a",
         },
       },
     });

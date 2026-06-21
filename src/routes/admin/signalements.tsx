@@ -149,6 +149,26 @@ function SignalementsAdmin() {
       } catch {
         // Silencieux : l'utilisateur n'est peut-être pas abonné aux push
       }
+
+      // 4. Email notification (best-effort — uniquement si signalement non anonyme)
+      if (!report.is_anonymous && report.user_id) {
+        try {
+          await supabase.functions.invoke("send-email", {
+            body: {
+              template: "report_updated",
+              user_id: report.user_id,   // EF résout l'email via auth.users
+              data: {
+                titre:          report.description.slice(0, 80),
+                statut:         newStatus,
+                commentaire:    comment.trim(),
+                collectivity_id: collectivityId ?? "",  // EF enrichit commune/logo/couleur
+              },
+            },
+          });
+        } catch {
+          // Silencieux : email non critique
+        }
+      }
     },
     onSuccess: (_, { newStatus }) => {
       qc.invalidateQueries({ queryKey: ["reports"] });
