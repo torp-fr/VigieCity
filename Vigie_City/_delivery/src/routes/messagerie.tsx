@@ -1,9 +1,10 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { useEffect, useRef, useState } from "react";
+import { useRef, useState } from "react";
 import { ArrowLeft, MessageSquare, Send, CheckCheck, Plus, X, ChevronRight } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { NotificationBanner } from "@/components/NotificationBanner";
+import { useAppAuth } from "@/hooks/useAppAuth";
 
 export const Route = createFileRoute("/messagerie")({
   component: MessageriePage,
@@ -66,9 +67,9 @@ function groupByDate(messages: Message[]): { date: string; items: Message[] }[] 
 // ── Page ──────────────────────────────────────────────────────────────────────
 function MessageriePage() {
   const qc = useQueryClient();
-  const [userId, setUserId]                 = useState<string | null>(null);
-  const [collectivityId, setCollectivityId] = useState<string | null>(null);
-  const [ready, setReady]                   = useState(false);
+  // Auth + profil mis en cache — plus de getUser() + profiles query individuels
+  const { userId, collectivityId, isLoading: authLoading } = useAppAuth();
+  const ready = !authLoading;
 
   const [activeConvId, setActiveConvId]     = useState<string | null>(null);
   const [newDialog, setNewDialog]           = useState(false);
@@ -77,22 +78,6 @@ function MessageriePage() {
   const [newServiceId, setNewServiceId]     = useState<string>("");
   const [reply, setReply]                   = useState("");
   const bottomRef                           = useRef<HTMLDivElement>(null);
-
-  useEffect(() => {
-    supabase.auth.getUser().then(async ({ data }) => {
-      const uid = data.user?.id ?? null;
-      setUserId(uid);
-      if (uid) {
-        const { data: profile } = await supabase
-          .from("profiles")
-          .select("collectivity_id")
-          .eq("id", uid)
-          .single();
-        setCollectivityId(profile?.collectivity_id ?? null);
-      }
-      setReady(true);
-    });
-  }, []);
 
   // ── Services disponibles (pour le picker) ────────────────────────────────
   const { data: services } = useQuery({

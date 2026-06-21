@@ -6,6 +6,7 @@ import { Camera, MapPin, Send, Loader2, ShieldOff, CheckCircle2, XCircle, Clock 
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { REPORT_CATEGORIES, SEVERITY_OPTIONS, type ReportCategoryValue } from "@/lib/categories";
+import { useAppAuth } from "@/hooks/useAppAuth";
 
 export const Route = createFileRoute("/signaler")({
   head: () => ({
@@ -47,8 +48,9 @@ async function hashFile(file: File): Promise<string> {
 function ReportPage() {
   const navigate = useNavigate();
   const qc = useQueryClient();
-  const [authed, setAuthed] = useState<boolean | null>(null);
-  const [userId, setUserId] = useState<string | null>(null);
+  // Auth mis en cache — plus de getUser() individuel
+  const { userId, isAuthenticated, isLoading: authLoading } = useAppAuth();
+  const authed = authLoading ? null : isAuthenticated;
 
   const [category, setCategory] = useState<ReportCategoryValue>("vehicule_suspect");
   const [severity, setSeverity] = useState<"info" | "vigilance" | "urgent">("vigilance");
@@ -58,14 +60,6 @@ function ReportPage() {
   const [coords, setCoords] = useState<{ lat: number; lng: number } | null>(null);
   const [gpsStatus, setGpsStatus] = useState<GpsStatus>("idle");
   const [files, setFiles] = useState<File[]>([]);
-
-  // Auth check
-  useEffect(() => {
-    supabase.auth.getUser().then(({ data }) => {
-      setAuthed(!!data.user);
-      setUserId(data.user?.id ?? null);
-    });
-  }, []);
 
   // Auto-trigger GPS at mount (RGPD : demande navigateur, silencieux si refusé)
   useEffect(() => {

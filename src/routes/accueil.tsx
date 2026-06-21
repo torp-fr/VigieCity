@@ -16,6 +16,7 @@ import {
 import { supabase } from "@/integrations/supabase/client";
 import { SosButton } from "@/components/SosButton";
 import { useRadio } from "@/hooks/useRadio";
+import { useAppAuth } from "@/hooks/useAppAuth";
 
 export const Route = createFileRoute("/accueil")({
   head: () => ({
@@ -62,7 +63,8 @@ type WeatherData = {
 // ─── Page principale ──────────────────────────────────────────────────────────
 function Home() {
   const queryClient = useQueryClient();
-  const [userId, setUserId] = useState<string | null>(null);
+  // Auth mis en cache — plus de getUser() individuel
+  const { userId, collectivityId } = useAppAuth();
   const { station } = useRadio();
 
   // Géolocalisation + météo
@@ -70,7 +72,6 @@ function Home() {
   const [geoError, setGeoError] = useState(false);
 
   useEffect(() => {
-    supabase.auth.getUser().then(({ data }) => setUserId(data.user?.id ?? null));
     if ("geolocation" in navigator) {
       navigator.geolocation.getCurrentPosition(
         (pos) => setGeo({ lat: pos.coords.latitude, lng: pos.coords.longitude }),
@@ -102,18 +103,8 @@ function Home() {
     },
   });
 
-  const { data: profile } = useQuery({
-    queryKey: ["profile", userId],
-    enabled: !!userId,
-    queryFn: async () => {
-      const { data } = await supabase
-        .from("profiles")
-        .select("collectivity_id")
-        .eq("id", userId!)
-        .single();
-      return data;
-    },
-  });
+  // collectivityId vient directement de useAppAuth (déjà en cache)
+  const profile = { collectivity_id: collectivityId };
 
   const { data: alerts } = useQuery({
     queryKey: ["alerts", "active", profile?.collectivity_id],

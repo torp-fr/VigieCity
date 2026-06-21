@@ -1,6 +1,7 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
+import { useAppAuth } from "@/hooks/useAppAuth";
 import {
   Plus,
   ChevronDown,
@@ -80,18 +81,12 @@ function timeAgo(iso: string) {
 // ── Page ──────────────────────────────────────────────────────────────────────
 
 function MesSignalementsPage() {
-  const [userId, setUserId] = useState<string | null>(null);
-  const [authed, setAuthed] = useState<boolean | null>(null);
+  // Auth mis en cache — plus de getUser() individuel
+  const { userId, isAuthenticated, isLoading: authLoading } = useAppAuth();
+  const authed = authLoading ? null : isAuthenticated;
   const [expanded, setExpanded] = useState<Set<string>>(new Set());
   const [history, setHistory] = useState<Record<string, HistoryEntry[]>>({});
   const [loadingHist, setLoadingHist] = useState<Set<string>>(new Set());
-
-  useEffect(() => {
-    supabase.auth.getUser().then(({ data }) => {
-      setAuthed(!!data.user);
-      setUserId(data.user?.id ?? null);
-    });
-  }, []);
 
   const { data: reports, isLoading } = useQuery({
     queryKey: ["reports", "mine", userId],

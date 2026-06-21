@@ -1,11 +1,12 @@
 import { useNavigate } from "@tanstack/react-router";
-import { useState, useEffect, type ReactNode } from "react";
+import { type ReactNode } from "react";
 import {
   LayoutDashboard, Building2, Users, Rss,
   BookOpen, Settings, LogOut, Shield, Loader2,
   CreditCard, Euro,
 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
+import { usePlatformAuth } from "@/hooks/usePlatformAuth";
 
 // ── Nav items ─────────────────────────────────────────────────────────────────
 
@@ -23,7 +24,6 @@ const NAV_ITEMS = [
 // ── Props ─────────────────────────────────────────────────────────────────────
 
 interface PlatformShellProps {
-  /** Exact path string to highlight the active nav item */
   activePath: string;
   children: ReactNode;
 }
@@ -32,27 +32,9 @@ interface PlatformShellProps {
 
 export function PlatformShell({ activePath, children }: PlatformShellProps) {
   const navigate = useNavigate();
-  const [authReady, setAuthReady]   = useState(false);
-  const [userEmail, setUserEmail]   = useState<string | null>(null);
 
-  // Auth guard — super_admin only
-  useEffect(() => {
-    (async () => {
-      const { data: { session } } = await supabase.auth.getSession();
-      if (!session) { navigate({ to: "/admin/login" }); return; }
-
-      const { data: profile } = await supabase
-        .from("profiles")
-        .select("role")
-        .eq("id", session.user.id)
-        .single();
-
-      if (profile?.role !== "super_admin") { navigate({ to: "/admin/login" }); return; }
-
-      setUserEmail(session.user.email ?? null);
-      setAuthReady(true);
-    })();
-  }, [navigate]);
+  // Auth check mis en cache par React Query — aucun re-fetch entre onglets
+  const auth = usePlatformAuth();
 
   async function handleSignOut() {
     await supabase.auth.signOut();
@@ -60,13 +42,16 @@ export function PlatformShell({ activePath, children }: PlatformShellProps) {
   }
 
   // ── Loading gate ─────────────────────────────────────────────────────────
-  if (!authReady) {
+  if (auth.status === "loading") {
     return (
       <div className="flex min-h-screen items-center justify-center bg-slate-50">
         <Loader2 className="h-7 w-7 animate-spin text-blue-600" />
       </div>
     );
   }
+
+  // isError → navigate() est appelé dans le hook, on render null en attendant
+  if (auth.status !== "ready") return null;
 
   // ── Shell ─────────────────────────────────────────────────────────────────
   return (
@@ -111,7 +96,7 @@ export function PlatformShell({ activePath, children }: PlatformShellProps) {
 
         {/* Footer — email + sign out */}
         <div className="border-t border-white/10 pt-3">
-          <p className="truncate px-3 text-[11px] text-blue-300">{userEmail}</p>
+          <p className="truncate px-3 text-[11px] text-blue-300">{auth.email}</p>
           <button
             onClick={handleSignOut}
             className="mt-2 flex w-full items-center gap-2 rounded-xl px-3 py-2 text-sm text-blue-200 transition hover:bg-white/10 hover:text-white"
