@@ -9,6 +9,7 @@ import {
 import { toast } from "sonner";
 import { formatDistanceToNow } from "date-fns";
 import { fr } from "date-fns/locale";
+import { PlatformShell } from "@/components/PlatformShell";
 
 export const Route = createFileRoute("/platform/knowledge")({
   component: KnowledgePlatform,
@@ -200,7 +201,8 @@ function KnowledgePlatform() {
 
   // ─── UI ──────────────────────────────────────────────────────────────────
   return (
-    <div className="space-y-5 px-4 py-6">
+    <PlatformShell activePath="/platform/knowledge">
+    <div className="space-y-5">
       {/* En-tête */}
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-3">
@@ -540,5 +542,6 @@ function KnowledgePlatform() {
         </div>
       )}
     </div>
+    </PlatformShell>
   );
 }

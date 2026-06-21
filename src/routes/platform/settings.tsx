@@ -1,14 +1,62 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { Info, Shield, Database, Bell } from "lucide-react";
+import { useQuery } from "@tanstack/react-query";
+import { supabase } from "@/integrations/supabase/client";
+import {
+  Info, Shield, Database, Bell, Rss, RefreshCw, Users, Building2,
+} from "lucide-react";
 import { PlatformShell } from "@/components/PlatformShell";
+import { formatDistanceToNow } from "date-fns";
+import { fr } from "date-fns/locale";
 
 export const Route = createFileRoute("/platform/settings")({
   component: PlatformSettingsPage,
 });
 
+// ── Data ──────────────────────────────────────────────────────────────────────
+
+async function fetchPlatformStats() {
+  const [articlesRes, sourcesRes, collRes, profilesRes, latestRes] = await Promise.all([
+    supabase.from("news_articles").select("id", { count: "exact", head: true }),
+    supabase.from("rss_sources").select("id, active"),
+    supabase.from("collectivities").select("id", { count: "exact", head: true }),
+    supabase.from("profiles").select("id", { count: "exact", head: true }),
+    supabase
+      .from("news_articles")
+      .select("created_at")
+      .order("created_at", { ascending: false })
+      .limit(1)
+      .maybeSingle(),
+  ]);
+
+  const sources = sourcesRes.data ?? [];
+  return {
+    articleCount:   articlesRes.count ?? 0,
+    activeSources:  sources.filter((s: any) => s.active).length,
+    totalSources:   sources.length,
+    communeCount:   collRes.count ?? 0,
+    userCount:      profilesRes.count ?? 0,
+    lastArticleAt:  latestRes.data?.created_at ?? null,
+  };
+}
+
 // ── Page ──────────────────────────────────────────────────────────────────────
 
 function PlatformSettingsPage() {
+  const { data: stats, isLoading } = useQuery({
+    queryKey: ["platform-settings-stats"],
+    queryFn:  fetchPlatformStats,
+    staleTime: 2 * 60_000,
+  });
+
+  const val = (v: string | number | null | undefined, loading = isLoading) =>
+    loading ? "…" : String(v ?? "—");
+
+  const lastIngested = isLoading
+    ? "…"
+    : stats?.lastArticleAt
+    ? formatDistanceToNow(new Date(stats.lastArticleAt), { addSuffix: true, locale: fr })
+    : "—";
+
   return (
     <PlatformShell activePath="/platform/settings">
 
@@ -21,6 +69,30 @@ function PlatformSettingsPage() {
       </div>
 
       <div className="max-w-2xl space-y-6">
+
+        {/* KPIs rapides */}
+        <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
+          <MetricCard
+            label="Communes"
+            value={val(stats?.communeCount)}
+            icon={<Building2 className="h-4 w-4 text-blue-600" />}
+          />
+          <MetricCard
+            label="Utilisateurs"
+            value={val(stats?.userCount)}
+            icon={<Users className="h-4 w-4 text-violet-600" />}
+          />
+          <MetricCard
+            label="Articles RSS"
+            value={val(stats?.articleCount)}
+            icon={<Rss className="h-4 w-4 text-orange-500" />}
+          />
+          <MetricCard
+            label="Sources actives"
+            value={isLoading ? "…" : `${stats?.activeSources ?? "—"}/${stats?.totalSources ?? "—"}`}
+            icon={<RefreshCw className="h-4 w-4 text-emerald-600" />}
+          />
+        </div>
 
         {/* App info */}
         <Card icon={<Info className="h-5 w-5 text-blue-600" />} title="Informations plateforme">
@@ -45,9 +117,13 @@ function PlatformSettingsPage() {
           ] as [string, boolean][]).map(([label, active]) => (
             <div key={label} className="flex items-center justify-between py-2">
               <span className="text-sm text-slate-700">{label}</span>
-              <span className={`rounded-full px-2.5 py-0.5 text-xs font-semibold ${
-                active ? "bg-emerald-100 text-emerald-700" : "bg-slate-100 text-slate-500"
-              }`}>
+              <span
+                className={`rounded-full px-2.5 py-0.5 text-xs font-semibold ${
+                  active
+                    ? "bg-emerald-100 text-emerald-700"
+                    : "bg-slate-100 text-slate-500"
+                }`}
+              >
                 {active ? "Actif" : "Bientôt"}
               </span>
             </div>
@@ -56,28 +132,19 @@ function PlatformSettingsPage() {
 
         {/* Sync RSS */}
         <Card icon={<Database className="h-5 w-5 text-violet-600" />} title="Synchronisation RSS">
-          <p className="mb-4 text-sm text-slate-500">
-            La synchronisation automatique des flux RSS nécessite un cron configuré
-            via <strong>pg_cron</strong> (Supabase) ou une action planifiée Vercel.
-          </p>
-          <Row label="Fréquence cible"   value="Toutes les heures"      />
-          <Row label="Edge Function"     value="fetch-rss (déployée)"   />
-          <Row label="Status pg_cron"    value="⚠️ À configurer"        />
-          <a
-            href="https://supabase.com/docs/guides/database/extensions/pg_cron"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="mt-4 inline-flex items-center gap-1.5 rounded-xl border border-slate-200 bg-slate-50 px-4 py-2 text-sm font-medium text-slate-700 transition hover:bg-slate-100"
-          >
-            Documentation pg_cron ↗
-          </a>
+          <Row label="Fréquence"          value="Toutes les heures (pg_cron)"           />
+          <Row label="Edge Function"      value="fetch-rss v3 — verify_jwt: false"      />
+          <Row label="Cron status"        value="✅ Actif"                               />
+          <Row label="Sources actives"    value={isLoading ? "…" : `${stats?.activeSources ?? "—"} sources`} />
+          <Row label="Articles indexés"   value={isLoading ? "…" : `${stats?.articleCount ?? "—"} articles`} />
+          <Row label="Dernier article"    value={lastIngested}                           />
         </Card>
 
-        {/* Notifications */}
+        {/* Notifications push */}
         <Card icon={<Bell className="h-5 w-5 text-amber-500" />} title="Notifications push">
           <p className="mb-4 text-sm text-slate-500">
-            Les notifications push sont en cours d'intégration.
-            Elles nécessiteront un service VAPID (Web Push) ou Firebase FCM.
+            Les notifications push sont en cours d'intégration. Elles nécessiteront
+            un service VAPID (Web Push) ou Firebase FCM.
           </p>
           <Row label="Status" value="🔧 En développement" />
         </Card>
@@ -89,8 +156,30 @@ function PlatformSettingsPage() {
 
 // ── Sub-components ────────────────────────────────────────────────────────────
 
+function MetricCard({
+  label,
+  value,
+  icon,
+}: {
+  label: string;
+  value: string;
+  icon: React.ReactNode;
+}) {
+  return (
+    <div className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm">
+      <div className="mb-1 flex items-center gap-1.5 text-xs text-slate-500">
+        {icon}
+        {label}
+      </div>
+      <div className="text-2xl font-extrabold text-slate-900">{value}</div>
+    </div>
+  );
+}
+
 function Card({
-  icon, title, children,
+  icon,
+  title,
+  children,
 }: {
   icon: React.ReactNode;
   title: string;

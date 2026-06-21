@@ -7,6 +7,7 @@ import {
 } from "lucide-react";
 import { toast } from "sonner";
 import { addDays } from "date-fns";
+import { PlatformShell } from "@/components/PlatformShell";
 
 export const Route = createFileRoute("/platform/onboarding")({
   component: PlatformOnboardingPage,
@@ -134,6 +135,7 @@ function PlatformOnboardingPage() {
   };
 
   return (
+    <PlatformShell activePath="/platform/onboarding">
     <div className="max-w-2xl space-y-6">
       <div>
         <h1 className="text-2xl font-bold">Onboarding commune</h1>
@@ -431,7 +433,7 @@ function PlatformOnboardingPage() {
                 Nouvelle commune
               </button>
               <button
-                onClick={() => navigate({ to: "/platform/communes" })}
+                onClick={() => navigate({ to: "/platform/collectivites" })}
                 className="rounded-lg bg-blue-600 px-5 py-2.5 text-sm font-medium text-white hover:bg-blue-700"
               >
                 Voir les communes
@@ -441,5 +443,6 @@ function PlatformOnboardingPage() {
         )}
       </div>
     </div>
+    </PlatformShell>
   );
 }

@@ -3,6 +3,7 @@ import {
   Shield, Megaphone, Wrench, MapPin, Bell, BarChart3,
   Code2, Palette, CheckCircle2, XCircle, Minus,
 } from "lucide-react";
+import { PlatformShell } from "@/components/PlatformShell";
 
 export const Route = createFileRoute("/platform/modules")({
   component: ModulesPlatform,
@@ -152,7 +153,8 @@ function PlanBadge({ status }: { status: boolean | "partial" }) {
 // ─── Composant ────────────────────────────────────────────────────────────────
 function ModulesPlatform() {
   return (
-    <div className="space-y-8 px-4 py-6">
+    <PlatformShell activePath="/platform/modules">
+    <div className="space-y-8">
       {/* En-tête */}
       <div>
         <h1 className="text-2xl font-bold">Modules & Plans</h1>
@@ -307,5 +309,6 @@ function ModulesPlatform() {
         </div>
       </section>
     </div>
+    </PlatformShell>
   );
 }

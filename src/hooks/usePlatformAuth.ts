@@ -2,60 +2,53 @@
  * usePlatformAuth — auth guard partagé pour toutes les pages /platform/*
  *
  * Utilise React Query pour mettre en cache la session + le rôle 5 minutes.
- * Résultat : l'auth check se fait UNE seule fois au premier chargement,
- * puis tous les onglets /platform/* naviguent instantanément.
+ *
+ * getUser() est utilisé à la place de getSession() :
+ *   - getSession() lit le localStorage → indisponible en SSR (TanStack Start)
+ *   - getUser() fait un appel réseau → SSR-safe, toujours à jour
+ *
+ * La redirection vers /admin/login est gérée dans PlatformShell (composant),
+ * pas ici, pour éviter les problèmes d'ordre des hooks TanStack Router.
  */
 import { useQuery } from "@tanstack/react-query";
-import { useNavigate } from "@tanstack/react-router";
-import { useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 
-type PlatformAuthResult =
+export type PlatformAuthResult =
   | { status: "loading" }
   | { status: "unauthorized" }
   | { status: "ready"; email: string };
 
 async function fetchPlatformAuth(): Promise<{ email: string }> {
   const {
-    data: { session },
-  } = await supabase.auth.getSession();
+    data: { user },
+    error: userError,
+  } = await supabase.auth.getUser();
 
-  if (!session) throw new Error("no_session");
+  if (userError || !user) throw new Error("no_session");
 
   const { data: profile, error } = await supabase
     .from("profiles")
     .select("role")
-    .eq("id", session.user.id)
+    .eq("id", user.id)
     .single();
 
   if (error || profile?.role !== "super_admin") throw new Error("unauthorized");
 
-  return { email: session.user.email ?? "" };
+  return { email: user.email ?? "" };
 }
 
 export function usePlatformAuth(): PlatformAuthResult {
-  const navigate = useNavigate();
-
-  const { data, isLoading, isError } = useQuery({
+  const { data, isPending, isError } = useQuery({
     queryKey: ["platform-auth"],
     queryFn: fetchPlatformAuth,
-    // Cache 5 minutes — pas de re-fetch entre onglets
     staleTime: 5 * 60_000,
-    gcTime: 10 * 60_000,
-    // Ne pas re-essayer automatiquement si non autorisé
-    retry: (failureCount, error: Error) => {
-      if (error.message === "no_session" || error.message === "unauthorized") return false;
-      return failureCount < 2;
-    },
+    gcTime:    10 * 60_000,
+    // Fail vite — pas de retry : la page citoyenne ne doit jamais faire tourner en boucle
+    retry: false,
   });
 
-  useEffect(() => {
-    if (isError) {
-      navigate({ to: "/admin/login" });
-    }
-  }, [isError, navigate]);
-
-  if (isLoading) return { status: "loading" };
+  // isPending = vrai aussi pendant l'hydratation SSR→CSR
+  if (isPending) return { status: "loading" };
   if (isError || !data) return { status: "unauthorized" };
   return { status: "ready", email: data.email };
 }

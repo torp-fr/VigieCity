@@ -3,6 +3,7 @@ import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { Users, TrendingDown, Activity, AlertTriangle, Search } from "lucide-react";
 import { useState, useMemo } from "react";
+import { PlatformShell } from "@/components/PlatformShell";
 
 export const Route = createFileRoute("/platform/retention")({
   component: RetentionPlatform,
@@ -184,7 +185,8 @@ function RetentionPlatform() {
 
   // ─── UI ──────────────────────────────────────────────────────────────────
   return (
-    <div className="space-y-5 px-4 py-6">
+    <PlatformShell activePath="/platform/retention">
+    <div className="space-y-5">
       {/* En-tête */}
       <div>
         <div className="flex items-center gap-3">
@@ -368,5 +370,6 @@ function RetentionPlatform() {
         </>
       )}
     </div>
+    </PlatformShell>
   );
 }
