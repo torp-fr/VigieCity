@@ -5,7 +5,7 @@ import {
   Search, ToggleLeft, ToggleRight, Loader2,
   ChevronLeft, ChevronRight, Building2, Users,
   TrendingUp, Zap, Mail, Phone, Globe, Edit2,
-  X, Save, MapPin,
+  X, Save, MapPin, UserPlus, Send, Clock, CheckCircle2,
 } from "lucide-react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
@@ -48,6 +48,14 @@ type EditForm = {
 
 type StatusKey = "all" | "active" | "dormant" | "suspended";
 
+type CommuneInvite = {
+  id:         string;
+  email:      string;
+  expires_at: string;
+  accepted_at: string | null;
+  created_at:  string;
+};
+
 // ── Helpers ───────────────────────────────────────────────────────────────────
 
 const STATUS_META: Record<string, { label: string; cls: string }> = {
@@ -71,6 +79,8 @@ function PlatformCollectivitesPage() {
   const [editForm,    setEditForm]   = useState<EditForm>({
     status: "dormant", mayor_name: "", email: "", phone: "", website: "",
   });
+  const [inviteEmail, setInviteEmail] = useState("");
+  const [inviteTab,   setInviteTab]   = useState<"edit" | "invite">("edit");
 
   // Debounce search 350 ms
   useEffect(() => {
@@ -127,6 +137,23 @@ function PlatformCollectivitesPage() {
     staleTime: 5 * 60_000,
   });
 
+  // ── Fetch last invite for the commune being edited ─────────────────────────
+  const { data: lastInvite, refetch: refetchInvite } = useQuery({
+    queryKey: ["platform/commune_invites", editTarget?.id],
+    enabled:  !!editTarget,
+    queryFn:  async () => {
+      const { data } = await supabase
+        .from("commune_invites")
+        .select("id, email, expires_at, accepted_at, created_at")
+        .eq("collectivity_id", editTarget!.id)
+        .order("created_at", { ascending: false })
+        .limit(1)
+        .maybeSingle();
+      return (data ?? null) as CommuneInvite | null;
+    },
+    staleTime: 30_000,
+  });
+
   const totalPages = Math.ceil((data?.total ?? 0) / PAGE_SIZE);
 
   // ── Toggle is_active ────────────────────────────────────────────────────────
@@ -171,8 +198,32 @@ function PlatformCollectivitesPage() {
     onError: (e: Error) => toast.error(e.message),
   });
 
+  // ── Send invite ─────────────────────────────────────────────────────────────
+  const inviteMut = useMutation({
+    mutationFn: async () => {
+      if (!editTarget || !inviteEmail.trim()) return;
+      const { data, error } = await supabase.functions.invoke("invite-commune", {
+        body: {
+          collectivity_id: editTarget.id,
+          email:           inviteEmail.trim().toLowerCase(),
+        },
+      });
+      if (error) throw error;
+      if (data?.error) throw new Error(data.error);
+      return data;
+    },
+    onSuccess: () => {
+      toast.success("Invitation envoyée avec succès !");
+      setInviteEmail("");
+      refetchInvite();
+    },
+    onError: (e: Error) => toast.error(`Erreur : ${e.message}`),
+  });
+
   function openEdit(c: Collectivity) {
     setEditTarget(c);
+    setInviteTab("edit");
+    setInviteEmail(c.email ?? "");
     setEditForm({
       status:     c.status,
       mayor_name: c.mayor_name ?? "",
@@ -189,6 +240,29 @@ function PlatformCollectivitesPage() {
     { key: "dormant",   label: "Prospects",          count: stats?.dormant },
     { key: "suspended", label: "Suspendues"                                },
   ];
+
+  // ── Invite status helper ────────────────────────────────────────────────────
+  function InviteStatus({ invite }: { invite: CommuneInvite | null | undefined }) {
+    if (!invite) return (
+      <p className="mt-2 text-xs text-slate-400">Aucune invitation envoyée pour cette commune.</p>
+    );
+    const expired = new Date(invite.expires_at) < new Date() && !invite.accepted_at;
+    if (invite.accepted_at) return (
+      <div className="mt-2 flex items-center gap-1.5 text-xs text-emerald-600">
+        <CheckCircle2 className="h-3.5 w-3.5" />
+        Compte créé par <strong>{invite.email}</strong>
+      </div>
+    );
+    return (
+      <div className={`mt-2 flex items-center gap-1.5 text-xs ${expired ? "text-red-500" : "text-amber-600"}`}>
+        <Clock className="h-3.5 w-3.5" />
+        {expired ? "Invitation expirée — " : "En attente — "}
+        <strong>{invite.email}</strong>
+        {" · "}
+        {new Date(invite.created_at).toLocaleDateString("fr-FR")}
+      </div>
+    );
+  }
 
   // ─── Render ───────────────────────────────────────────────────────────────
   return (
@@ -456,11 +530,11 @@ function PlatformCollectivitesPage() {
           onClick={() => setEditTarget(null)}
         >
           <div
-            className="w-full max-w-md rounded-2xl bg-white p-6 shadow-xl"
+            className="w-full max-w-md rounded-2xl bg-white shadow-xl"
             onClick={e => e.stopPropagation()}
           >
             {/* Modal header */}
-            <div className="mb-5 flex items-start justify-between gap-3">
+            <div className="flex items-start justify-between gap-3 border-b border-slate-100 p-6 pb-4">
               <div>
                 <h2 className="font-bold text-slate-900">{editTarget.name}</h2>
                 <p className="mt-0.5 text-xs text-slate-400">
@@ -477,66 +551,154 @@ function PlatformCollectivitesPage() {
               </button>
             </div>
 
-            <div className="space-y-3">
-              {/* Statut lifecycle */}
-              <div>
-                <label className="mb-1 block text-[11px] font-semibold uppercase tracking-wide text-slate-400">
-                  Statut VigieCity
-                </label>
-                <select
-                  value={editForm.status}
-                  onChange={e => setEditForm(f => ({ ...f, status: e.target.value as Collectivity["status"] }))}
-                  className="w-full rounded-xl border border-slate-200 px-3 py-2.5 text-sm focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500"
-                >
-                  <option value="dormant">Dormante (prospect)</option>
-                  <option value="active">Active — client VigieCity ✅</option>
-                  <option value="suspended">Suspendue</option>
-                </select>
-              </div>
-
-              <CrmField
-                label="Maire / Référent"
-                value={editForm.mayor_name}
-                onChange={v => setEditForm(f => ({ ...f, mayor_name: v }))}
-                placeholder="Mme Marie Dupont"
-              />
-              <CrmField
-                label="Email mairie"
-                value={editForm.email}
-                onChange={v => setEditForm(f => ({ ...f, email: v }))}
-                placeholder="mairie@commune.fr"
-                type="email"
-              />
-              <CrmField
-                label="Téléphone"
-                value={editForm.phone}
-                onChange={v => setEditForm(f => ({ ...f, phone: v }))}
-                placeholder="01 23 45 67 89"
-              />
-              <CrmField
-                label="Site web"
-                value={editForm.website}
-                onChange={v => setEditForm(f => ({ ...f, website: v }))}
-                placeholder="https://www.commune.fr"
-              />
+            {/* Tab switcher */}
+            <div className="flex border-b border-slate-100">
+              <button
+                onClick={() => setInviteTab("edit")}
+                className={`flex-1 py-2.5 text-xs font-semibold transition ${
+                  inviteTab === "edit"
+                    ? "border-b-2 border-blue-600 text-blue-600"
+                    : "text-slate-500 hover:text-slate-700"
+                }`}
+              >
+                Fiche commune
+              </button>
+              <button
+                onClick={() => setInviteTab("invite")}
+                className={`flex flex-1 items-center justify-center gap-1.5 py-2.5 text-xs font-semibold transition ${
+                  inviteTab === "invite"
+                    ? "border-b-2 border-blue-600 text-blue-600"
+                    : "text-slate-500 hover:text-slate-700"
+                }`}
+              >
+                <UserPlus className="h-3.5 w-3.5" />
+                Accès admin
+              </button>
             </div>
 
-            {/* Modal actions */}
-            <div className="mt-5 flex gap-3">
-              <button
-                onClick={() => setEditTarget(null)}
-                className="flex-1 rounded-xl border border-slate-200 py-2.5 text-sm font-medium text-slate-600 hover:bg-slate-50"
-              >
-                Annuler
-              </button>
-              <button
-                onClick={() => saveMut.mutate()}
-                disabled={saveMut.isPending}
-                className="flex flex-1 items-center justify-center gap-2 rounded-xl bg-blue-600 py-2.5 text-sm font-semibold text-white hover:bg-blue-700 disabled:opacity-60"
-              >
-                <Save className="h-4 w-4" />
-                {saveMut.isPending ? "Enregistrement…" : "Enregistrer"}
-              </button>
+            <div className="p-6">
+              {/* ── TAB: Edit CRM ── */}
+              {inviteTab === "edit" && (
+                <div className="space-y-3">
+                  {/* Statut lifecycle */}
+                  <div>
+                    <label className="mb-1 block text-[11px] font-semibold uppercase tracking-wide text-slate-400">
+                      Statut VigieCity
+                    </label>
+                    <select
+                      value={editForm.status}
+                      onChange={e => setEditForm(f => ({ ...f, status: e.target.value as Collectivity["status"] }))}
+                      className="w-full rounded-xl border border-slate-200 px-3 py-2.5 text-sm focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    >
+                      <option value="dormant">Dormante (prospect)</option>
+                      <option value="active">Active — client VigieCity ✅</option>
+                      <option value="suspended">Suspendue</option>
+                    </select>
+                  </div>
+
+                  <CrmField
+                    label="Maire / Référent"
+                    value={editForm.mayor_name}
+                    onChange={v => setEditForm(f => ({ ...f, mayor_name: v }))}
+                    placeholder="Mme Marie Dupont"
+                  />
+                  <CrmField
+                    label="Email mairie"
+                    value={editForm.email}
+                    onChange={v => setEditForm(f => ({ ...f, email: v }))}
+                    placeholder="mairie@commune.fr"
+                    type="email"
+                  />
+                  <CrmField
+                    label="Téléphone"
+                    value={editForm.phone}
+                    onChange={v => setEditForm(f => ({ ...f, phone: v }))}
+                    placeholder="01 23 45 67 89"
+                  />
+                  <CrmField
+                    label="Site web"
+                    value={editForm.website}
+                    onChange={v => setEditForm(f => ({ ...f, website: v }))}
+                    placeholder="https://www.commune.fr"
+                  />
+
+                  {/* Modal actions */}
+                  <div className="flex gap-3 pt-2">
+                    <button
+                      onClick={() => setEditTarget(null)}
+                      className="flex-1 rounded-xl border border-slate-200 py-2.5 text-sm font-medium text-slate-600 hover:bg-slate-50"
+                    >
+                      Annuler
+                    </button>
+                    <button
+                      onClick={() => saveMut.mutate()}
+                      disabled={saveMut.isPending}
+                      className="flex flex-1 items-center justify-center gap-2 rounded-xl bg-blue-600 py-2.5 text-sm font-semibold text-white hover:bg-blue-700 disabled:opacity-60"
+                    >
+                      <Save className="h-4 w-4" />
+                      {saveMut.isPending ? "Enregistrement…" : "Enregistrer"}
+                    </button>
+                  </div>
+                </div>
+              )}
+
+              {/* ── TAB: Invite admin ── */}
+              {inviteTab === "invite" && (
+                <div>
+                  <p className="mb-4 text-sm text-slate-600">
+                    Envoyez une invitation à l'administrateur de la commune pour qu'il crée son compte VigieCity.
+                  </p>
+
+                  {/* Last invite status */}
+                  <div className="mb-4 rounded-xl bg-slate-50 p-3">
+                    <p className="text-[11px] font-semibold uppercase tracking-wide text-slate-400">
+                      Dernière invitation
+                    </p>
+                    <InviteStatus invite={lastInvite} />
+                  </div>
+
+                  {/* New invite form */}
+                  <div className="space-y-3">
+                    <div>
+                      <label className="mb-1 block text-[11px] font-semibold uppercase tracking-wide text-slate-400">
+                        Email du responsable
+                      </label>
+                      <input
+                        type="email"
+                        value={inviteEmail}
+                        onChange={e => setInviteEmail(e.target.value)}
+                        placeholder={editTarget.email ?? "admin@commune.fr"}
+                        className="w-full rounded-xl border border-slate-200 px-3 py-2.5 text-sm focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                        onKeyDown={e => {
+                          if (e.key === "Enter" && inviteEmail.trim()) inviteMut.mutate();
+                        }}
+                      />
+                      <p className="mt-1 text-[11px] text-slate-400">
+                        Le lien d'activation sera valable 48 heures.
+                      </p>
+                    </div>
+
+                    <div className="flex gap-3 pt-1">
+                      <button
+                        onClick={() => setInviteTab("edit")}
+                        className="flex-1 rounded-xl border border-slate-200 py-2.5 text-sm font-medium text-slate-600 hover:bg-slate-50"
+                      >
+                        Retour
+                      </button>
+                      <button
+                        onClick={() => inviteMut.mutate()}
+                        disabled={inviteMut.isPending || !inviteEmail.trim()}
+                        className="flex flex-1 items-center justify-center gap-2 rounded-xl bg-blue-600 py-2.5 text-sm font-semibold text-white hover:bg-blue-700 disabled:opacity-60"
+                      >
+                        {inviteMut.isPending
+                          ? <Loader2 className="h-4 w-4 animate-spin" />
+                          : <Send className="h-4 w-4" />}
+                        {inviteMut.isPending ? "Envoi…" : "Envoyer l'invitation"}
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              )}
             </div>
           </div>
         </div>

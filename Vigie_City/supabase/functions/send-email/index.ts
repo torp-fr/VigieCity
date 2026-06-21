@@ -23,6 +23,7 @@ const SUBJECTS: Record<string, string> = {
   report_notification:  "Nouveau signalement dans votre commune",
   alert_broadcast:      "⚠️ Alerte de sécurité — VigieCity",
   weekly_digest:        "Résumé de la semaine — VigieCity",
+  invite_admin:         "🏛️ Invitation à administrer votre commune sur VigieCity",
 };
 
 function renderTemplate(template: string, data: Record<string, string> = {}): string {
@@ -122,6 +123,21 @@ function renderTemplate(template: string, data: Record<string, string> = {}): st
           </div>
         </div>
         <a href="https://vigiecity.fr/platform" class="btn">Voir le tableau de bord →</a>
+      `);
+
+    case "invite_admin":
+      return base(`
+        <span class="badge" style="background:#dbeafe;color:#1e40af;">🏛️ Invitation</span>
+        <h1>Vous êtes invité à administrer ${data.commune ?? "votre commune"}</h1>
+        <p>La plateforme VigieCity vous invite à créer votre espace administrateur pour la commune de <strong>${data.commune ?? ""}${data.department ? " (dépt. " + data.department + ")" : ""}</strong>.</p>
+        <p>VigieCity permet à votre commune de :</p>
+        <ul style="color:#475569;font-size:14px;line-height:1.8;padding-left:20px;margin:0 0 16px;">
+          <li>Recevoir et traiter les signalements de vos citoyens</li>
+          <li>Publier des actualités, alertes et événements</li>
+          <li>Mettre à disposition une application mobile aux habitants</li>
+        </ul>
+        <a href="${data.invite_url ?? "#"}" class="btn">Créer mon compte administrateur →</a>
+        <p style="color:#94a3b8;font-size:12px;">Ce lien est valable jusqu'au <strong>${data.expires ?? "48 heures"}</strong>. Après expiration, contactez votre référent VigieCity pour obtenir un nouveau lien.</p>
       `);
 
     default:

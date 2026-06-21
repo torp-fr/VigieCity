@@ -9,7 +9,7 @@ echo OK
 
 echo [2/3] Git add + commit...
 git add -A
-git commit -m "feat: J1 multi-tenant theming — logo/couleurs par commune, AdminShell dynamique, AppHeader citoyen, settings identite visuelle"
+git commit -m "feat: J2 invitation admin commune — commune_invites table, EF invite-commune, send-email invite_admin template, accept-invite route, CRM modal tabs"
 git push
 
 echo.
