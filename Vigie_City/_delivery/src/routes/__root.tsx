@@ -10,9 +10,26 @@ import {
   Scripts,
 } from "@tanstack/react-router";
 import { useEffect, type ReactNode } from "react";
+import posthog from "posthog-js";
 
 import appCss from "../styles.css?url";
 import { reportLovableError } from "../lib/lovable-error-reporting";
+
+// ── PostHog — analytics GDPR-compliant (EU Cloud Frankfurt) ──────────────────
+// Clé lue depuis VITE_POSTHOG_KEY (variable d'environnement Vercel)
+// En local dev : PostHog ne s'initialise pas (pas de tracking dev involontaire)
+const POSTHOG_KEY = (import.meta.env.VITE_POSTHOG_KEY as string) ?? "";
+if (POSTHOG_KEY) {
+  posthog.init(POSTHOG_KEY, {
+    api_host:             "https://eu.i.posthog.com",
+    ui_host:              "https://eu.posthog.com",
+    person_profiles:      "identified_only",
+    capture_pageview:     true,   // track toutes les navigations
+    capture_pageleave:    true,   // track temps passé
+    autocapture:          false,  // on capture manuellement (plus propre)
+    session_recording:    { maskAllInputs: true },
+  });
+}
 import { AppHeader } from "../components/AppHeader";
 import { BottomNav } from "../components/BottomNav";
 import { Toaster } from "../components/ui/sonner";
@@ -143,6 +160,13 @@ function RootComponent() {
       if (event !== "SIGNED_IN" && event !== "SIGNED_OUT" && event !== "USER_UPDATED") return;
       router.invalidate();
       if (event !== "SIGNED_OUT") queryClient.invalidateQueries();
+
+      // PostHog — identifier / déconnecter l'utilisateur
+      if (event === "SIGNED_IN" && session?.user) {
+        posthog.identify(session.user.id, { email: session.user.email });
+      } else if (event === "SIGNED_OUT") {
+        posthog.reset();
+      }
 
       // After sign-in, check if user needs onboarding
       if (event === "SIGNED_IN" && session?.user) {

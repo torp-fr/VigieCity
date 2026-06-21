@@ -9,7 +9,7 @@ echo OK
 
 echo [2/3] Git add + commit...
 git add -A
-git commit -m "feat: session 10 — collectivites pagination serveur + CRM modal, layout 2-3 cols plans/knowledge"
+git commit -m "feat: session 11 — PostHog VITE_POSTHOG_KEY, Resend EF, Brave EF, analytics page"
 git push
 
 echo.

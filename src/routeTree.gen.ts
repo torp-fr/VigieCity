@@ -52,6 +52,7 @@ import { Route as PlatformFeaturesRouteImport } from './routes/platform/features
 import { Route as PlatformFacturationRouteImport } from './routes/platform/facturation'
 import { Route as PlatformCommunesRouteImport } from './routes/platform/communes'
 import { Route as PlatformCollectivitesRouteImport } from './routes/platform/collectivites'
+import { Route as PlatformAnalyticsRouteImport } from './routes/platform/analytics'
 import { Route as AdminVoisinsRouteImport } from './routes/admin/voisins'
 import { Route as AdminUrgencesRouteImport } from './routes/admin/urgences'
 import { Route as AdminStatsRouteImport } from './routes/admin/stats'
@@ -287,6 +288,11 @@ const PlatformCollectivitesRoute = PlatformCollectivitesRouteImport.update({
   path: '/platform/collectivites',
   getParentRoute: () => rootRouteImport,
 } as any)
+const PlatformAnalyticsRoute = PlatformAnalyticsRouteImport.update({
+  id: '/platform/analytics',
+  path: '/platform/analytics',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const AdminVoisinsRoute = AdminVoisinsRouteImport.update({
   id: '/admin/voisins',
   path: '/admin/voisins',
@@ -422,6 +428,7 @@ export interface FileRoutesByFullPath {
   '/admin/stats': typeof AdminStatsRoute
   '/admin/urgences': typeof AdminUrgencesRoute
   '/admin/voisins': typeof AdminVoisinsRoute
+  '/platform/analytics': typeof PlatformAnalyticsRoute
   '/platform/collectivites': typeof PlatformCollectivitesRoute
   '/platform/communes': typeof PlatformCommunesRoute
   '/platform/facturation': typeof PlatformFacturationRoute
@@ -485,6 +492,7 @@ export interface FileRoutesByTo {
   '/admin/stats': typeof AdminStatsRoute
   '/admin/urgences': typeof AdminUrgencesRoute
   '/admin/voisins': typeof AdminVoisinsRoute
+  '/platform/analytics': typeof PlatformAnalyticsRoute
   '/platform/collectivites': typeof PlatformCollectivitesRoute
   '/platform/communes': typeof PlatformCommunesRoute
   '/platform/facturation': typeof PlatformFacturationRoute
@@ -550,6 +558,7 @@ export interface FileRoutesById {
   '/admin/stats': typeof AdminStatsRoute
   '/admin/urgences': typeof AdminUrgencesRoute
   '/admin/voisins': typeof AdminVoisinsRoute
+  '/platform/analytics': typeof PlatformAnalyticsRoute
   '/platform/collectivites': typeof PlatformCollectivitesRoute
   '/platform/communes': typeof PlatformCommunesRoute
   '/platform/facturation': typeof PlatformFacturationRoute
@@ -616,6 +625,7 @@ export interface FileRouteTypes {
     | '/admin/stats'
     | '/admin/urgences'
     | '/admin/voisins'
+    | '/platform/analytics'
     | '/platform/collectivites'
     | '/platform/communes'
     | '/platform/facturation'
@@ -679,6 +689,7 @@ export interface FileRouteTypes {
     | '/admin/stats'
     | '/admin/urgences'
     | '/admin/voisins'
+    | '/platform/analytics'
     | '/platform/collectivites'
     | '/platform/communes'
     | '/platform/facturation'
@@ -743,6 +754,7 @@ export interface FileRouteTypes {
     | '/admin/stats'
     | '/admin/urgences'
     | '/admin/voisins'
+    | '/platform/analytics'
     | '/platform/collectivites'
     | '/platform/communes'
     | '/platform/facturation'
@@ -808,6 +820,7 @@ export interface RootRouteChildren {
   AdminStatsRoute: typeof AdminStatsRoute
   AdminUrgencesRoute: typeof AdminUrgencesRoute
   AdminVoisinsRoute: typeof AdminVoisinsRoute
+  PlatformAnalyticsRoute: typeof PlatformAnalyticsRoute
   PlatformCollectivitesRoute: typeof PlatformCollectivitesRoute
   PlatformCommunesRoute: typeof PlatformCommunesRoute
   PlatformFacturationRoute: typeof PlatformFacturationRoute
@@ -1135,6 +1148,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof PlatformCollectivitesRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/platform/analytics': {
+      id: '/platform/analytics'
+      path: '/platform/analytics'
+      fullPath: '/platform/analytics'
+      preLoaderRoute: typeof PlatformAnalyticsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/admin/voisins': {
       id: '/admin/voisins'
       path: '/admin/voisins'
@@ -1324,6 +1344,7 @@ const rootRouteChildren: RootRouteChildren = {
   AdminStatsRoute: AdminStatsRoute,
   AdminUrgencesRoute: AdminUrgencesRoute,
   AdminVoisinsRoute: AdminVoisinsRoute,
+  PlatformAnalyticsRoute: PlatformAnalyticsRoute,
   PlatformCollectivitesRoute: PlatformCollectivitesRoute,
   PlatformCommunesRoute: PlatformCommunesRoute,
   PlatformFacturationRoute: PlatformFacturationRoute,

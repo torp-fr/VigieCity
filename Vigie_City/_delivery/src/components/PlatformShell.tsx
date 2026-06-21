@@ -4,7 +4,7 @@ import {
   LayoutDashboard, Building2, Users, Rss,
   BookOpen, Settings, LogOut, Shield, Loader2,
   CreditCard, Euro, UserPlus, TrendingUp,
-  Newspaper, Package,
+  Newspaper, Package, BarChart3,
 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { usePlatformAuth } from "@/hooks/usePlatformAuth";
@@ -36,6 +36,12 @@ const NAV_SECTIONS = [
       { icon: CreditCard,      label: "Plans tarifaires", path: "/platform/plans"          },
       { icon: Euro,            label: "Intercommunal",    path: "/platform/tarification"   },
       { icon: Package,         label: "Modules",          path: "/platform/modules"        },
+    ],
+  },
+  {
+    label: "ANALYTICS",
+    items: [
+      { icon: BarChart3,       label: "Analytics",        path: "/platform/analytics"      },
     ],
   },
   {

@@ -13,6 +13,9 @@ dist-ssr
 .output
 .vercel/output
 supabase/.temp
+
+# Data files (not source)
+*.zip
 .vinxi
 .tanstack/**
 .nitro
