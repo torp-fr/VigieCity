@@ -41,7 +41,7 @@ const SKIP_ONBOARDING_ROUTES = ["/auth", "/onboarding", "/profil", "/mentions-le
 const ADMIN_ROLES = ["commune_admin", "interco_admin", "super_admin"] as const;
 
 // Routes rendered without the app shell (header / bottom nav / padding)
-const SHELL_FREE_ROUTES = ["/", "/landing", "/admin/login"];
+const SHELL_FREE_ROUTES = ["/", "/landing", "/admin/login", "/admin/reset-password"];
 
 function NotFoundComponent() {
   return (

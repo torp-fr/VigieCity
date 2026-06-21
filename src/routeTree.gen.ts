@@ -58,8 +58,10 @@ import { Route as AdminUrgencesRouteImport } from './routes/admin/urgences'
 import { Route as AdminStatsRouteImport } from './routes/admin/stats'
 import { Route as AdminSosRouteImport } from './routes/admin/sos'
 import { Route as AdminSignalementsRouteImport } from './routes/admin/signalements'
+import { Route as AdminSettingsRouteImport } from './routes/admin/settings'
 import { Route as AdminServicesRouteImport } from './routes/admin/services'
 import { Route as AdminRoutageRouteImport } from './routes/admin/routage'
+import { Route as AdminResetPasswordRouteImport } from './routes/admin/reset-password'
 import { Route as AdminRadioRouteImport } from './routes/admin/radio'
 import { Route as AdminPublicationsRouteImport } from './routes/admin/publications'
 import { Route as AdminParametresRouteImport } from './routes/admin/parametres'
@@ -319,6 +321,11 @@ const AdminSignalementsRoute = AdminSignalementsRouteImport.update({
   path: '/admin/signalements',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AdminSettingsRoute = AdminSettingsRouteImport.update({
+  id: '/admin/settings',
+  path: '/admin/settings',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const AdminServicesRoute = AdminServicesRouteImport.update({
   id: '/admin/services',
   path: '/admin/services',
@@ -327,6 +334,11 @@ const AdminServicesRoute = AdminServicesRouteImport.update({
 const AdminRoutageRoute = AdminRoutageRouteImport.update({
   id: '/admin/routage',
   path: '/admin/routage',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AdminResetPasswordRoute = AdminResetPasswordRouteImport.update({
+  id: '/admin/reset-password',
+  path: '/admin/reset-password',
   getParentRoute: () => rootRouteImport,
 } as any)
 const AdminRadioRoute = AdminRadioRouteImport.update({
@@ -428,8 +440,10 @@ export interface FileRoutesByFullPath {
   '/admin/parametres': typeof AdminParametresRoute
   '/admin/publications': typeof AdminPublicationsRoute
   '/admin/radio': typeof AdminRadioRoute
+  '/admin/reset-password': typeof AdminResetPasswordRoute
   '/admin/routage': typeof AdminRoutageRoute
   '/admin/services': typeof AdminServicesRoute
+  '/admin/settings': typeof AdminSettingsRoute
   '/admin/signalements': typeof AdminSignalementsRoute
   '/admin/sos': typeof AdminSosRoute
   '/admin/stats': typeof AdminStatsRoute
@@ -493,8 +507,10 @@ export interface FileRoutesByTo {
   '/admin/parametres': typeof AdminParametresRoute
   '/admin/publications': typeof AdminPublicationsRoute
   '/admin/radio': typeof AdminRadioRoute
+  '/admin/reset-password': typeof AdminResetPasswordRoute
   '/admin/routage': typeof AdminRoutageRoute
   '/admin/services': typeof AdminServicesRoute
+  '/admin/settings': typeof AdminSettingsRoute
   '/admin/signalements': typeof AdminSignalementsRoute
   '/admin/sos': typeof AdminSosRoute
   '/admin/stats': typeof AdminStatsRoute
@@ -560,8 +576,10 @@ export interface FileRoutesById {
   '/admin/parametres': typeof AdminParametresRoute
   '/admin/publications': typeof AdminPublicationsRoute
   '/admin/radio': typeof AdminRadioRoute
+  '/admin/reset-password': typeof AdminResetPasswordRoute
   '/admin/routage': typeof AdminRoutageRoute
   '/admin/services': typeof AdminServicesRoute
+  '/admin/settings': typeof AdminSettingsRoute
   '/admin/signalements': typeof AdminSignalementsRoute
   '/admin/sos': typeof AdminSosRoute
   '/admin/stats': typeof AdminStatsRoute
@@ -628,8 +646,10 @@ export interface FileRouteTypes {
     | '/admin/parametres'
     | '/admin/publications'
     | '/admin/radio'
+    | '/admin/reset-password'
     | '/admin/routage'
     | '/admin/services'
+    | '/admin/settings'
     | '/admin/signalements'
     | '/admin/sos'
     | '/admin/stats'
@@ -693,8 +713,10 @@ export interface FileRouteTypes {
     | '/admin/parametres'
     | '/admin/publications'
     | '/admin/radio'
+    | '/admin/reset-password'
     | '/admin/routage'
     | '/admin/services'
+    | '/admin/settings'
     | '/admin/signalements'
     | '/admin/sos'
     | '/admin/stats'
@@ -759,8 +781,10 @@ export interface FileRouteTypes {
     | '/admin/parametres'
     | '/admin/publications'
     | '/admin/radio'
+    | '/admin/reset-password'
     | '/admin/routage'
     | '/admin/services'
+    | '/admin/settings'
     | '/admin/signalements'
     | '/admin/sos'
     | '/admin/stats'
@@ -826,8 +850,10 @@ export interface RootRouteChildren {
   AdminParametresRoute: typeof AdminParametresRoute
   AdminPublicationsRoute: typeof AdminPublicationsRoute
   AdminRadioRoute: typeof AdminRadioRoute
+  AdminResetPasswordRoute: typeof AdminResetPasswordRoute
   AdminRoutageRoute: typeof AdminRoutageRoute
   AdminServicesRoute: typeof AdminServicesRoute
+  AdminSettingsRoute: typeof AdminSettingsRoute
   AdminSignalementsRoute: typeof AdminSignalementsRoute
   AdminSosRoute: typeof AdminSosRoute
   AdminStatsRoute: typeof AdminStatsRoute
@@ -1203,6 +1229,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminSignalementsRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/admin/settings': {
+      id: '/admin/settings'
+      path: '/admin/settings'
+      fullPath: '/admin/settings'
+      preLoaderRoute: typeof AdminSettingsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/admin/services': {
       id: '/admin/services'
       path: '/admin/services'
@@ -1215,6 +1248,13 @@ declare module '@tanstack/react-router' {
       path: '/admin/routage'
       fullPath: '/admin/routage'
       preLoaderRoute: typeof AdminRoutageRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/admin/reset-password': {
+      id: '/admin/reset-password'
+      path: '/admin/reset-password'
+      fullPath: '/admin/reset-password'
+      preLoaderRoute: typeof AdminResetPasswordRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/admin/radio': {
@@ -1358,8 +1398,10 @@ const rootRouteChildren: RootRouteChildren = {
   AdminParametresRoute: AdminParametresRoute,
   AdminPublicationsRoute: AdminPublicationsRoute,
   AdminRadioRoute: AdminRadioRoute,
+  AdminResetPasswordRoute: AdminResetPasswordRoute,
   AdminRoutageRoute: AdminRoutageRoute,
   AdminServicesRoute: AdminServicesRoute,
+  AdminSettingsRoute: AdminSettingsRoute,
   AdminSignalementsRoute: AdminSignalementsRoute,
   AdminSosRoute: AdminSosRoute,
   AdminStatsRoute: AdminStatsRoute,

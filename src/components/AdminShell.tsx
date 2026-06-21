@@ -17,6 +17,7 @@ import {
   ChevronRight,
   Tablet,
   BarChart3,
+  Settings,
 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 
@@ -34,6 +35,7 @@ const BASE_NAV = [
   { icon: Megaphone,       label: "Alertes",          path: "/admin/alertes"      },
   { icon: Tablet,          label: "Mode terrain",     path: "/admin/terrain"      },
   { icon: BarChart3,       label: "Analytics",         path: "/admin/analytics"    },
+  { icon: Settings,        label: "Paramètres",        path: "/admin/settings"     },
 ] as const;
 
 const EPCI_ITEM = { icon: Building2, label: "Intercommunal", path: "/admin/epci" } as const;
@@ -51,48 +53,75 @@ export interface AdminShellProps {
 export function AdminShell({ activePath, children }: AdminShellProps) {
   const navigate = useNavigate();
   const [authReady,    setAuthReady]    = useState(false);
+  const [authError,    setAuthError]    = useState(false);
   const [communeName,  setCommuneName]  = useState<string | null>(null);
   const [hasEpci,      setHasEpci]      = useState(false);
 
   useEffect(() => {
+    const timeout = setTimeout(() => setAuthError(true), 10_000);
+
     (async () => {
-      const { data: { session } } = await supabase.auth.getSession();
-      if (!session) { navigate({ to: "/admin/login" }); return; }
+      try {
+        const { data: { session } } = await supabase.auth.getSession();
+        if (!session) { clearTimeout(timeout); navigate({ to: "/admin/login" }); return; }
 
-      const { data: profile } = await supabase
-        .from("profiles")
-        .select("role, collectivity_id")
-        .eq("id", session.user.id)
-        .single();
-
-      const ADMIN_ROLES = ["commune_admin", "interco_admin", "super_admin"];
-      if (!ADMIN_ROLES.includes(profile?.role ?? "")) {
-        navigate({ to: "/admin/login" });
-        return;
-      }
-
-      // EPCI tab visible for interco_admin and super_admin
-      if (profile?.role === "interco_admin" || profile?.role === "super_admin") {
-        setHasEpci(true);
-      }
-
-      // Resolve commune name for display
-      if (profile?.collectivity_id) {
-        const { data: coll } = await supabase
-          .from("collectivities")
-          .select("name")
-          .eq("id", profile.collectivity_id)
+        // Fetches parallèles : profile + (éventuelle collectivité résolue après)
+        const { data: profile } = await supabase
+          .from("profiles")
+          .select("role, collectivity_id")
+          .eq("id", session.user.id)
           .single();
-        setCommuneName(coll?.name ?? null);
-      }
 
-      setAuthReady(true);
+        const ADMIN_ROLES = ["commune_admin", "interco_admin", "super_admin"];
+        if (!ADMIN_ROLES.includes(profile?.role ?? "")) {
+          clearTimeout(timeout);
+          navigate({ to: "/admin/login" });
+          return;
+        }
+
+        // EPCI tab visible for interco_admin and super_admin
+        const showEpci = profile?.role === "interco_admin" || profile?.role === "super_admin";
+
+        // Résolution du nom de commune (parallèle, non bloquante)
+        const collPromise = profile?.collectivity_id
+          ? supabase.from("collectivities").select("name").eq("id", profile.collectivity_id).single()
+          : Promise.resolve({ data: null });
+
+        const [{ data: coll }] = await Promise.all([collPromise]);
+
+        setHasEpci(showEpci);
+        setCommuneName(coll?.name ?? null);
+        clearTimeout(timeout);
+        setAuthReady(true);
+      } catch {
+        clearTimeout(timeout);
+        setAuthError(true);
+      }
     })();
+
+    return () => clearTimeout(timeout);
   }, [navigate]);
 
   async function handleSignOut() {
     await supabase.auth.signOut();
     navigate({ to: "/admin/login" });
+  }
+
+  // ── Error / timeout ────────────────────────────────────────────────────────
+  if (authError) {
+    return (
+      <div className="flex min-h-screen flex-col items-center justify-center gap-4 bg-slate-50 px-4 text-center">
+        <Shield className="h-10 w-10 text-slate-300" />
+        <p className="text-sm font-medium text-slate-600">Impossible de charger le panneau</p>
+        <p className="text-xs text-slate-400">Vérifiez votre connexion et réessayez.</p>
+        <button
+          onClick={() => { setAuthError(false); setAuthReady(false); window.location.reload(); }}
+          className="rounded-xl bg-emerald-600 px-5 py-2 text-sm font-semibold text-white hover:bg-emerald-700"
+        >
+          Réessayer
+        </button>
+      </div>
+    );
   }
 
   // ── Loading ────────────────────────────────────────────────────────────────

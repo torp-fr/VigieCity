@@ -9,7 +9,7 @@ echo OK
 
 echo [2/3] Git add + commit...
 git add -A
-git commit -m "feat: analytics panels - /admin/analytics commune + /platform/analytics map Leaflet + posthog-query EF"
+git commit -m "feat: perf AdminShell + forgot password + reset-password + /admin/settings changement mdp"
 git push
 
 echo.
