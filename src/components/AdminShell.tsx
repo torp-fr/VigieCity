@@ -16,6 +16,7 @@ import {
   Loader2,
   ChevronRight,
   Tablet,
+  BarChart3,
 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 
@@ -32,6 +33,7 @@ const BASE_NAV = [
   { icon: Radio,           label: "Radio locale",     path: "/admin/radio"        },
   { icon: Megaphone,       label: "Alertes",          path: "/admin/alertes"      },
   { icon: Tablet,          label: "Mode terrain",     path: "/admin/terrain"      },
+  { icon: BarChart3,       label: "Analytics",         path: "/admin/analytics"    },
 ] as const;
 
 const EPCI_ITEM = { icon: Building2, label: "Intercommunal", path: "/admin/epci" } as const;

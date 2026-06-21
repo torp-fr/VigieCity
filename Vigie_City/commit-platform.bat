@@ -9,7 +9,7 @@ echo OK
 
 echo [2/3] Git add + commit...
 git add -A
-git commit -m "fix: force rebuild Vercel pour injecter VITE_POSTHOG_KEY dans le bundle Vite"
+git commit -m "feat: analytics panels - /admin/analytics commune + /platform/analytics map Leaflet + posthog-query EF"
 git push
 
 echo.

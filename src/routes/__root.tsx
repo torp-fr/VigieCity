@@ -162,14 +162,12 @@ function RootComponent() {
       router.invalidate();
       if (event !== "SIGNED_OUT") queryClient.invalidateQueries();
 
-      // PostHog — identifier / déconnecter l'utilisateur
-      if (event === "SIGNED_IN" && session?.user) {
-        posthog.identify(session.user.id, { email: session.user.email });
-      } else if (event === "SIGNED_OUT") {
+      // PostHog — reset à la déconnexion
+      if (event === "SIGNED_OUT") {
         posthog.reset();
       }
 
-      // After sign-in, check if user needs onboarding
+      // After sign-in: PostHog identify + onboarding check (1 seul fetch profil)
       if (event === "SIGNED_IN" && session?.user) {
         if (SKIP_ONBOARDING_ROUTES.includes(pathname)) return;
         // Délai court : laisse la DB propager le profil auto-créé par le trigger
@@ -179,12 +177,34 @@ function RootComponent() {
           .select("collectivity_id, role")
           .eq("id", session.user.id)
           .single();
-        // Les rôles admin gèrent leur propre navigation (ex: /admin/login → /platform)
+
+        // PostHog — identifier avec rôle + commune pour filtrage par commune dans analytics
+        if (profile?.collectivity_id) {
+          const { data: coll } = await supabase
+            .from("collectivities")
+            .select("name, department_code, region")
+            .eq("id", profile.collectivity_id)
+            .single();
+          posthog.identify(session.user.id, {
+            email:           session.user.email,
+            role:            profile.role ?? "citizen",
+            collectivity_id: profile.collectivity_id,
+            commune:         coll?.name,
+            department:      coll?.department_code,
+            region:          coll?.region,
+          });
+        } else {
+          posthog.identify(session.user.id, {
+            email: session.user.email,
+            role:  profile?.role ?? "citizen",
+          });
+        }
+
+        // Onboarding check — les admins gèrent leur propre navigation
         if (ADMIN_ROLES.includes(profile?.role as typeof ADMIN_ROLES[number])) return;
         if (!profile?.collectivity_id) {
           navigate({ to: "/onboarding" });
         } else if (pathname === "/") {
-          // Utilisateur connecté sur la landing → app
           navigate({ to: "/accueil" });
         }
       }
