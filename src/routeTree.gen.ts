@@ -36,6 +36,7 @@ import { Route as PlatformIndexRouteImport } from './routes/platform/index'
 import { Route as AdminIndexRouteImport } from './routes/admin/index'
 import { Route as PlatformUsersRouteImport } from './routes/platform/users'
 import { Route as PlatformTrialsRouteImport } from './routes/platform/trials'
+import { Route as PlatformTarificationRouteImport } from './routes/platform/tarification'
 import { Route as PlatformSupportRouteImport } from './routes/platform/support'
 import { Route as PlatformStatsRouteImport } from './routes/platform/stats'
 import { Route as PlatformSettingsRouteImport } from './routes/platform/settings'
@@ -204,6 +205,11 @@ const PlatformUsersRoute = PlatformUsersRouteImport.update({
 const PlatformTrialsRoute = PlatformTrialsRouteImport.update({
   id: '/platform/trials',
   path: '/platform/trials',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const PlatformTarificationRoute = PlatformTarificationRouteImport.update({
+  id: '/platform/tarification',
+  path: '/platform/tarification',
   getParentRoute: () => rootRouteImport,
 } as any)
 const PlatformSupportRoute = PlatformSupportRouteImport.update({
@@ -431,6 +437,7 @@ export interface FileRoutesByFullPath {
   '/platform/settings': typeof PlatformSettingsRoute
   '/platform/stats': typeof PlatformStatsRoute
   '/platform/support': typeof PlatformSupportRoute
+  '/platform/tarification': typeof PlatformTarificationRoute
   '/platform/trials': typeof PlatformTrialsRoute
   '/platform/users': typeof PlatformUsersRoute
   '/admin/': typeof AdminIndexRoute
@@ -493,6 +500,7 @@ export interface FileRoutesByTo {
   '/platform/settings': typeof PlatformSettingsRoute
   '/platform/stats': typeof PlatformStatsRoute
   '/platform/support': typeof PlatformSupportRoute
+  '/platform/tarification': typeof PlatformTarificationRoute
   '/platform/trials': typeof PlatformTrialsRoute
   '/platform/users': typeof PlatformUsersRoute
   '/admin': typeof AdminIndexRoute
@@ -557,6 +565,7 @@ export interface FileRoutesById {
   '/platform/settings': typeof PlatformSettingsRoute
   '/platform/stats': typeof PlatformStatsRoute
   '/platform/support': typeof PlatformSupportRoute
+  '/platform/tarification': typeof PlatformTarificationRoute
   '/platform/trials': typeof PlatformTrialsRoute
   '/platform/users': typeof PlatformUsersRoute
   '/admin/': typeof AdminIndexRoute
@@ -622,6 +631,7 @@ export interface FileRouteTypes {
     | '/platform/settings'
     | '/platform/stats'
     | '/platform/support'
+    | '/platform/tarification'
     | '/platform/trials'
     | '/platform/users'
     | '/admin/'
@@ -684,6 +694,7 @@ export interface FileRouteTypes {
     | '/platform/settings'
     | '/platform/stats'
     | '/platform/support'
+    | '/platform/tarification'
     | '/platform/trials'
     | '/platform/users'
     | '/admin'
@@ -747,6 +758,7 @@ export interface FileRouteTypes {
     | '/platform/settings'
     | '/platform/stats'
     | '/platform/support'
+    | '/platform/tarification'
     | '/platform/trials'
     | '/platform/users'
     | '/admin/'
@@ -811,6 +823,7 @@ export interface RootRouteChildren {
   PlatformSettingsRoute: typeof PlatformSettingsRoute
   PlatformStatsRoute: typeof PlatformStatsRoute
   PlatformSupportRoute: typeof PlatformSupportRoute
+  PlatformTarificationRoute: typeof PlatformTarificationRoute
   PlatformTrialsRoute: typeof PlatformTrialsRoute
   PlatformUsersRoute: typeof PlatformUsersRoute
   AdminIndexRoute: typeof AdminIndexRoute
@@ -1008,6 +1021,13 @@ declare module '@tanstack/react-router' {
       path: '/platform/trials'
       fullPath: '/platform/trials'
       preLoaderRoute: typeof PlatformTrialsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/platform/tarification': {
+      id: '/platform/tarification'
+      path: '/platform/tarification'
+      fullPath: '/platform/tarification'
+      preLoaderRoute: typeof PlatformTarificationRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/platform/support': {
@@ -1319,6 +1339,7 @@ const rootRouteChildren: RootRouteChildren = {
   PlatformSettingsRoute: PlatformSettingsRoute,
   PlatformStatsRoute: PlatformStatsRoute,
   PlatformSupportRoute: PlatformSupportRoute,
+  PlatformTarificationRoute: PlatformTarificationRoute,
   PlatformTrialsRoute: PlatformTrialsRoute,
   PlatformUsersRoute: PlatformUsersRoute,
   AdminIndexRoute: AdminIndexRoute,

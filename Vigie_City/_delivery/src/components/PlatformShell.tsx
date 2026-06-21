@@ -3,18 +3,21 @@ import { useState, useEffect, type ReactNode } from "react";
 import {
   LayoutDashboard, Building2, Users, Rss,
   BookOpen, Settings, LogOut, Shield, Loader2,
+  CreditCard, Euro,
 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 
 // ── Nav items ─────────────────────────────────────────────────────────────────
 
 const NAV_ITEMS = [
-  { icon: LayoutDashboard, label: "Tableau de bord", path: "/platform"                },
-  { icon: Building2,       label: "Collectivités",   path: "/platform/collectivites"  },
-  { icon: Users,           label: "Utilisateurs",    path: "/platform/users"          },
-  { icon: Rss,             label: "Flux RSS",        path: "/platform/rss"            },
-  { icon: BookOpen,        label: "Éditeurs",        path: "/platform/publishers"     },
-  { icon: Settings,        label: "Paramètres",      path: "/platform/settings"       },
+  { icon: LayoutDashboard, label: "Tableau de bord",    path: "/platform"                 },
+  { icon: Building2,       label: "Collectivités",      path: "/platform/collectivites"   },
+  { icon: Users,           label: "Utilisateurs",       path: "/platform/users"           },
+  { icon: Rss,             label: "Flux RSS",           path: "/platform/rss"             },
+  { icon: CreditCard,      label: "Plans tarifaires",   path: "/platform/plans"           },
+  { icon: Euro,            label: "Tarif intercommunal",path: "/platform/tarification"    },
+  { icon: BookOpen,        label: "Éditeurs",           path: "/platform/publishers"      },
+  { icon: Settings,        label: "Paramètres",         path: "/platform/settings"        },
 ] as const;
 
 // ── Props ─────────────────────────────────────────────────────────────────────
