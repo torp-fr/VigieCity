@@ -2,6 +2,7 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useEffect, useState } from "react";
 import { NotificationBanner } from "@/components/NotificationBanner";
+import { WeatherVigilanceWidget } from "@/components/WeatherVigilanceWidget";
 import {
   PhoneCall,
   AlertCircle,
@@ -198,6 +199,9 @@ function Home() {
 
       {/* SOS */}
       <SosButton />
+
+      {/* Météo Vigilance Alert (J8.1) */}
+      <WeatherVigilanceWidget compact={true} />
 
       {/* Quick actions */}
       <section className="grid grid-cols-3 gap-3">

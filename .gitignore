@@ -21,6 +21,11 @@ supabase/.temp
 .nitro
 *.local
 
+# Env / secrets
+.env
+.env.*
+!.env.example
+
 # Wrangler / Cloudflare
 .wrangler/
 .dev.vars

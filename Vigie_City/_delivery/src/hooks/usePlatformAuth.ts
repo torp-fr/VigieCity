@@ -1,16 +1,12 @@
 /**
  * usePlatformAuth — auth guard partagé pour toutes les pages /platform/*
  *
- * Utilise React Query pour mettre en cache la session + le rôle 5 minutes.
- *
- * getUser() est utilisé à la place de getSession() :
- *   - getSession() lit le localStorage → indisponible en SSR (TanStack Start)
- *   - getUser() fait un appel réseau → SSR-safe, toujours à jour
- *
- * La redirection vers /admin/login est gérée dans PlatformShell (composant),
- * pas ici, pour éviter les problèmes d'ordre des hooks TanStack Router.
+ * Utilise React Query pour mettre en cache la session + le rôle.
+ * Écoute onAuthStateChange pour invalider immédiatement si la session expire
+ * ou si l'utilisateur se déconnecte depuis un autre onglet.
  */
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 
 export type PlatformAuthResult =
@@ -38,16 +34,28 @@ async function fetchPlatformAuth(): Promise<{ email: string }> {
 }
 
 export function usePlatformAuth(): PlatformAuthResult {
+  const queryClient = useQueryClient();
+
+  // Écouter les changements de session Supabase (expiry, logout, refresh)
+  useEffect(() => {
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((event) => {
+      if (event === "SIGNED_OUT" || event === "TOKEN_REFRESHED" || event === "USER_UPDATED") {
+        // Invalider le cache pour forcer une re-vérification
+        queryClient.invalidateQueries({ queryKey: ["platform-auth"] });
+      }
+    });
+    return () => subscription.unsubscribe();
+  }, [queryClient]);
+
   const { data, isPending, isError } = useQuery({
     queryKey: ["platform-auth"],
     queryFn: fetchPlatformAuth,
-    staleTime: 5 * 60_000,
+    staleTime: 4 * 60_000,   // 4 min — re-fetch avant expiry JWT (1h Supabase)
     gcTime:    10 * 60_000,
-    // Fail vite — pas de retry : la page citoyenne ne doit jamais faire tourner en boucle
-    retry: false,
+    retry: 1,                 // 1 retry pour absorber les erreurs réseau transitoires
+    retryDelay: 1000,
   });
 
-  // isPending = vrai aussi pendant l'hydratation SSR→CSR
   if (isPending) return { status: "loading" };
   if (isError || !data) return { status: "unauthorized" };
   return { status: "ready", email: data.email };
