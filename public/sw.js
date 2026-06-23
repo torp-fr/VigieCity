@@ -1,9 +1,9 @@
-// VigieCity Service Worker — v4
+// VigieCity Service Worker — v5
 // Gère : multi-stratégie cache + offline shell + Web Push notifications
-// rebuild: 2026-06-21
+// rebuild: 2026-06-23
 
 // ── Cache names ────────────────────────────────────────────────────────────────
-const V             = 'v4';
+const V             = 'v5';
 const CACHE_STATIC  = `vigiecity-${V}-static`;   // JS/CSS/fonts — cache-first
 const CACHE_PAGES   = `vigiecity-${V}-pages`;    // HTML navigation — stale-while-revalidate
 const CACHE_IMAGES  = `vigiecity-${V}-images`;   // Images/icons   — cache-first
@@ -84,6 +84,11 @@ self.addEventListener('fetch', (event) => {
   }
 
   const path = url.pathname;
+
+  // ── 0. Bypass admin/platform — never cache auth-protected routes ──────────
+  if (path.startsWith('/admin') || path.startsWith('/platform')) {
+    return;
+  }
 
   // ── 1. Static assets — Cache-first (JS/CSS/fonts/manifest) ───────────────
   if (/\.(js|css|woff2?|ttf|otf|webmanifest)$/.test(path)) {
