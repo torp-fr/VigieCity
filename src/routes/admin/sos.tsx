@@ -1,4 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
+import { AdminShell } from "@/components/AdminShell";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useState } from "react";
@@ -55,7 +56,8 @@ function SosPage() {
   const openCount = events?.filter((e) => !e.resolved_at).length ?? 0;
 
   return (
-    <div className="space-y-6">
+    <AdminShell activePath="/admin/urgences">
+      <div className="mx-auto max-w-7xl px-8 py-8 space-y-6">
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-2xl font-bold flex items-center gap-2">
@@ -175,6 +177,7 @@ function SosPage() {
           })}
         </div>
       )}
-    </div>
+      </div>
+    </AdminShell>
   );
 }

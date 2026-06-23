@@ -1,4 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
+import { AdminShell } from "@/components/AdminShell";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useState } from "react";
@@ -81,7 +82,8 @@ function ParametresPage() {
   if (isLoading) return <div className="text-center py-12 text-muted-foreground">Chargement…</div>;
 
   return (
-    <div className="space-y-6 max-w-2xl">
+    <AdminShell activePath="/admin/settings">
+      <div className="mx-auto  px-8 py-8 space-y-6 max-w-2xl">
       <div>
         <h1 className="text-2xl font-bold flex items-center gap-2">
           <Settings className="h-6 w-6 text-primary" />
@@ -213,6 +215,7 @@ function ParametresPage() {
           Couleur primaire et logo personnalisé — disponible avec le plan Pro.
         </p>
       </div>
-    </div>
+      </div>
+    </AdminShell>
   );
 }

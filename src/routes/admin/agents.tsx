@@ -1,4 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
+import { AdminShell } from "@/components/AdminShell";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useState } from "react";
@@ -82,7 +83,8 @@ function AgentsPage() {
   });
 
   return (
-    <div className="space-y-6">
+    <AdminShell activePath="/admin/habilitations">
+      <div className="mx-auto max-w-7xl px-8 py-8 space-y-6">
       <div>
         <h1 className="text-2xl font-bold flex items-center gap-2">
           <Users className="h-6 w-6 text-primary" />
@@ -174,6 +176,7 @@ function AgentsPage() {
           </table>
         </div>
       )}
-    </div>
+      </div>
+    </AdminShell>
   );
 }

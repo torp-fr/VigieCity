@@ -1,4 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
+import { AdminShell } from "@/components/AdminShell";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { GitBranch, Save } from "lucide-react";
@@ -85,7 +86,8 @@ function RoutagePage() {
   const hasChanges = Object.keys(localEdits).length > 0;
 
   return (
-    <div className="space-y-6">
+    <AdminShell activePath="/admin/settings">
+      <div className="mx-auto max-w-7xl px-8 py-8 space-y-6">
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-2xl font-bold flex items-center gap-2">
@@ -180,6 +182,7 @@ function RoutagePage() {
           <a href="/admin/services" className="text-primary underline">Mes services</a>.
         </p>
       )}
-    </div>
+      </div>
+    </AdminShell>
   );
 }

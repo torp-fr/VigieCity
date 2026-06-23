@@ -1,4 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
+import { AdminShell } from "@/components/AdminShell";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import {
@@ -129,7 +130,8 @@ function StatsPage() {
   if (isLoading) return <div className="text-center py-12 text-muted-foreground">Chargement…</div>;
 
   return (
-    <div className="space-y-6">
+    <AdminShell activePath="/admin/analytics">
+      <div className="mx-auto max-w-7xl px-8 py-8 space-y-6">
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-2xl font-bold flex items-center gap-2">
@@ -212,6 +214,7 @@ function StatsPage() {
           )}
         </div>
       </div>
-    </div>
+      </div>
+    </AdminShell>
   );
 }
