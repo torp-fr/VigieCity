@@ -564,4 +564,63 @@ function TrustedContactsSection({ userId }: { userId: string }) {
             <button
               type="button"
               onClick={() => add.mutate()}
-            
+              disabled={add.isPending}
+              className="flex flex-1 items-center justify-center gap-1 rounded-lg bg-primary py-2 text-sm font-medium text-primary-foreground disabled:opacity-50"
+            >
+              {add.isPending ? <Loader2 className="h-4 w-4 animate-spin" /> : "Enregistrer"}
+            </button>
+            <button type="button" onClick={() => setShowAdd(false)} className="rounded-lg border border-border px-3 py-2 text-sm">
+              Annuler
+            </button>
+          </div>
+        </div>
+      )}
+
+      {contacts?.length === 0 && !showAdd && (
+        <p className="text-sm text-muted-foreground">Aucun contact de confiance enregistré.</p>
+      )}
+
+      <ul className="space-y-2">
+        {contacts?.map((c) => (
+          <li key={c.id} className="flex items-center gap-3 rounded-xl border border-border bg-muted/30 px-3 py-2">
+            <Phone className="h-4 w-4 shrink-0 text-muted-foreground" />
+            <div className="min-w-0 flex-1">
+              <p className="text-sm font-medium">{c.name}</p>
+              <p className="text-xs text-muted-foreground">{c.phone}</p>
+            </div>
+            <button
+              type="button"
+              onClick={() => remove.mutate(c.id)}
+              disabled={remove.isPending}
+              className="rounded-lg p-1.5 text-muted-foreground hover:bg-destructive/10 hover:text-destructive disabled:opacity-40"
+              aria-label="Supprimer"
+            >
+              <Trash2 className="h-4 w-4" />
+            </button>
+          </li>
+        ))}
+      </ul>
+    </section>
+  );
+}
+
+// ── Sign Out ──────────────────────────────────────────────────────────────────
+function SignOutSection({ navigate }: { navigate: ReturnType<typeof useNavigate> }) {
+  const handleSignOut = async () => {
+    await supabase.auth.signOut();
+    navigate({ to: "/" });
+  };
+
+  return (
+    <section className="rounded-2xl border border-border bg-card p-4 shadow-card">
+      <button
+        type="button"
+        onClick={handleSignOut}
+        className="flex w-full items-center justify-center gap-2 rounded-xl border border-border py-2.5 text-sm font-medium text-muted-foreground hover:bg-muted/50"
+      >
+        <LogOut className="h-4 w-4" />
+        Se déconnecter
+      </button>
+    </section>
+  );
+}
