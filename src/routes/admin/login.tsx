@@ -64,7 +64,8 @@ function AdminLoginPage() {
       }
 
       toast.success(`Bienvenue${profile.display_name ? `, ${profile.display_name}` : ""} !`);
-      navigate({ to: destination as any });
+      // Navigation dure pour les cross-section jumps (admin → platform)
+      window.location.href = destination;
     } finally {
       setLoading(false);
     }
