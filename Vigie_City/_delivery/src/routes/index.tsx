@@ -1,5 +1,5 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { useState } from "react";
+import { useState, useRef, useEffect } from "react";
 import {
   CheckCircle2, ArrowRight, ChevronDown,
   BellRing, MapPin, CalendarDays, Newspaper, MessageSquare,
@@ -738,6 +738,259 @@ const ADMIN_FEATURES = [
 ];
 
 
+// ── Calculateur tarifaire INSEE ───────────────────────────────────────────────
+
+type CommuneResult = { nom: string; code: string; population: number };
+
+function getPopulationTierIndex(population: number): number {
+  if (population < 1000)  return 0; // Nano
+  if (population < 2500)  return 1; // Micro
+  if (population < 10000) return 2; // Local
+  if (population < 50000) return 3; // Urbain
+  return 4;                          // Métropole
+}
+
+function CommuneCalculatorSection() {
+  const [query, setQuery]             = useState("");
+  const [results, setResults]         = useState<CommuneResult[]>([]);
+  const [loading, setLoading]         = useState(false);
+  const [selected, setSelected]       = useState<CommuneResult | null>(null);
+  const [showDropdown, setShowDropdown] = useState(false);
+  const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const containerRef = useRef<HTMLDivElement>(null);
+
+  // Ferme le dropdown si clic extérieur
+  useEffect(() => {
+    const handler = (e: MouseEvent) => {
+      if (containerRef.current && !containerRef.current.contains(e.target as Node)) {
+        setShowDropdown(false);
+      }
+    };
+    document.addEventListener("mousedown", handler);
+    return () => document.removeEventListener("mousedown", handler);
+  }, []);
+
+  const search = async (q: string) => {
+    if (q.trim().length < 2) { setResults([]); setLoading(false); return; }
+    setLoading(true);
+    try {
+      const url = `https://geo.api.gouv.fr/communes?nom=${encodeURIComponent(q)}&fields=nom,code,population&limit=7&boost=population`;
+      const res  = await fetch(url);
+      const data = await res.json() as CommuneResult[];
+      setResults(data.filter((c) => c.population != null && c.population > 0));
+    } catch {
+      setResults([]);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleInput = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const val = e.target.value;
+    setQuery(val);
+    setSelected(null);
+    setShowDropdown(true);
+    if (debounceRef.current) clearTimeout(debounceRef.current);
+    debounceRef.current = setTimeout(() => search(val), 280);
+  };
+
+  const handleSelect = (c: CommuneResult) => {
+    setSelected(c);
+    setQuery(c.nom);
+    setResults([]);
+    setShowDropdown(false);
+  };
+
+  const tierIndex = selected ? getPopulationTierIndex(selected.population) : null;
+  // PRICING_TIERS n'est pas encore déclaré ici, on le référence après
+  // → on passe par les mêmes constantes définies plus bas dans le fichier
+
+  const TIER_DATA = [
+    { name: "Nano",      range: "< 1 000 hab.",          monthly: 49,  annual: 490  },
+    { name: "Micro",     range: "1 000 – 2 500 hab.",    monthly: 99,  annual: 990  },
+    { name: "Local",     range: "2 500 – 10 000 hab.",   monthly: 189, annual: 1890 },
+    { name: "Urbain",    range: "10 000 – 50 000 hab.",  monthly: 490, annual: 4900 },
+    { name: "Métropole", range: "> 50 000 hab.",          monthly: null, annual: null },
+  ] as const;
+
+  const tier = tierIndex !== null ? TIER_DATA[tierIndex] : null;
+
+  return (
+    <section style={{ background: "linear-gradient(150deg, #1e3a8a 0%, #1d4ed8 100%)" }} className="py-20">
+      <div className="mx-auto max-w-2xl px-6">
+        {/* Header */}
+        <div className="text-center">
+          <p className="text-sm font-semibold uppercase tracking-widest text-blue-300">
+            Calculateur de tarif
+          </p>
+          <h2 className="mt-2 text-3xl font-extrabold text-white md:text-4xl">
+            Quel est le tarif pour votre commune ?
+          </h2>
+          <p className="mx-auto mt-4 max-w-lg text-blue-200">
+            Entrez le nom de votre commune — la population est récupérée directement
+            depuis l'INSEE et votre plan s'affiche instantanément.
+          </p>
+        </div>
+
+        {/* Champ de recherche */}
+        <div ref={containerRef} className="relative mt-10">
+          <div
+            className="flex items-center gap-3 rounded-2xl bg-white px-5 py-4 shadow-xl"
+            style={{ border: "2px solid transparent" }}
+          >
+            <MapPin className="h-5 w-5 flex-shrink-0 text-blue-400" />
+            <input
+              type="text"
+              value={query}
+              onChange={handleInput}
+              onFocus={() => query.length >= 2 && results.length > 0 && setShowDropdown(true)}
+              placeholder="Nom de votre commune ou code postal..."
+              className="flex-1 bg-transparent text-base font-medium text-gray-900 placeholder-gray-400 outline-none"
+            />
+            {loading && (
+              <span className="text-xs text-gray-400">Recherche…</span>
+            )}
+          </div>
+
+          {/* Dropdown résultats */}
+          {showDropdown && results.length > 0 && (
+            <div
+              className="absolute left-0 right-0 top-full z-50 mt-2 overflow-hidden rounded-2xl bg-white"
+              style={{ boxShadow: "0 20px 60px rgba(0,0,0,0.18), 0 4px 16px rgba(0,0,0,0.08)" }}
+            >
+              {results.map((c, i) => (
+                <button
+                  key={c.code}
+                  onClick={() => handleSelect(c)}
+                  className="flex w-full items-center justify-between px-5 py-3 text-left transition hover:bg-blue-50"
+                  style={{
+                    borderTop: i > 0 ? "1px solid #f1f5f9" : "none",
+                  }}
+                >
+                  <div>
+                    <span className="font-semibold text-gray-900">{c.nom}</span>
+                    <span className="ml-2 text-xs text-gray-400">{c.code}</span>
+                  </div>
+                  <span
+                    className="rounded-full px-2.5 py-0.5 text-xs font-bold"
+                    style={{ background: "#eff6ff", color: "#1e3a8a" }}
+                  >
+                    {c.population.toLocaleString("fr-FR")} hab.
+                  </span>
+                </button>
+              ))}
+            </div>
+          )}
+        </div>
+
+        {/* Résultat : plan adapté */}
+        {selected && tier && (
+          <div
+            className="mt-8 overflow-hidden rounded-2xl bg-white"
+            style={{ boxShadow: "0 24px 64px rgba(0,0,0,0.22)" }}
+          >
+            {/* Bandeau commune */}
+            <div
+              className="flex items-center gap-3 px-7 py-4"
+              style={{ background: "#f8faff", borderBottom: "1px solid #e0e7ff" }}
+            >
+              <div
+                className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-xl text-lg"
+                style={{ background: "#eff6ff" }}
+              >
+                🏛️
+              </div>
+              <div>
+                <p className="font-bold text-gray-900">{selected.nom}</p>
+                <p className="text-xs text-gray-500">
+                  {selected.population.toLocaleString("fr-FR")} habitants · Code INSEE {selected.code}
+                </p>
+              </div>
+              <button
+                onClick={() => { setSelected(null); setQuery(""); }}
+                className="ml-auto rounded-lg p-1.5 text-gray-400 transition hover:bg-gray-100 hover:text-gray-700"
+              >
+                <X className="h-4 w-4" />
+              </button>
+            </div>
+
+            {/* Tarif */}
+            <div className="px-7 py-7 text-center">
+              <p
+                className="text-xs font-bold uppercase tracking-widest"
+                style={{ color: "#1e3a8a" }}
+              >
+                Plan recommandé
+              </p>
+              <p className="mt-1 text-2xl font-extrabold text-gray-900">
+                {tier.name}
+              </p>
+              <p className="text-sm text-gray-400">{tier.range}</p>
+
+              {tier.monthly === null ? (
+                <>
+                  <p className="mt-5 text-4xl font-extrabold text-gray-900">
+                    Sur devis
+                  </p>
+                  <p className="mt-2 text-sm text-gray-500">
+                    Tarif personnalisé · SLA et accompagnement adaptés
+                  </p>
+                </>
+              ) : (
+                <>
+                  <div className="mt-5 flex items-end justify-center gap-2">
+                    <span className="text-5xl font-extrabold text-gray-900">
+                      {tier.monthly} €
+                    </span>
+                    <span className="mb-2 text-gray-400">/mois HT</span>
+                  </div>
+                  <p className="mt-1.5 text-sm font-semibold" style={{ color: "#1e3a8a" }}>
+                    ou {tier.annual?.toLocaleString("fr-FR")} €/an HT{" "}
+                    <span className="font-normal text-gray-400">(2 mois offerts)</span>
+                  </p>
+                </>
+              )}
+
+              {/* Features condensées */}
+              <div className="mt-5 flex flex-wrap justify-center gap-2">
+                {["Tous modules inclus", "App iOS & Android", "Espace admin web", "Support inclus"].map((f) => (
+                  <span
+                    key={f}
+                    className="flex items-center gap-1 rounded-full px-3 py-1 text-xs font-medium"
+                    style={{ background: "#f0fdf4", color: "#15803d" }}
+                  >
+                    <CheckCircle2 className="h-3 w-3" />
+                    {f}
+                  </span>
+                ))}
+              </div>
+
+              <a
+                href={`mailto:contact@vigiecity.fr?subject=Demande de proposition VigieCity — ${encodeURIComponent(selected.nom)}&body=Bonjour,%0A%0AJe souhaite obtenir une proposition pour la commune de ${encodeURIComponent(selected.nom)} (${selected.population.toLocaleString("fr-FR")} habitants).%0A%0AMerci.`}
+                className="mt-6 inline-flex items-center gap-2 rounded-xl px-8 py-4 text-sm font-bold text-white shadow-lg transition hover:opacity-90"
+                style={{ backgroundColor: "#1e3a8a" }}
+              >
+                Demander une proposition pour {selected.nom}
+                <ArrowRight className="h-4 w-4" />
+              </a>
+            </div>
+          </div>
+        )}
+
+        {/* Note de bas de section */}
+        <p className="mt-8 text-center text-xs text-blue-300">
+          Données population source :{" "}
+          <span className="font-medium text-blue-200">INSEE via geo.api.gouv.fr</span>{" "}
+          ·{" "}
+          <a href="#tarifs" className="underline transition hover:text-white">
+            Voir la grille tarifaire complète ↓
+          </a>
+        </p>
+      </div>
+    </section>
+  );
+}
+
 // ── Grille tarifaire ──────────────────────────────────────────────────────────
 
 const PRICING_TIERS = [
@@ -1101,255 +1354,4 @@ function LandingPage() {
         </div>
       </section>
 
-      {/* ── Pour qui ───────────────────────────────────────────────────── */}
-      <section id="pour-qui" className="bg-white py-20">
-        <div className="mx-auto max-w-7xl px-6">
-          <div className="text-center">
-            <p className="text-sm font-semibold uppercase tracking-widest text-blue-600">
-              Pour qui
-            </p>
-            <h2 className="mt-2 text-3xl font-extrabold text-gray-900 md:text-4xl">
-              Toutes les collectivités, sans distinction
-            </h2>
-            <p className="mx-auto mt-4 max-w-xl text-lg text-gray-500">
-              Que vous gériez 200 ou 200 000 habitants, VigieCity s'adapte à
-              votre territoire et à votre organisation.
-            </p>
-          </div>
-
-          <div className="mt-14 grid gap-8 md:grid-cols-3">
-            {FOR_WHO.map((c) => (
-              <div
-                key={c.title}
-                className="rounded-2xl border border-gray-100 bg-gray-50 p-8"
-              >
-                <c.Icon className="h-10 w-10" style={{ color: "#1e3a8a" }} />
-                <h3 className="mt-4 text-lg font-bold text-gray-900">
-                  {c.title}
-                </h3>
-                <p
-                  className="mt-1 text-xs font-semibold uppercase tracking-wider"
-                  style={{ color: "#1e3a8a" }}
-                >
-                  {c.sub}
-                </p>
-                <p className="mt-3 text-sm leading-relaxed text-gray-500">
-                  {c.desc}
-                </p>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* ── Modules ────────────────────────────────────────────────────── */}
-      <section id="modules" style={{ backgroundColor: "#f8fafc" }} className="py-20">
-        <div className="mx-auto max-w-7xl px-6">
-          <div className="text-center">
-            <p className="text-sm font-semibold uppercase tracking-widest text-blue-600">
-              Fonctionnalités
-            </p>
-            <h2 className="mt-2 text-3xl font-extrabold text-gray-900 md:text-4xl">
-              Bien plus qu'un simple outil de signalement
-            </h2>
-            <p className="mx-auto mt-4 max-w-xl text-lg text-gray-500">
-              VigieCity couvre l'ensemble des besoins de communication entre
-              votre collectivité et ses habitants.
-            </p>
-          </div>
-
-          <div className="mt-14 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-            {MODULES.map((m) => (
-              <div
-                key={m.title}
-                className="rounded-2xl border border-gray-100 bg-white p-7 transition hover:shadow-md"
-              >
-                <div
-                  className="mb-4 flex h-12 w-12 items-center justify-center rounded-xl"
-                  style={{ backgroundColor: m.color + "18" }}
-                >
-                  <m.Icon className="h-6 w-6" style={{ color: m.color }} />
-                </div>
-                <h3 className="mb-2 font-bold text-gray-900">{m.title}</h3>
-                <p className="text-sm leading-relaxed text-gray-500">{m.desc}</p>
-              </div>
-            ))}
-
-            {/* Admin card */}
-            <div
-              className="rounded-2xl p-7"
-              style={{
-                background: "linear-gradient(135deg, #1e3a8a, #1d4ed8)",
-              }}
-            >
-              <div className="mb-4 flex h-12 w-12 items-center justify-center rounded-xl bg-white/20">
-                <LayoutDashboard className="h-6 w-6 text-white" />
-              </div>
-              <h3 className="mb-2 font-bold text-white">
-                Espace d'administration
-              </h3>
-              <p className="mb-4 text-sm leading-relaxed text-blue-200">
-                Interface web dédiée à vos agents pour gérer l'ensemble des
-                contenus et interactions.
-              </p>
-              <div className="grid grid-cols-2 gap-1.5">
-                {ADMIN_FEATURES.map((f) => (
-                  <div key={f.t} className="flex items-center gap-1.5">
-                    <f.Icon className="h-3.5 w-3.5 flex-shrink-0 text-blue-300" />
-                    <span className="text-xs text-blue-100">{f.t}</span>
-                  </div>
-                ))}
-              </div>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* ── How it works ───────────────────────────────────────────────── */}
-      <section id="comment-ca-marche" className="bg-white py-20">
-        <div className="mx-auto max-w-7xl px-6">
-          <div className="text-center">
-            <p className="text-sm font-semibold uppercase tracking-widest text-blue-600">
-              Mise en place
-            </p>
-            <h2 className="mt-2 text-3xl font-extrabold text-gray-900 md:text-4xl">
-              Opérationnel en 48 heures
-            </h2>
-            <p className="mx-auto mt-4 max-w-lg text-lg text-gray-500">
-              Pas d'équipe technique requise. De la configuration à votre
-              premier habitant connecté, tout se fait simplement.
-            </p>
-          </div>
-
-          <div className="mt-14 grid gap-8 md:grid-cols-3">
-            {STEPS.map((step) => (
-              <div
-                key={step.n}
-                className="rounded-2xl border border-gray-100 bg-gray-50 p-8"
-              >
-                <div
-                  className="mb-5 inline-flex h-12 w-12 items-center justify-center rounded-xl text-lg font-extrabold text-white"
-                  style={{ backgroundColor: "#1e3a8a" }}
-                >
-                  {step.n}
-                </div>
-                <h3 className="mb-2 text-base font-bold text-gray-900">
-                  {step.title}
-                </h3>
-                <p className="text-sm leading-relaxed text-gray-500">
-                  {step.desc}
-                </p>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      <PricingSection />
-
-      {/* ── Contact ────────────────────────────────────────────────────── */}
-      <section
-        id="contact"
-        className="py-20"
-        style={{
-          background: "linear-gradient(135deg, #f0f4ff 0%, #e0e7ff 100%)",
-        }}
-      >
-        <div className="mx-auto max-w-3xl px-6 text-center">
-          <p className="text-sm font-semibold uppercase tracking-widest text-blue-600">
-            Contact
-          </p>
-          <h2 className="mt-2 text-3xl font-extrabold text-gray-900 md:text-4xl">
-            Votre commune mérite un lien{" "}
-            <span style={{ color: "#1e3a8a" }}>direct avec ses habitants</span>
-          </h2>
-          <p className="mx-auto mt-5 max-w-lg text-lg text-gray-500">
-            Nous accompagnons les premières collectivités qui souhaitent adopter
-            VigieCity. Prenez contact pour en savoir plus sur le projet et les
-            conditions de lancement.
-          </p>
-
-          <div className="mt-10 flex flex-col items-center justify-center gap-4 sm:flex-row">
-            <a
-              href="mailto:contact@vigiecity.fr?subject=Je souhaite en savoir plus sur VigieCity"
-              className="inline-flex items-center gap-2 rounded-xl px-8 py-4 text-base font-bold text-white shadow-lg transition hover:opacity-90"
-              style={{ backgroundColor: "#1e3a8a" }}
-            >
-              Écrire à contact@vigiecity.fr
-              <ArrowRight className="h-4 w-4" />
-            </a>
-          </div>
-
-          <div className="mt-8 flex flex-wrap items-center justify-center gap-6 text-sm text-gray-500">
-            {[
-              "Application iOS & Android",
-              "Espace admin web",
-              "Support inclus",
-              "Données hébergées en Europe",
-              "Conforme RGPD",
-            ].map((item) => (
-              <span key={item} className="flex items-center gap-1.5">
-                <CheckCircle2 className="h-4 w-4 text-green-500" />
-                {item}
-              </span>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* ── Footer ─────────────────────────────────────────────────────── */}
-      <footer className="py-10" style={{ backgroundColor: "#0f172a" }}>
-        <div className="mx-auto max-w-7xl px-6">
-          <div className="flex flex-col items-center justify-between gap-6 md:flex-row">
-            <div className="flex items-center gap-2.5">
-              <VCLogo size={26} />
-              <span className="text-lg font-bold text-white">VigieCity</span>
-              <span className="text-sm text-slate-500">
-                — L'app citoyenne pour votre commune
-              </span>
-            </div>
-            <div className="flex flex-wrap items-center gap-6">
-              <a
-                href="mailto:contact@vigiecity.fr"
-                className="text-sm text-slate-400 transition hover:text-white"
-              >
-                contact@vigiecity.fr
-              </a>
-              <Link
-                to="/auth"
-                className="text-sm text-slate-400 transition hover:text-white"
-              >
-                Connexion habitants
-              </Link>
-              <Link
-                to="/mentions-legales"
-                className="text-sm text-slate-400 transition hover:text-white"
-              >
-                Mentions légales
-              </Link>
-              <Link
-                to="/confidentialite"
-                className="text-sm text-slate-400 transition hover:text-white"
-              >
-                Confidentialité
-              </Link>
-              <Link
-                to="/cgu"
-                className="text-sm text-slate-400 transition hover:text-white"
-              >
-                CGU
-              </Link>
-            </div>
-          </div>
-          <div className="mt-6 border-t border-slate-800 pt-6 text-center text-xs text-slate-600">
-            © {new Date().getFullYear()} VigieCity · Application déployée sur{" "}
-            <span className="text-slate-500">Vercel</span> · Base de données{" "}
-            <span className="text-slate-500">Supabase (EU)</span> · Données
-            hébergées en Europe · Conforme RGPD
-          </div>
-        </div>
-      </footer>
-      <PromoBanner />
-    </div>
-  );
-}
+      {/* ── Pour qui ───────────────────────────────�
