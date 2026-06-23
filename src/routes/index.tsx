@@ -1,5 +1,5 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { useState } from "react";
+import { useState, useRef, useEffect } from "react";
 import {
   CheckCircle2, ArrowRight, ChevronDown,
   BellRing, MapPin, CalendarDays, Newspaper, MessageSquare,
@@ -738,6 +738,187 @@ const ADMIN_FEATURES = [
 ];
 
 
+
+// ── Calculateur tarifaire INSEE ───────────────────────────────────────────────
+
+type CommuneResult = { nom: string; code: string; population: number };
+
+function getPopulationTierIndex(population: number): number {
+  if (population < 1000)  return 0;
+  if (population < 2500)  return 1;
+  if (population < 10000) return 2;
+  if (population < 50000) return 3;
+  return 4;
+}
+
+const TIER_DATA = [
+  { name: "Nano",      range: "< 1 000 hab.",         monthly: 49,  annual: 490  },
+  { name: "Micro",     range: "1 000 – 2 500 hab.",   monthly: 99,  annual: 990  },
+  { name: "Local",     range: "2 500 – 10 000 hab.",  monthly: 189, annual: 1890 },
+  { name: "Urbain",    range: "10 000 – 50 000 hab.", monthly: 490, annual: 4900 },
+  { name: "Métropole", range: "> 50 000 hab.",         monthly: null, annual: null },
+] as const;
+
+function CommuneCalculatorSection() {
+  const [query, setQuery]               = useState("");
+  const [results, setResults]           = useState<CommuneResult[]>([]);
+  const [loading, setLoading]           = useState(false);
+  const [selected, setSelected]         = useState<CommuneResult | null>(null);
+  const [showDropdown, setShowDropdown] = useState(false);
+  const debounceRef  = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const containerRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const handler = (e: MouseEvent) => {
+      if (containerRef.current && !containerRef.current.contains(e.target as Node)) {
+        setShowDropdown(false);
+      }
+    };
+    document.addEventListener("mousedown", handler);
+    return () => document.removeEventListener("mousedown", handler);
+  }, []);
+
+  const search = async (q: string) => {
+    if (q.trim().length < 2) { setResults([]); setLoading(false); return; }
+    setLoading(true);
+    try {
+      const res  = await fetch(`https://geo.api.gouv.fr/communes?nom=${encodeURIComponent(q)}&fields=nom,code,population&limit=7&boost=population`);
+      const data = await res.json() as CommuneResult[];
+      setResults(data.filter((c) => c.population != null && c.population > 0));
+    } catch {
+      setResults([]);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleInput = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const val = e.target.value;
+    setQuery(val);
+    setSelected(null);
+    setShowDropdown(true);
+    if (debounceRef.current) clearTimeout(debounceRef.current);
+    debounceRef.current = setTimeout(() => search(val), 280);
+  };
+
+  const handleSelect = (c: CommuneResult) => {
+    setSelected(c);
+    setQuery(c.nom);
+    setResults([]);
+    setShowDropdown(false);
+  };
+
+  const tierIndex = selected ? getPopulationTierIndex(selected.population) : null;
+  const tier      = tierIndex !== null ? TIER_DATA[tierIndex] : null;
+
+  return (
+    <section style={{ background: "linear-gradient(150deg, #1e3a8a 0%, #1d4ed8 100%)" }} className="py-20">
+      <div className="mx-auto max-w-2xl px-6">
+        <div className="text-center">
+          <p className="text-sm font-semibold uppercase tracking-widest text-blue-300">Calculateur de tarif</p>
+          <h2 className="mt-2 text-3xl font-extrabold text-white md:text-4xl">Quel est le tarif pour votre commune ?</h2>
+          <p className="mx-auto mt-4 max-w-lg text-blue-200">
+            Entrez le nom de votre commune — la population est récupérée depuis l'INSEE et votre plan s'affiche instantanément.
+          </p>
+        </div>
+
+        <div ref={containerRef} className="relative mt-10">
+          <div className="flex items-center gap-3 rounded-2xl bg-white px-5 py-4 shadow-xl">
+            <MapPin className="h-5 w-5 flex-shrink-0 text-blue-400" />
+            <input
+              type="text"
+              value={query}
+              onChange={handleInput}
+              onFocus={() => results.length > 0 && setShowDropdown(true)}
+              placeholder="Nom de votre commune..."
+              className="flex-1 bg-transparent text-base font-medium text-gray-900 placeholder-gray-400 outline-none"
+            />
+            {loading && <span className="text-xs text-gray-400">Recherche…</span>}
+          </div>
+          {showDropdown && results.length > 0 && (
+            <div className="absolute left-0 right-0 top-full z-50 mt-2 overflow-hidden rounded-2xl bg-white" style={{ boxShadow: "0 20px 60px rgba(0,0,0,0.18)" }}>
+              {results.map((c, i) => (
+                <button
+                  key={c.code}
+                  onClick={() => handleSelect(c)}
+                  className="flex w-full items-center justify-between px-5 py-3 text-left transition hover:bg-blue-50"
+                  style={{ borderTop: i > 0 ? "1px solid #f1f5f9" : "none" }}
+                >
+                  <div>
+                    <span className="font-semibold text-gray-900">{c.nom}</span>
+                    <span className="ml-2 text-xs text-gray-400">{c.code}</span>
+                  </div>
+                  <span className="rounded-full px-2.5 py-0.5 text-xs font-bold" style={{ background: "#eff6ff", color: "#1e3a8a" }}>
+                    {c.population.toLocaleString("fr-FR")} hab.
+                  </span>
+                </button>
+              ))}
+            </div>
+          )}
+        </div>
+
+        {selected && tier && (
+          <div className="mt-8 overflow-hidden rounded-2xl bg-white" style={{ boxShadow: "0 24px 64px rgba(0,0,0,0.22)" }}>
+            <div className="flex items-center gap-3 px-7 py-4" style={{ background: "#f8faff", borderBottom: "1px solid #e0e7ff" }}>
+              <div className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-xl" style={{ background: "#eff6ff" }}>
+                🏛️
+              </div>
+              <div>
+                <p className="font-bold text-gray-900">{selected.nom}</p>
+                <p className="text-xs text-gray-500">{selected.population.toLocaleString("fr-FR")} habitants · Code INSEE {selected.code}</p>
+              </div>
+              <button onClick={() => { setSelected(null); setQuery(""); }} className="ml-auto rounded-lg p-1.5 text-gray-400 transition hover:bg-gray-100">
+                <X className="h-4 w-4" />
+              </button>
+            </div>
+            <div className="px-7 py-7 text-center">
+              <p className="text-xs font-bold uppercase tracking-widest" style={{ color: "#1e3a8a" }}>Plan recommandé</p>
+              <p className="mt-1 text-2xl font-extrabold text-gray-900">{tier.name}</p>
+              <p className="text-sm text-gray-400">{tier.range}</p>
+              {tier.monthly === null ? (
+                <>
+                  <p className="mt-5 text-4xl font-extrabold text-gray-900">Sur devis</p>
+                  <p className="mt-2 text-sm text-gray-500">Tarif personnalisé · SLA et accompagnement adaptés</p>
+                </>
+              ) : (
+                <>
+                  <div className="mt-5 flex items-end justify-center gap-2">
+                    <span className="text-5xl font-extrabold text-gray-900">{tier.monthly} €</span>
+                    <span className="mb-2 text-gray-400">/mois HT</span>
+                  </div>
+                  <p className="mt-1.5 text-sm font-semibold" style={{ color: "#1e3a8a" }}>
+                    ou {tier.annual?.toLocaleString("fr-FR")} €/an HT <span className="font-normal text-gray-400">(2 mois offerts)</span>
+                  </p>
+                </>
+              )}
+              <div className="mt-5 flex flex-wrap justify-center gap-2">
+                {["Tous modules inclus", "App iOS & Android", "Espace admin web", "Support inclus"].map((f) => (
+                  <span key={f} className="flex items-center gap-1 rounded-full px-3 py-1 text-xs font-medium" style={{ background: "#f0fdf4", color: "#15803d" }}>
+                    <CheckCircle2 className="h-3 w-3" />{f}
+                  </span>
+                ))}
+              </div>
+              <a
+                href={`mailto:contact@vigiecity.fr?subject=Proposition VigieCity — ${encodeURIComponent(selected.nom)}&body=Bonjour,%0A%0AJe souhaite obtenir une proposition pour ${encodeURIComponent(selected.nom)} (${selected.population.toLocaleString("fr-FR")} habitants).%0A%0AMerci.`}
+                className="mt-6 inline-flex items-center gap-2 rounded-xl px-8 py-4 text-sm font-bold text-white shadow-lg transition hover:opacity-90"
+                style={{ backgroundColor: "#1e3a8a" }}
+              >
+                Demander une proposition pour {selected.nom}
+                <ArrowRight className="h-4 w-4" />
+              </a>
+            </div>
+          </div>
+        )}
+
+        <p className="mt-8 text-center text-xs text-blue-300">
+          Population source : <span className="font-medium text-blue-200">INSEE via geo.api.gouv.fr</span> ·{" "}
+          <a href="#tarifs" className="underline hover:text-white">Voir la grille tarifaire complète ↓</a>
+        </p>
+      </div>
+    </section>
+  );
+}
+
 // ── Grille tarifaire ──────────────────────────────────────────────────────────
 
 const PRICING_TIERS = [
@@ -1245,6 +1426,7 @@ function LandingPage() {
         </div>
       </section>
 
+      <CommuneCalculatorSection />
       <PricingSection />
 
       {/* ── Contact ────────────────────────────────────────────────────── */}
