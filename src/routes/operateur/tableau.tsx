@@ -413,4 +413,354 @@ function OperateurTableau() {
                     padding: "6px 10px", borderRadius: 6, border: "none", cursor: "pointer",
                     fontSize: 12, fontWeight: 600,
                     background: active ? (sev ? sev.text : "#374151") : "transparent",
-                    color:      active ?
+                    color:      active ? "#fff" : (sev ? sev.text : "#374151"),
+                  }}>
+                    {v === "all" ? "Tous" : (sev?.label ?? v)}
+                  </button>
+                );
+              })}
+            </div>
+
+            {/* Catégorie */}
+            <select
+              value={catFilter}
+              onChange={e => setCatFilter(e.target.value)}
+              style={{
+                padding: "6px 10px", borderRadius: 7,
+                border: "1.5px solid #e5e7eb", fontSize: 13,
+                background: "white", cursor: "pointer", fontFamily: "inherit",
+              }}
+            >
+              <option value="all">📂 Catégories</option>
+              {Object.entries(CATEGORY_LABELS).map(([k, lbl]) => (
+                <option key={k} value={k}>{lbl}</option>
+              ))}
+            </select>
+          </div>
+        </div>
+
+        {/* ── Liste signalements ── */}
+        {loading ? (
+          <div style={{ textAlign: "center", padding: "40px 0", color: "#9ca3af", fontSize: 14 }}>
+            Chargement…
+          </div>
+        ) : filtered.length === 0 ? (
+          <div style={{
+            background: "white", borderRadius: 14, padding: 40,
+            textAlign: "center", color: "#9ca3af",
+            boxShadow: "0 1px 3px rgba(0,0,0,0.07)",
+          }}>
+            <div style={{ fontSize: 36, marginBottom: 10 }}>✅</div>
+            <div style={{ fontSize: 16, fontWeight: 600, color: "#374151", marginBottom: 4 }}>
+              Aucun signalement
+            </div>
+            <div style={{ fontSize: 13 }}>Tous les signalements ont été traités.</div>
+          </div>
+        ) : (
+          <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
+            {filtered.map(r => {
+              const sev  = SEVERITY[r.severity] ?? SEVERITY.info;
+              const st   = STATUS[r.status]     ?? { label: r.status, color: "#6b7280" };
+              const cat  = CATEGORY_LABELS[r.category] ?? r.category;
+              const addr = r.approximate_address
+                ?? (r.lat ? `${r.lat.toFixed(4)}, ${r.lng?.toFixed(4)}` : "–");
+              const when = new Date(r.occurred_at).toLocaleString("fr-FR", {
+                day: "2-digit", month: "short", hour: "2-digit", minute: "2-digit",
+              });
+              return (
+                <div
+                  key={r.id}
+                  onClick={() => openDetail(r)}
+                  style={{
+                    background: "white", borderRadius: 12, padding: "13px 16px",
+                    boxShadow: "0 1px 3px rgba(0,0,0,0.07)",
+                    cursor: "pointer", display: "flex", gap: 12, alignItems: "flex-start",
+                    borderLeft: `4px solid ${sev.border}`,
+                  }}
+                  onMouseEnter={e => { (e.currentTarget as HTMLDivElement).style.boxShadow = "0 3px 10px rgba(0,0,0,0.13)"; }}
+                  onMouseLeave={e => { (e.currentTarget as HTMLDivElement).style.boxShadow = "0 1px 3px rgba(0,0,0,0.07)"; }}
+                >
+                  <span style={{
+                    background: sev.bg, color: sev.text, border: `1px solid ${sev.border}`,
+                    borderRadius: 7, padding: "3px 9px", fontSize: 11, fontWeight: 700,
+                    whiteSpace: "nowrap", flexShrink: 0, marginTop: 2,
+                  }}>
+                    {sev.label}
+                  </span>
+
+                  <div style={{ flex: 1, minWidth: 0 }}>
+                    <div style={{ display: "flex", gap: 8, alignItems: "center", marginBottom: 3, flexWrap: "wrap" }}>
+                      <span style={{ fontWeight: 700, fontSize: 14, color: "#1f2937" }}>
+                        {r.title ?? cat}
+                      </span>
+                      <span style={{
+                        fontSize: 11, color: st.color, fontWeight: 600,
+                        background: `${st.color}18`, padding: "1px 7px", borderRadius: 99,
+                      }}>
+                        {st.label}
+                      </span>
+                      {r.media_paths?.length > 0 && (
+                        <span style={{ fontSize: 11, color: "#6b7280" }}>
+                          📷 {r.media_paths.length}
+                        </span>
+                      )}
+                    </div>
+                    <div style={{ fontSize: 12, color: "#6b7280", marginBottom: 3, display: "flex", gap: 10, flexWrap: "wrap" }}>
+                      <span>🏷 {cat}</span>
+                      <span>📍 {addr}</span>
+                      <span>🕐 {when}</span>
+                    </div>
+                    <div style={{
+                      fontSize: 13, color: "#374151",
+                      overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap",
+                    }}>
+                      {r.description}
+                    </div>
+                  </div>
+
+                  <span style={{ color: "#9ca3af", fontSize: 18, flexShrink: 0 }}>›</span>
+                </div>
+              );
+            })}
+          </div>
+        )}
+      </div>
+
+      {/* ── Modale détail (bottom-sheet) ── */}
+      {selected && (
+        <div
+          style={{
+            position: "fixed", inset: 0, zIndex: 100,
+            background: "rgba(0,0,0,0.45)",
+            display: "flex", alignItems: "flex-end",
+          }}
+          onClick={e => { if (e.target === e.currentTarget) setSelected(null); }}
+        >
+          <div style={{
+            background: "white", width: "100%", maxWidth: 700,
+            margin: "0 auto",
+            borderRadius: "20px 20px 0 0",
+            maxHeight: "92vh",
+            overflowY: "auto",
+          }}>
+            {/* Header fixe de la modale */}
+            <div style={{
+              position: "sticky", top: 0, background: "white", zIndex: 2,
+              padding: "12px 16px 10px",
+              borderBottom: "1px solid #f1f5f9",
+              display: "flex", alignItems: "center", justifyContent: "space-between",
+            }}>
+              <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+                {(() => {
+                  const sev = SEVERITY[selected.severity] ?? SEVERITY.info;
+                  return (
+                    <span style={{
+                      background: sev.bg, color: sev.text, border: `1px solid ${sev.border}`,
+                      borderRadius: 7, padding: "3px 9px", fontSize: 11, fontWeight: 700,
+                    }}>{sev.label}</span>
+                  );
+                })()}
+                <span style={{ fontWeight: 700, fontSize: 15, color: "#1f2937" }}>
+                  {selected.title ?? CATEGORY_LABELS[selected.category] ?? selected.category}
+                </span>
+              </div>
+              <button
+                onClick={() => setSelected(null)}
+                style={{
+                  background: "#f3f4f6", border: "none", borderRadius: "50%",
+                  width: 32, height: 32, cursor: "pointer",
+                  fontSize: 20, lineHeight: "32px", textAlign: "center",
+                }}
+              >×</button>
+            </div>
+
+            <div style={{ padding: "14px 16px 32px" }}>
+
+              {/* Infos rapides */}
+              <div style={{
+                background: "#f8fafc", borderRadius: 10, padding: "11px 14px",
+                fontSize: 13, color: "#374151", marginBottom: 14,
+                display: "grid", gridTemplateColumns: "1fr 1fr", gap: "6px 16px",
+              }}>
+                <span>🏷 <strong>Catégorie :</strong> {CATEGORY_LABELS[selected.category] ?? selected.category}</span>
+                <span>📌 <strong>Statut :</strong> {STATUS[selected.status]?.label ?? selected.status}</span>
+                <span>📍 <strong>Lieu :</strong> {selected.approximate_address ?? "–"}</span>
+                <span>🕐 <strong>Signalé :</strong> {new Date(selected.occurred_at).toLocaleString("fr-FR")}</span>
+              </div>
+
+              {/* Description */}
+              <div style={{ marginBottom: 14 }}>
+                <div style={{ fontSize: 12, fontWeight: 600, color: "#6b7280", marginBottom: 5, textTransform: "uppercase", letterSpacing: 0.5 }}>
+                  Description
+                </div>
+                <div style={{ fontSize: 14, color: "#1f2937", lineHeight: 1.6, background: "#f9fafb", padding: 12, borderRadius: 9 }}>
+                  {selected.description}
+                </div>
+              </div>
+
+              {detailLoading ? (
+                <div style={{ textAlign: "center", padding: "20px 0", color: "#9ca3af", fontSize: 14 }}>
+                  Chargement des détails…
+                </div>
+              ) : (
+                <>
+                  {/* Photos */}
+                  {detailPhotos.length > 0 && (
+                    <div style={{ marginBottom: 14 }}>
+                      <div style={{ fontSize: 12, fontWeight: 600, color: "#6b7280", marginBottom: 8, textTransform: "uppercase", letterSpacing: 0.5 }}>
+                        Photos ({detailPhotos.length})
+                      </div>
+                      <div style={{ position: "relative", borderRadius: 10, overflow: "hidden", background: "#000", aspectRatio: "16/9" }}>
+                        <img
+                          src={detailPhotos[photoIdx]}
+                          alt={`Photo ${photoIdx + 1}`}
+                          style={{ width: "100%", height: "100%", objectFit: "contain" }}
+                        />
+                        {detailPhotos.length > 1 && (
+                          <>
+                            <button
+                              onClick={() => setPhotoIdx(i => (i - 1 + detailPhotos.length) % detailPhotos.length)}
+                              style={{ position: "absolute", left: 8, top: "50%", transform: "translateY(-50%)", background: "rgba(0,0,0,0.5)", color: "white", border: "none", borderRadius: "50%", width: 32, height: 32, cursor: "pointer", fontSize: 16 }}
+                            >&#8249;</button>
+                            <button
+                              onClick={() => setPhotoIdx(i => (i + 1) % detailPhotos.length)}
+                              style={{ position: "absolute", right: 8, top: "50%", transform: "translateY(-50%)", background: "rgba(0,0,0,0.5)", color: "white", border: "none", borderRadius: "50%", width: 32, height: 32, cursor: "pointer", fontSize: 16 }}
+                            >&#8250;</button>
+                            <span style={{ position: "absolute", bottom: 8, right: 8, background: "rgba(0,0,0,0.6)", color: "white", fontSize: 11, padding: "2px 8px", borderRadius: 99 }}>
+                              {photoIdx + 1} / {detailPhotos.length}
+                            </span>
+                          </>
+                        )}
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Historique statuts */}
+                  {detailHistory.length > 0 && (
+                    <div style={{ marginBottom: 14 }}>
+                      <div style={{ fontSize: 12, fontWeight: 600, color: "#6b7280", marginBottom: 8, textTransform: "uppercase", letterSpacing: 0.5 }}>
+                        Historique
+                      </div>
+                      <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
+                        {detailHistory.map(h => (
+                          <div key={h.id} style={{ background: "#f8fafc", borderRadius: 8, padding: "8px 12px", fontSize: 13 }}>
+                            <div style={{ display: "flex", gap: 8, alignItems: "center", marginBottom: h.comment ? 4 : 0 }}>
+                              {h.old_status && (
+                                <span style={{ color: STATUS[h.old_status]?.color ?? "#6b7280", fontWeight: 600 }}>
+                                  {STATUS[h.old_status]?.label ?? h.old_status}
+                                </span>
+                              )}
+                              {h.old_status && <span style={{ color: "#9ca3af" }}>&#8594;</span>}
+                              <span style={{ color: STATUS[h.new_status]?.color ?? "#6b7280", fontWeight: 700 }}>
+                                {STATUS[h.new_status]?.label ?? h.new_status}
+                              </span>
+                              <span style={{ color: "#9ca3af", fontSize: 11, marginLeft: "auto" }}>
+                                {new Date(h.changed_at).toLocaleString("fr-FR")}
+                              </span>
+                            </div>
+                            {h.comment && (
+                              <div style={{ color: "#4b5563", fontSize: 12 }}>&#128172; {h.comment}</div>
+                            )}
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Notes internes */}
+                  <div style={{ marginBottom: 14 }}>
+                    <div style={{ fontSize: 12, fontWeight: 600, color: "#6b7280", marginBottom: 8, textTransform: "uppercase", letterSpacing: 0.5 }}>
+                      Notes internes
+                    </div>
+                    {detailNotes.length === 0 ? (
+                      <div style={{ color: "#9ca3af", fontSize: 13, padding: "4px 0 8px" }}>Aucune note.</div>
+                    ) : (
+                      <div style={{ display: "flex", flexDirection: "column", gap: 6, marginBottom: 8 }}>
+                        {detailNotes.map(n => (
+                          <div key={n.id} style={{
+                            background: "#fffbeb", border: "1px solid #fde68a",
+                            borderRadius: 8, padding: "8px 12px", fontSize: 13,
+                          }}>
+                            <div style={{ color: "#92400e", marginBottom: 2 }}>{n.text}</div>
+                            <div style={{ fontSize: 11, color: "#b45309" }}>
+                              {new Date(n.created_at).toLocaleString("fr-FR")}
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                    <div style={{ display: "flex", gap: 6 }}>
+                      <textarea
+                        value={noteText}
+                        onChange={e => setNoteText(e.target.value)}
+                        placeholder="Ajouter une note interne…"
+                        rows={2}
+                        style={{
+                          flex: 1, padding: "8px 12px", borderRadius: 8,
+                          border: "1.5px solid #e5e7eb", fontSize: 13,
+                          fontFamily: "inherit", resize: "vertical", outline: "none",
+                        }}
+                        onFocus={e => { e.target.style.borderColor = accentColor; }}
+                        onBlur={e => { e.target.style.borderColor = "#e5e7eb"; }}
+                      />
+                      <button
+                        onClick={addNote}
+                        disabled={!noteText.trim() || updating}
+                        style={{
+                          padding: "0 14px", borderRadius: 8, border: "none",
+                          background: accentColor, color: "white",
+                          fontSize: 13, fontWeight: 600, cursor: "pointer",
+                          opacity: (!noteText.trim() || updating) ? 0.5 : 1,
+                          alignSelf: "flex-end", height: 38,
+                        }}
+                      >
+                        {updating ? "…" : "Ajouter"}
+                      </button>
+                    </div>
+                  </div>
+                </>
+              )}
+
+              {/* ── Actions statut ── */}
+              <div style={{ background: "#f8fafc", borderRadius: 12, padding: 14 }}>
+                <div style={{ fontSize: 12, fontWeight: 600, color: "#6b7280", marginBottom: 10, textTransform: "uppercase", letterSpacing: 0.5 }}>
+                  Changer le statut
+                </div>
+                <div style={{ display: "flex", flexWrap: "wrap", gap: 8 }}>
+                  {Object.entries(STATUS)
+                    .filter(([k]) => k !== selected.status)
+                    .map(([k, v]) => (
+                      <button
+                        key={k}
+                        disabled={updating}
+                        onClick={() => changeStatus(k)}
+                        style={{
+                          padding: "8px 16px", borderRadius: 9,
+                          border: `1.5px solid ${v.color}`,
+                          background: "white", color: v.color,
+                          fontSize: 13, fontWeight: 600, cursor: "pointer",
+                          opacity: updating ? 0.6 : 1,
+                        }}
+                        onMouseEnter={e => {
+                          (e.currentTarget as HTMLButtonElement).style.background = v.color;
+                          (e.currentTarget as HTMLButtonElement).style.color = "white";
+                        }}
+                        onMouseLeave={e => {
+                          (e.currentTarget as HTMLButtonElement).style.background = "white";
+                          (e.currentTarget as HTMLButtonElement).style.color = v.color;
+                        }}
+                      >
+                        {updating ? "…" : v.label}
+                      </button>
+                    ))}
+                </div>
+              </div>
+
+            </div>
+          </div>
+        </div>
+      )}
+
+    </div>
+  );
+}
