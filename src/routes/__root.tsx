@@ -244,11 +244,11 @@ function RootComponent() {
           });
         }
 
-        // Admin roles → redirect to /admin/dashboard
+        // Admin roles → redirect to /admin (index)
         const role = profile?.role as string;
         if (ADMIN_ROLES.includes(role as typeof ADMIN_ROLES[number])) {
           if (!pathname.startsWith("/admin") && !pathname.startsWith("/platform")) {
-            navigate({ to: "/admin/dashboard" });
+            navigate({ to: "/admin" });
           }
           return;
         }
@@ -283,3 +283,4 @@ function RootComponent() {
     </QueryClientProvider>
   );
 }
+            

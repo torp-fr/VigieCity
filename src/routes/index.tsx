@@ -5,7 +5,7 @@ import {
   BellRing, MapPin, CalendarDays, Newspaper, MessageSquare,
   Home, Network, Building2,
   LayoutDashboard, CheckSquare, BarChart3, Map as MapIcon, Users,
-  X, Sparkles, ToggleLeft, ToggleRight,
+  ToggleLeft, ToggleRight,
 } from "lucide-react";
 
 export const Route = createFileRoute("/")({
@@ -1278,59 +1278,6 @@ function PricingSection() {
   );
 }
 
-// ── Banner promo flottante ────────────────────────────────────────────────────
-
-function PromoBanner() {
-  const [dismissed, setDismissed] = useState(false);
-  if (dismissed) return null;
-  return (
-    <>
-      <style>{`
-        @keyframes vcSlideUp {
-          from { transform: translateY(24px); opacity: 0; }
-          to   { transform: translateY(0);    opacity: 1; }
-        }
-        .vc-promo { animation: vcSlideUp 0.45s cubic-bezier(0.22,1,0.36,1) both; }
-      `}</style>
-      <div
-        className="vc-promo fixed bottom-6 right-6 z-50 w-72 rounded-2xl bg-white p-5"
-        style={{ boxShadow: "0 20px 60px rgba(0,0,0,0.18), 0 4px 16px rgba(0,0,0,0.10)", border: "1px solid #e0e7ff" }}
-      >
-        {/* Close */}
-        <button
-          onClick={() => setDismissed(true)}
-          className="absolute right-3 top-3 rounded-lg p-1 text-gray-400 transition hover:bg-gray-100 hover:text-gray-700"
-          aria-label="Fermer"
-        >
-          <X className="h-4 w-4" />
-        </button>
-
-        {/* Content */}
-        <div className="flex items-center gap-2">
-          <Sparkles className="h-5 w-5 flex-shrink-0" style={{ color: "#f59e0b" }} />
-          <p className="text-sm font-extrabold text-gray-900">Offre à ne pas manquer</p>
-        </div>
-        <p className="mt-2.5 text-sm leading-relaxed text-gray-600">
-          Les <strong>premières collectivités partenaires</strong> bénéficient de{" "}
-          <strong className="text-blue-700">2 mois offerts</strong> avant le début de l'abonnement.
-        </p>
-        <p className="mt-1.5 text-xs text-gray-400">
-          Places limitées · Accès prioritaire aux nouvelles fonctionnalités
-        </p>
-        <a
-          href="#contact"
-          onClick={() => setDismissed(true)}
-          className="mt-4 flex items-center justify-center gap-1.5 rounded-xl py-2.5 text-sm font-bold text-white transition hover:opacity-90"
-          style={{ backgroundColor: "#1e3a8a" }}
-        >
-          En savoir plus
-          <ArrowRight className="h-3.5 w-3.5" />
-        </a>
-      </div>
-    </>
-  );
-}
-
 // ── Page ──────────────────────────────────────────────────────────────────────
 
 function LandingPage() {
@@ -1697,7 +1644,7 @@ function LandingPage() {
           </div>
         </div>
       </footer>
-      <PromoBanner />
     </div>
   );
 }
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 
