@@ -177,4 +177,9 @@ function RoutagePage() {
       {data?.services.length === 0 && (
         <p className="text-sm text-muted-foreground text-center">
           Aucun service actif — créez d'abord des services dans{" "}
-          <
+          <a href="/admin/services" className="text-primary underline">Mes services</a>.
+        </p>
+      )}
+    </div>
+  );
+}

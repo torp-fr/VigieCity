@@ -400,4 +400,3 @@ function AcceptInvitePage() {
     </div>
   );
 }
-          

@@ -299,4 +299,69 @@ function AdminAlertesPage() {
         </div>
 
         {/* Preview */}
-    
+        {/* Preview */}
+        <div>
+          <h2 className="mb-3 font-semibold text-slate-900">Aperçu notification</h2>
+          <div className={`rounded-2xl border p-4 ${sevConf.color}`}>
+            <div className="flex items-start gap-3">
+              <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-white/60">
+                <SevIcon className="h-4 w-4" />
+              </div>
+              <div>
+                <p className="font-semibold">{form.title || "Titre de l'alerte"}</p>
+                <p className="mt-0.5 text-sm opacity-80">{form.body || "Message de l'alerte…"}</p>
+              </div>
+            </div>
+            <div className="mt-3 flex items-center gap-2">
+              <Bell className="h-3 w-3 opacity-50" />
+              <span className="text-xs opacity-60">VigieCity · {meta?.communeName || "Commune"}</span>
+            </div>
+          </div>
+
+          <div className="mt-4 rounded-xl bg-slate-50 p-4 text-xs text-slate-500">
+            <p className="font-medium text-slate-700">Comment ça fonctionne ?</p>
+            <p className="mt-1">Les citoyens abonnés aux notifications push recevront cette alerte en temps réel sur leur téléphone. L'alerte sera aussi visible dans l'onglet Alertes de l'application.</p>
+          </div>
+
+          {/* History toggle */}
+          <button
+            onClick={() => setShowHistory(h => !h)}
+            className="mt-6 flex w-full items-center justify-between rounded-xl border border-slate-200 px-4 py-3 text-sm font-medium text-slate-700 transition hover:bg-slate-50"
+          >
+            <span className="flex items-center gap-2"><Clock className="h-4 w-4 text-slate-400" /> Historique des alertes</span>
+            <ChevronDown className={`h-4 w-4 text-slate-400 transition ${showHistory ? "rotate-180" : ""}`} />
+          </button>
+
+          {showHistory && (
+            <div className="mt-2 overflow-hidden rounded-xl border border-slate-200 bg-white">
+              {loadingAlerts ? (
+                <div className="flex justify-center py-6"><Loader2 className="h-5 w-5 animate-spin text-slate-400" /></div>
+              ) : alerts.length === 0 ? (
+                <p className="py-6 text-center text-sm text-slate-400">Aucune alerte envoyée</p>
+              ) : (
+                <ul className="divide-y divide-slate-100">
+                  {alerts.map(a => (
+                    <li key={a.id} className="px-4 py-3">
+                      <div className="flex items-start justify-between gap-2">
+                        <div className="min-w-0">
+                          <SevBadge severity={a.severity} />
+                          <p className="mt-1 font-medium text-slate-800 text-sm">{a.title}</p>
+                          <p className="text-xs text-slate-500 line-clamp-2">{a.body}</p>
+                        </div>
+                        <span className="shrink-0 text-xs text-slate-400">
+                          {new Date(a.sent_at).toLocaleDateString("fr-FR", { day: "numeric", month: "short", hour: "2-digit", minute: "2-digit" })}
+                        </span>
+                      </div>
+                    </li>
+                  ))}
+                </ul>
+              )}
+            </div>
+          )}
+        </div>
+
+      </div>
+    </div>
+    </AdminShell>
+  );
+}
