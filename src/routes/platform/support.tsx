@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { ArrowLeft, Loader2, Shield, ChevronDown, ChevronUp } from "lucide-react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
+import { PlatformShell } from "@/components/PlatformShell";
 
 export const Route = createFileRoute("/platform/support")({
   head: () => ({ meta: [{ title: "Support — Platform Admin" }, { name: "robots", content: "noindex" }] }),
@@ -45,7 +46,6 @@ function fmtDate(iso: string) {
 function PlatformSupportPage() {
   const navigate = useNavigate();
   const qc = useQueryClient();
-  const [isAdmin, setIsAdmin] = useState<boolean | null>(null);
   const [expandedId, setExpandedId] = useState<string | null>(null);
   const [filterStatus, setFilterStatus] = useState<string>("open");
   const [resolution, setResolution] = useState("");
@@ -63,7 +63,6 @@ function PlatformSupportPage() {
 
   const { data, isLoading } = useQuery({
     queryKey: ["platform_support", filterStatus],
-    enabled: isAdmin === true,
     queryFn: async () => {
       let q = supabase
         .from("support_tickets")
@@ -98,20 +97,10 @@ function PlatformSupportPage() {
     onError: () => toast.error("Erreur lors de la mise à jour."),
   });
 
-  if (isAdmin === null) return <div className="flex justify-center pt-20"><Loader2 className="h-6 w-6 animate-spin text-muted-foreground" /></div>;
-  if (!isAdmin) return (
-    <div className="px-4 pt-10 text-center">
-      <Shield className="mx-auto h-10 w-10 text-muted-foreground" />
-      <p className="mt-4 text-sm text-muted-foreground">Accès refusé.</p>
-      <button onClick={() => navigate({ to: "/" })} className="mt-4 text-sm text-primary underline">Retour</button>
-    </div>
-  );
 
   return (
+    <PlatformShell activePath="/platform/support">
     <div className="space-y-4 px-4 pt-5">
-      <Link to="/platform" className="inline-flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground">
-        <ArrowLeft className="h-4 w-4" /> Platform Admin
-      </Link>
       <header>
         <h1 className="text-2xl font-bold">Support</h1>
         <p className="mt-1 text-sm text-muted-foreground">Tickets des communes.</p>
@@ -225,5 +214,6 @@ function PlatformSupportPage() {
         </ul>
       )}
     </div>
+    </PlatformShell>
   );
 }

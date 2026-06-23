@@ -4,6 +4,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { Zap, Save, Loader2 } from "lucide-react";
 import { useState } from "react";
 import { toast } from "sonner";
+import { PlatformShell } from "@/components/PlatformShell";
 
 export const Route = createFileRoute("/platform/features")({
   component: FeaturesPage,
@@ -79,6 +80,7 @@ function FeaturesPage() {
   if (isLoading) return <div className="text-center py-12 text-muted-foreground">Chargement…</div>;
 
   return (
+    <PlatformShell activePath="/platform/features">
     <div className="space-y-5">
       <div className="flex items-center justify-between">
         <div>
@@ -136,7 +138,7 @@ function FeaturesPage() {
                     <span className={`text-xs px-2 py-0.5 rounded-full font-medium ${
                       lic.plan === "trial" ? "bg-amber-100 text-amber-700" :
                       lic.plan === "pro" ? "bg-violet-100 text-violet-700" :
-                      lic.plan === "enterprise" ? "bg-gray-100 text-gray-700" :
+                      lic.plan === "metropole" ? "bg-amber-100 text-amber-700" :
                       "bg-blue-100 text-blue-700"
                     }`}>
                       {lic.plan}
@@ -178,5 +180,6 @@ function FeaturesPage() {
         Les modifications ne sont appliquées qu'après avoir cliqué « Sauvegarder ».
       </p>
     </div>
+    </PlatformShell>
   );
 }

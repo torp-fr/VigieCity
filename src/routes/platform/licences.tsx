@@ -9,6 +9,7 @@ import {
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { ActionMenu } from "@/components/ActionMenu";
+import { PlatformShell } from "@/components/PlatformShell";
 
 export const Route = createFileRoute("/platform/licences")({
   head: () => ({ meta: [{ title: "Licences — Platform Admin" }, { name: "robots", content: "noindex" }] }),
@@ -39,19 +40,18 @@ type Invoice = {
 };
 
 // ── Constants ─────────────────────────────────────────────────────────────────
-const PLANS = ["trial", "decouverte", "essentiel", "standard", "pro", "intercommunal"] as const;
+const PLANS = ["trial", "nano", "micro", "local", "urbain", "metropole"] as const;
 type PlanKey = typeof PLANS[number];
 
 const PLAN_PRICE: Record<PlanKey, number> = {
-  trial: 0, decouverte: 29, essentiel: 49, standard: 129, pro: 249, intercommunal: 0,
+  trial: 0, nano: 49, micro: 99, local: 189, urbain: 490, metropole: 0,
 };
 const PLAN_LABELS: Record<PlanKey, string> = {
-  trial: "Trial", decouverte: "Découverte", essentiel: "Essentiel",
-  standard: "Standard", pro: "Pro", intercommunal: "Intercommunal",
+  trial: "Trial", nano: "Nano", micro: "Micro", local: "Local", urbain: "Urbain", metropole: "Metropole",
 };
 const PLAN_PRICE_LABEL: Record<PlanKey, string> = {
-  trial: "Gratuit", decouverte: "29 €/mois", essentiel: "49 €/mois",
-  standard: "129 €/mois", pro: "249 €/mois", intercommunal: "Sur devis",
+  trial: "Gratuit", nano: "49 EUR/mois", micro: "99 EUR/mois",
+  local: "189 EUR/mois", urbain: "490 EUR/mois", metropole: "Sur devis",
 };
 
 function fmtDate(iso: string) {
@@ -65,7 +65,6 @@ function daysUntil(iso: string) {
 function PlatformLicencesPage() {
   const navigate = useNavigate();
   const qc = useQueryClient();
-  const [isAdmin, setIsAdmin] = useState<boolean | null>(null);
   const [editingId, setEditingId] = useState<string | null>(null);
   const [editPlan, setEditPlan] = useState<PlanKey>("trial");
   const [expandedId, setExpandedId] = useState<string | null>(null);
@@ -84,7 +83,6 @@ function PlatformLicencesPage() {
   // ── Queries ────────────────────────────────────────────────────────────────
   const { data, isLoading } = useQuery({
     queryKey: ["platform_licences_v2"],
-    enabled: isAdmin === true,
     queryFn: async () => {
       // 2 requêtes séparées — join embedded bloque RLS sur commune_licenses
       const [licRes, colRes, invRes] = await Promise.all([
@@ -176,20 +174,10 @@ function PlatformLicencesPage() {
   }).length;
 
   // ── Guards ─────────────────────────────────────────────────────────────────
-  if (isAdmin === null) return <div className="flex justify-center pt-20"><Loader2 className="h-6 w-6 animate-spin text-muted-foreground" /></div>;
-  if (!isAdmin) return (
-    <div className="px-4 pt-10 text-center">
-      <Shield className="mx-auto h-10 w-10 text-muted-foreground" />
-      <p className="mt-4 text-sm text-muted-foreground">Accès refusé.</p>
-      <button onClick={() => navigate({ to: "/" })} className="mt-4 text-sm text-primary underline">Retour</button>
-    </div>
-  );
 
   return (
+    <PlatformShell activePath="/platform/licences">
     <div className="space-y-5 px-4 pt-5 pb-10">
-      <Link to="/platform" className="inline-flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground">
-        <ArrowLeft className="h-4 w-4" /> Platform Admin
-      </Link>
 
       <header>
         <h1 className="text-2xl font-bold">Licences & Finances</h1>
@@ -275,7 +263,7 @@ function PlatformLicencesPage() {
                       <span className="rounded-full border border-border px-2 py-0.5 text-xs font-semibold">
                         {PLAN_LABELS[plan]}
                         {price > 0 && <span className="ml-1 text-[10px] font-normal text-muted-foreground">· {price} €/mois</span>}
-                        {plan === "intercommunal" && <span className="ml-1 text-[10px] font-normal text-muted-foreground">· sur devis</span>}
+                        {plan === "metropole" && <span className="ml-1 text-[10px] font-normal text-muted-foreground">· sur devis</span>}
                         {plan === "trial" && <span className="ml-1 text-[10px] font-normal text-muted-foreground">· gratuit</span>}
                       </span>
                       <span className={`rounded-full px-2 py-0.5 text-[10px] font-semibold uppercase ${l.status === "active" ? "bg-green-500/10 text-green-700 dark:text-green-400 border border-green-500/30" : "bg-muted text-muted-foreground"}`}>
@@ -385,5 +373,6 @@ function PlatformLicencesPage() {
         </ul>
       )}
     </div>
+    </PlatformShell>
   );
 }

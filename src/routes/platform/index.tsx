@@ -1,20 +1,16 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { useQuery, useQueryClient, useMutation } from "@tanstack/react-query";
+import { useQuery } from "@tanstack/react-query";
 import {
-  Users, Building2, Activity, Rss,
-  RefreshCw, CheckCircle, Clock, Loader2,
-  AlertCircle,
+  Users, Building2, FileText, AlertTriangle,
+  CheckCircle, Clock, Loader2, TrendingUp,
 } from "lucide-react";
-import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { PlatformShell } from "@/components/PlatformShell";
 
 export const Route = createFileRoute("/platform/")({
-  head: () => ({ meta: [{ title: "Tableau de bord — VigieCity Platform" }] }),
+  head: () => ({ meta: [{ title: "Tableau de bord - VigieCity Platform" }] }),
   component: PlatformDashboard,
 });
-
-// ── Color map ─────────────────────────────────────────────────────────────────
 
 const COLORS = {
   blue:    { bg: "bg-blue-50",    icon: "text-blue-500"    },
@@ -23,39 +19,62 @@ const COLORS = {
   amber:   { bg: "bg-amber-50",   icon: "text-amber-500"   },
 } as const;
 
-// ── Main component ────────────────────────────────────────────────────────────
+const PLAN_COLORS: Record<string, string> = {
+  trial:     "bg-amber-100 text-amber-700",
+  nano:      "bg-slate-100 text-slate-700",
+  micro:     "bg-blue-100 text-blue-700",
+  local:     "bg-emerald-100 text-emerald-700",
+  urbain:    "bg-violet-100 text-violet-700",
+  metropole: "bg-amber-100 text-amber-700",
+};
+
+function fmtDate(iso: string) {
+  return new Date(iso).toLocaleDateString("fr-FR", {
+    day: "numeric", month: "short", year: "numeric",
+  });
+}
 
 function PlatformDashboard() {
-  const queryClient = useQueryClient();
-
-  // ── Stats ───────────────────────────────────────────────────────────────────
   const { data: stats, isLoading: statsLoading } = useQuery({
-    queryKey: ["platform-stats"],
+    queryKey: ["platform-dashboard-stats"],
     queryFn: async () => {
-      const [usersRes, communesRes, articlesRes, sourcesRes] = await Promise.all([
+      const [usersRes, communesRes, licencesRes, pubsRes] = await Promise.all([
         supabase.from("profiles").select("id", { count: "exact", head: true }),
         supabase.from("collectivities").select("id", { count: "exact", head: true }),
-        supabase.from("news_articles").select("id", { count: "exact", head: true }),
-        supabase.from("rss_sources").select("id", { count: "exact", head: true }),
+        supabase.from("commune_licenses").select("id", { count: "exact", head: true }),
+        supabase.from("publications").select("id", { count: "exact", head: true }),
       ]);
       return {
         users:    usersRes.count    ?? 0,
         communes: communesRes.count ?? 0,
-        articles: articlesRes.count ?? 0,
-        sources:  sourcesRes.count  ?? 0,
+        licences: licencesRes.count ?? 0,
+        pubs:     pubsRes.count     ?? 0,
       };
     },
     staleTime: 60_000,
   });
 
-  // ── Collectivités ───────────────────────────────────────────────────────────
+  const { data: licences, isLoading: licLoading } = useQuery({
+    queryKey: ["platform-dashboard-licences"],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("commune_licenses")
+        .select("id, plan, status, started_at, expires_at, collectivities(name)")
+        .order("started_at", { ascending: false })
+        .limit(20);
+      if (error) throw error;
+      return data ?? [];
+    },
+    staleTime: 5 * 60_000,
+  });
+
   const { data: collectivities, isLoading: collLoading } = useQuery({
-    queryKey: ["platform-collectivities"],
+    queryKey: ["platform-dashboard-collectivities"],
     queryFn: async () => {
       const { data, error } = await supabase
         .from("collectivities")
         .select("id, name, insee_code, status, created_at")
-        .order("name")
+        .order("created_at", { ascending: false })
         .limit(30);
       if (error) throw error;
       return data ?? [];
@@ -63,59 +82,16 @@ function PlatformDashboard() {
     staleTime: 5 * 60_000,
   });
 
-  // ── Sources RSS ─────────────────────────────────────────────────────────────
-  const { data: rssSources, isLoading: rssLoading } = useQuery({
-    queryKey: ["platform-rss-sources"],
-    queryFn: async () => {
-      const { data, error } = await supabase
-        .from("rss_sources")
-        .select("id, name, url, category, active, last_fetched_at, fetch_error")
-        .is("collectivity_id", null)
-        .order("name");
-      if (error) throw error;
-      return data ?? [];
-    },
-    staleTime: 5 * 60_000,
-  });
-
-  // ── Refresh RSS ─────────────────────────────────────────────────────────────
-  const refreshRss = useMutation({
-    mutationFn: async () => {
-      const res = await supabase.functions.invoke("fetch-rss", { body: {} });
-      if (res.error) throw res.error;
-      return res.data;
-    },
-    onSuccess: (data) => {
-      toast.success(`${data?.fetched ?? "—"} article(s) récupéré(s)`);
-      queryClient.invalidateQueries({ queryKey: ["platform-stats"] });
-      queryClient.invalidateQueries({ queryKey: ["platform-rss-sources"] });
-    },
-    onError: () => toast.error("Impossible de rafraîchir les flux RSS"),
-  });
-
-  // ── Render ──────────────────────────────────────────────────────────────────
   return (
     <PlatformShell activePath="/platform">
-
-      {/* Top bar */}
-      <div className="mb-8 flex items-center justify-between">
-        <div>
-          <h1 className="text-xl font-bold text-slate-900">Tableau de bord</h1>
-          <p className="mt-0.5 text-sm text-slate-500">Vue d'ensemble de la plateforme VigieCity</p>
-        </div>
-        <button
-          onClick={() => refreshRss.mutate()}
-          disabled={refreshRss.isPending}
-          className="flex items-center gap-2 rounded-lg border border-slate-200 bg-white px-4 py-2 text-sm font-medium text-slate-700 shadow-sm transition hover:bg-slate-50 disabled:opacity-60"
-        >
-          <RefreshCw className={`h-4 w-4 ${refreshRss.isPending ? "animate-spin" : ""}`} />
-          Sync RSS
-        </button>
+      <div className="mb-8">
+        <h1 className="text-xl font-bold text-slate-900">Tableau de bord</h1>
+        <p className="mt-0.5 text-sm text-slate-500">Vue d'ensemble de la plateforme VigieCity</p>
       </div>
 
       <div className="space-y-8">
 
-        {/* ── Stats ─────────────────────────────────────────────────────── */}
+        {/* Stats */}
         <section>
           <h2 className="mb-4 text-xs font-semibold uppercase tracking-wider text-slate-400">
             Statistiques globales
@@ -128,23 +104,95 @@ function PlatformDashboard() {
             </div>
           ) : (
             <div className="grid grid-cols-4 gap-4">
-              <StatCard label="Utilisateurs"    value={stats?.users    ?? 0} Icon={Users}    color="blue"    />
-              <StatCard label="Collectivités"   value={stats?.communes ?? 0} Icon={Building2} color="emerald" />
-              <StatCard label="Articles RSS"    value={stats?.articles ?? 0} Icon={Activity}  color="purple"  />
-              <StatCard label="Sources actives" value={stats?.sources  ?? 0} Icon={Rss}       color="amber"   />
+              <StatCard label="Utilisateurs" value={stats?.users    ?? 0} Icon={Users}      color="blue"    />
+              <StatCard label="Communes"     value={stats?.communes ?? 0} Icon={Building2}  color="emerald" />
+              <StatCard label="Licences"     value={stats?.licences ?? 0} Icon={TrendingUp} color="purple"  />
+              <StatCard label="Publications" value={stats?.pubs     ?? 0} Icon={FileText}   color="amber"   />
             </div>
           )}
         </section>
 
-        {/* ── Collectivités ─────────────────────────────────────────────── */}
+        {/* Licences recentes */}
         <section>
           <div className="mb-4 flex items-center justify-between">
             <h2 className="text-xs font-semibold uppercase tracking-wider text-slate-400">
-              Collectivités enregistrées
+              Licences recentes
             </h2>
-            {collectivities && (
-              <span className="text-xs text-slate-400">{collectivities.length} résultat(s)</span>
+            {licences && <span className="text-xs text-slate-400">{licences.length} affichees</span>}
+          </div>
+          <div className="overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm">
+            {licLoading ? (
+              <div className="flex items-center justify-center py-12">
+                <Loader2 className="h-5 w-5 animate-spin text-slate-300" />
+              </div>
+            ) : !licences?.length ? (
+              <div className="py-14 text-center">
+                <TrendingUp className="mx-auto mb-3 h-8 w-8 text-slate-200" />
+                <p className="text-sm text-slate-400">Aucune licence</p>
+              </div>
+            ) : (
+              <table className="w-full text-sm">
+                <thead>
+                  <tr className="border-b border-slate-100 bg-slate-50 text-left text-xs font-semibold uppercase tracking-wide text-slate-500">
+                    <th className="px-5 py-3">Commune</th>
+                    <th className="px-5 py-3">Plan</th>
+                    <th className="px-5 py-3">Statut</th>
+                    <th className="px-5 py-3">Debut</th>
+                    <th className="px-5 py-3">Expiration</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-slate-50">
+                  {licences.map((l: any) => {
+                    const expiry = l.expires_at ? new Date(l.expires_at) : null;
+                    const daysLeft = expiry
+                      ? Math.ceil((expiry.getTime() - Date.now()) / 86400000)
+                      : null;
+                    const expired = daysLeft !== null && daysLeft < 0;
+                    return (
+                      <tr key={l.id} className="transition-colors hover:bg-slate-50/60">
+                        <td className="px-5 py-3.5 font-medium text-slate-900">
+                          {(l.collectivities as any)?.name ?? l.id.slice(0, 8)}
+                        </td>
+                        <td className="px-5 py-3.5">
+                          <span className={`rounded-full px-2 py-0.5 text-xs font-semibold capitalize ${PLAN_COLORS[l.plan] ?? "bg-slate-100 text-slate-600"}`}>
+                            {l.plan ?? "?"}
+                          </span>
+                        </td>
+                        <td className="px-5 py-3.5">
+                          <StatusBadge status={l.status} />
+                        </td>
+                        <td className="px-5 py-3.5 text-slate-500">
+                          {l.started_at ? fmtDate(l.started_at) : "—"}
+                        </td>
+                        <td className="px-5 py-3.5">
+                          {expiry ? (
+                            <span className={`text-xs font-medium ${expired ? "text-red-500" : daysLeft! <= 30 ? "text-amber-600" : "text-slate-500"}`}>
+                              {expired
+                                ? `Expire il y a ${Math.abs(daysLeft!)}j`
+                                : daysLeft === 0
+                                ? "Expire aujourd'hui"
+                                : `${daysLeft}j restants`}
+                            </span>
+                          ) : (
+                            <span className="text-slate-300">Sans limite</span>
+                          )}
+                        </td>
+                      </tr>
+                    );
+                  })}
+                </tbody>
+              </table>
             )}
+          </div>
+        </section>
+
+        {/* Collectivites */}
+        <section>
+          <div className="mb-4 flex items-center justify-between">
+            <h2 className="text-xs font-semibold uppercase tracking-wider text-slate-400">
+              Collectivites enregistrees
+            </h2>
+            {collectivities && <span className="text-xs text-slate-400">{collectivities.length} affichees</span>}
           </div>
           <div className="overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm">
             {collLoading ? (
@@ -154,7 +202,7 @@ function PlatformDashboard() {
             ) : !collectivities?.length ? (
               <div className="py-14 text-center">
                 <Building2 className="mx-auto mb-3 h-8 w-8 text-slate-200" />
-                <p className="text-sm text-slate-400">Aucune collectivité enregistrée</p>
+                <p className="text-sm text-slate-400">Aucune collectivite enregistree</p>
               </div>
             ) : (
               <table className="w-full text-sm">
@@ -163,7 +211,7 @@ function PlatformDashboard() {
                     <th className="px-5 py-3">Nom</th>
                     <th className="px-5 py-3">Type</th>
                     <th className="px-5 py-3">Code INSEE</th>
-                    <th className="px-5 py-3">Création</th>
+                    <th className="px-5 py-3">Creation</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-slate-50">
@@ -175,94 +223,7 @@ function PlatformDashboard() {
                         {c.insee_code ?? "—"}
                       </td>
                       <td className="px-5 py-3.5 text-slate-500">
-                        {c.created_at
-                          ? new Date(c.created_at).toLocaleDateString("fr-FR", {
-                              day: "numeric", month: "short", year: "numeric",
-                            })
-                          : "—"}
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            )}
-          </div>
-        </section>
-
-        {/* ── Sources RSS ────────────────────────────────────────────────── */}
-        <section>
-          <div className="mb-4 flex items-center justify-between">
-            <h2 className="text-xs font-semibold uppercase tracking-wider text-slate-400">
-              Sources RSS nationales
-            </h2>
-            <button
-              onClick={() => queryClient.invalidateQueries({ queryKey: ["platform-rss-sources"] })}
-              className="text-xs text-slate-400 transition-colors hover:text-slate-600"
-            >
-              Actualiser
-            </button>
-          </div>
-          <div className="overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm">
-            {rssLoading ? (
-              <div className="flex items-center justify-center py-12">
-                <Loader2 className="h-5 w-5 animate-spin text-slate-300" />
-              </div>
-            ) : !rssSources?.length ? (
-              <div className="py-14 text-center">
-                <Rss className="mx-auto mb-3 h-8 w-8 text-slate-200" />
-                <p className="text-sm text-slate-400">Aucune source RSS configurée</p>
-              </div>
-            ) : (
-              <table className="w-full text-sm">
-                <thead>
-                  <tr className="border-b border-slate-100 bg-slate-50 text-left text-xs font-semibold uppercase tracking-wide text-slate-500">
-                    <th className="px-5 py-3">Source</th>
-                    <th className="px-5 py-3">Catégorie</th>
-                    <th className="px-5 py-3">Statut</th>
-                    <th className="px-5 py-3">Dernière sync</th>
-                    <th className="px-5 py-3">Erreur</th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-slate-50">
-                  {rssSources.map((s: any) => (
-                    <tr key={s.id} className="transition-colors hover:bg-slate-50/60">
-                      <td className="px-5 py-3.5">
-                        <p className="font-medium text-slate-900">{s.name}</p>
-                        <p className="mt-0.5 max-w-[260px] truncate text-xs text-slate-400">{s.url}</p>
-                      </td>
-                      <td className="px-5 py-3.5">
-                        <span className="rounded-full bg-slate-100 px-2 py-0.5 text-xs font-medium text-slate-600">
-                          {s.category}
-                        </span>
-                      </td>
-                      <td className="px-5 py-3.5">
-                        {s.active ? (
-                          <span className="flex items-center gap-1.5 text-xs font-medium text-emerald-600">
-                            <CheckCircle className="h-3.5 w-3.5" /> Actif
-                          </span>
-                        ) : (
-                          <span className="flex items-center gap-1.5 text-xs font-medium text-slate-400">
-                            <Clock className="h-3.5 w-3.5" /> Inactif
-                          </span>
-                        )}
-                      </td>
-                      <td className="px-5 py-3.5 text-xs text-slate-500">
-                        {s.last_fetched_at
-                          ? new Date(s.last_fetched_at).toLocaleString("fr-FR", {
-                              day: "numeric", month: "short",
-                              hour: "2-digit", minute: "2-digit",
-                            })
-                          : <span className="text-slate-300">Jamais</span>}
-                      </td>
-                      <td className="px-5 py-3.5">
-                        {s.fetch_error ? (
-                          <span className="flex items-center gap-1.5 text-red-500">
-                            <AlertCircle className="h-3.5 w-3.5 shrink-0" />
-                            <span className="max-w-[200px] truncate text-xs">{s.fetch_error}</span>
-                          </span>
-                        ) : (
-                          <span className="text-slate-200">—</span>
-                        )}
+                        {c.created_at ? fmtDate(c.created_at) : "—"}
                       </td>
                     </tr>
                   ))}
@@ -276,8 +237,6 @@ function PlatformDashboard() {
     </PlatformShell>
   );
 }
-
-// ── StatCard ──────────────────────────────────────────────────────────────────
 
 function StatCard({
   label, value, Icon, color,
@@ -299,7 +258,21 @@ function StatCard({
   );
 }
 
-// ── TypeBadge ─────────────────────────────────────────────────────────────────
+function StatusBadge({ status }: { status: string | null }) {
+  const map: Record<string, { cls: string; Icon: React.ElementType; label: string }> = {
+    active:    { cls: "text-emerald-600", Icon: CheckCircle,   label: "Actif"    },
+    trial:     { cls: "text-amber-600",   Icon: Clock,         label: "Trial"    },
+    suspended: { cls: "text-red-500",     Icon: AlertTriangle, label: "Suspendu" },
+    cancelled: { cls: "text-slate-400",   Icon: AlertTriangle, label: "Annule"   },
+  };
+  const cfg = map[status ?? ""] ?? { cls: "text-slate-400", Icon: Clock, label: status ?? "?" };
+  const Icon = cfg.Icon;
+  return (
+    <span className={`flex items-center gap-1.5 text-xs font-medium ${cfg.cls}`}>
+      <Icon className="h-3.5 w-3.5" /> {cfg.label}
+    </span>
+  );
+}
 
 function TypeBadge({ type }: { type: string | null }) {
   const map: Record<string, string> = {

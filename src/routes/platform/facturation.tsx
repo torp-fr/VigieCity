@@ -7,6 +7,7 @@ import { ActionMenu } from "@/components/ActionMenu";
 import { format } from "date-fns";
 import { fr } from "date-fns/locale";
 import { toast } from "sonner";
+import { PlatformShell } from "@/components/PlatformShell";
 
 export const Route = createFileRoute("/platform/facturation")({
   component: FacturationPage,
@@ -14,11 +15,11 @@ export const Route = createFileRoute("/platform/facturation")({
 
 const PLAN_PRICES: Record<string, number> = {
   trial: 0,
-  decouverte: 29,
-  essentiel: 49,
-  standard: 129,
-  pro: 249,
-  intercommunal: 0,
+  nano: 49,
+  micro: 99,
+  local: 189,
+  urbain: 490,
+  metropole: 0,
 };
 
 type Invoice = {
@@ -159,6 +160,7 @@ function FacturationPage() {
   if (isLoading) return <div className="text-center py-12 text-muted-foreground">Chargement…</div>;
 
   return (
+    <PlatformShell activePath="/platform/facturation">
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <div>
@@ -324,5 +326,6 @@ function FacturationPage() {
         </div>
       )}
     </div>
+    </PlatformShell>
   );
 }

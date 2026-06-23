@@ -1,74 +1,75 @@
 import { useNavigate } from "@tanstack/react-router";
 import { type ReactNode, useEffect } from "react";
 import {
-  LayoutDashboard, Building2, Users, Rss,
-  BookOpen, Settings, LogOut, Shield, Loader2,
+  LayoutDashboard, Building2, Users, BookOpen,
+  Settings, LogOut, Shield, Loader2,
   CreditCard, Euro, UserPlus, TrendingUp,
-  Newspaper, Package, BarChart3, Network,
+  Package, BarChart3, Network, Zap,
+  FileText, Clock, Headphones,
 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { usePlatformAuth, PLATFORM_SESSION_KEY } from "@/hooks/usePlatformAuth";
-
-// ── Nav sections (groupées) ───────────────────────────────────────────────────
 
 const NAV_SECTIONS = [
   {
     label: "COMMUNES",
     items: [
-      { icon: LayoutDashboard, label: "Tableau de bord",  path: "/platform"                },
-      { icon: Building2,       label: "Collectivités",    path: "/platform/collectivites"      },
-      { icon: Network,         label: "Intercommunalités", path: "/platform/intercommunalites" },
-      { icon: UserPlus,        label: "Onboarding",       path: "/platform/onboarding"         },
-      { icon: TrendingUp,      label: "Rétention",        path: "/platform/retention"      },
-      { icon: Users,           label: "Utilisateurs",     path: "/platform/users"          },
+      { icon: LayoutDashboard, label: "Tableau de bord",    path: "/platform"                    },
+      { icon: Building2,       label: "Collectivites",      path: "/platform/collectivites"      },
+      { icon: Network,         label: "Intercommunalites",  path: "/platform/intercommunalites"  },
+      { icon: UserPlus,        label: "Onboarding",         path: "/platform/onboarding"         },
+      { icon: TrendingUp,      label: "Retention",          path: "/platform/retention"          },
+      { icon: Users,           label: "Utilisateurs",       path: "/platform/users"              },
+    ],
+  },
+  {
+    label: "LICENCES & FACTURATION",
+    items: [
+      { icon: Shield,    label: "Licences",   path: "/platform/licences"    },
+      { icon: Clock,     label: "Trials",     path: "/platform/trials"      },
+      { icon: Euro,      label: "Facturation",path: "/platform/facturation" },
+      { icon: CreditCard,label: "Plans",      path: "/platform/plans"       },
+      { icon: Package,   label: "Modules",    path: "/platform/modules"     },
+    ],
+  },
+  {
+    label: "TARIFICATION EPCI",
+    items: [
+      { icon: Network, label: "Tarification EPCI", path: "/platform/tarification" },
     ],
   },
   {
     label: "CONTENU",
     items: [
-      { icon: Rss,             label: "Flux RSS",         path: "/platform/rss"            },
-      { icon: BookOpen,        label: "Connaissances",    path: "/platform/knowledge"      },
-      { icon: Newspaper,       label: "Éditeurs",         path: "/platform/publishers"     },
+      { icon: BookOpen, label: "Base de connaissances", path: "/platform/knowledge" },
+      { icon: FileText, label: "Publications",          path: "/platform/publishers" },
     ],
   },
   {
-    label: "TARIFICATION",
+    label: "ANALYTICS & SUPPORT",
     items: [
-      { icon: CreditCard,      label: "Plans tarifaires", path: "/platform/plans"          },
-      { icon: Euro,            label: "Intercommunal",    path: "/platform/tarification"   },
-      { icon: Package,         label: "Modules",          path: "/platform/modules"        },
-    ],
-  },
-  {
-    label: "ANALYTICS",
-    items: [
-      { icon: BarChart3,       label: "Analytics",        path: "/platform/analytics"      },
+      { icon: BarChart3,  label: "Analytics", path: "/platform/analytics" },
+      { icon: Zap,        label: "Features",  path: "/platform/features"  },
+      { icon: Headphones, label: "Support",   path: "/platform/support"   },
     ],
   },
   {
     label: "CONFIG",
     items: [
-      { icon: Settings,        label: "Paramètres",       path: "/platform/settings"       },
+      { icon: Settings, label: "Parametres", path: "/platform/settings" },
     ],
   },
 ] as const;
-
-// ── Props ─────────────────────────────────────────────────────────────────────
 
 interface PlatformShellProps {
   activePath: string;
   children: ReactNode;
 }
 
-// ── Component ─────────────────────────────────────────────────────────────────
-
 export function PlatformShell({ activePath, children }: PlatformShellProps) {
   const navigate = useNavigate();
-
-  // Auth check mis en cache par React Query — aucun re-fetch entre onglets
   const auth = usePlatformAuth();
 
-  // Redirection gérée ici (composant), pas dans le hook
   useEffect(() => {
     if (auth.status === "unauthorized") {
       navigate({ to: "/admin/login" });
@@ -81,9 +82,6 @@ export function PlatformShell({ activePath, children }: PlatformShellProps) {
     navigate({ to: "/admin/login" });
   }
 
-  // ── Loading / unauthorized gate ───────────────────────────────────────────
-  // On affiche toujours un spinner (jamais de page blanche) pendant que l'auth
-  // est en cours ou que la redirection est sur le point de se déclencher.
   if (auth.status !== "ready") {
     return (
       <div className="flex min-h-screen items-center justify-center bg-slate-50">
@@ -92,11 +90,10 @@ export function PlatformShell({ activePath, children }: PlatformShellProps) {
     );
   }
 
-  // ── Shell ─────────────────────────────────────────────────────────────────
   return (
     <div className="flex min-h-screen bg-slate-50">
 
-      {/* ── Sidebar ──────────────────────────────────────────────────────── */}
+      {/* Sidebar */}
       <aside
         className="fixed inset-y-0 left-0 flex w-60 flex-col px-3 py-6 shadow-lg"
         style={{ backgroundColor: "#1e3a8a" }}
@@ -112,7 +109,7 @@ export function PlatformShell({ activePath, children }: PlatformShellProps) {
           </div>
         </div>
 
-        {/* Nav links — groupées par section */}
+        {/* Nav */}
         <nav className="flex-1 space-y-4 overflow-y-auto">
           {NAV_SECTIONS.map((section) => (
             <div key={section.label}>
@@ -142,7 +139,7 @@ export function PlatformShell({ activePath, children }: PlatformShellProps) {
           ))}
         </nav>
 
-        {/* Footer — email + sign out */}
+        {/* Footer */}
         <div className="border-t border-white/10 pt-3">
           <p className="truncate px-3 text-[11px] text-blue-300">{auth.email}</p>
           <button
@@ -150,13 +147,13 @@ export function PlatformShell({ activePath, children }: PlatformShellProps) {
             className="mt-2 flex w-full items-center gap-2 rounded-xl px-3 py-2 text-sm text-blue-200 transition hover:bg-white/10 hover:text-white"
           >
             <LogOut className="h-4 w-4" />
-            Déconnexion
+            Deconnexion
           </button>
         </div>
       </aside>
 
-      {/* ── Main content ── */}
-      <main className="ml-60 flex-1 overflow-auto">{children}</main>
+      {/* Main content avec padding */}
+      <main className="ml-60 flex-1 overflow-auto p-8">{children}</main>
     </div>
   );
 }

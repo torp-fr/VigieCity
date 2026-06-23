@@ -6,15 +6,18 @@ import { Clock, AlertTriangle, CheckCircle, ArrowUpRight, Loader2 } from "lucide
 import { differenceInDays, format } from "date-fns";
 import { fr } from "date-fns/locale";
 import { toast } from "sonner";
+import { PlatformShell } from "@/components/PlatformShell";
 
 export const Route = createFileRoute("/platform/trials")({
   component: TrialsPage,
 });
 
 const PLANS = [
-  { value: "starter", label: "Starter" },
-  { value: "pro", label: "Pro" },
-  { value: "enterprise", label: "Enterprise" },
+  { value: "nano",      label: "Nano"     },
+  { value: "micro",     label: "Micro"    },
+  { value: "local",     label: "Local"    },
+  { value: "urbain",    label: "Urbain"   },
+  { value: "metropole", label: "Metropole"},
 ];
 
 type License = {
@@ -86,6 +89,7 @@ function TrialsPage() {
   if (isLoading) return <div className="text-center py-12 text-muted-foreground">Chargement…</div>;
 
   return (
+    <PlatformShell activePath="/platform/trials">
     <div className="space-y-6">
       <div>
         <h1 className="text-2xl font-bold flex items-center gap-2">
@@ -152,11 +156,12 @@ function TrialsPage() {
         </div>
       )}
     </div>
+    </PlatformShell>
   );
 }
 
 function TrialRow({ t, extendTrial, convertPlan }: { t: License; extendTrial: any; convertPlan: any }) {
-  const [selectedPlan, setSelectedPlan] = useState("starter");
+  const [selectedPlan, setSelectedPlan] = useState("nano");
   const days = differenceInDays(new Date(t.expires_at), new Date());
 
   function DaysChip() {

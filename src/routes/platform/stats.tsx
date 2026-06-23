@@ -7,6 +7,7 @@ import {
   AreaChart, Area, BarChart, Bar, Cell,
   XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend,
 } from "recharts";
+import { PlatformShell } from "@/components/PlatformShell";
 
 export const Route = createFileRoute("/platform/stats")({
   head: () => ({ meta: [{ title: "Statistiques — Platform Admin" }, { name: "robots", content: "noindex" }] }),
@@ -28,7 +29,6 @@ function last30Days() {
 
 function PlatformStatsPage() {
   const navigate = useNavigate();
-  const [isAdmin, setIsAdmin] = useState<boolean | null>(null);
   const [refreshKey, setRefreshKey] = useState(0);
 
   useEffect(() => {
@@ -43,7 +43,6 @@ function PlatformStatsPage() {
 
   const { data, isLoading, refetch } = useQuery({
     queryKey: ["platform_stats_full", refreshKey],
-    enabled: isAdmin === true,
     refetchInterval: 60000,
     queryFn: async () => {
       const since30 = new Date(Date.now() - 30 * 86400000).toISOString();
@@ -101,20 +100,10 @@ function PlatformStatsPage() {
     },
   });
 
-  if (isAdmin === null) return <div className="flex justify-center pt-20"><Loader2 className="h-6 w-6 animate-spin text-muted-foreground" /></div>;
-  if (!isAdmin) return (
-    <div className="px-4 pt-10 text-center">
-      <Shield className="mx-auto h-10 w-10 text-muted-foreground" />
-      <p className="mt-4 text-sm text-muted-foreground">Accès refusé.</p>
-      <button onClick={() => navigate({ to: "/" })} className="mt-4 text-sm text-primary underline">Retour</button>
-    </div>
-  );
 
   return (
+    <PlatformShell activePath="/platform/stats">
     <div className="space-y-6 px-4 pt-5 pb-8">
-      <Link to="/platform" className="inline-flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground">
-        <ArrowLeft className="h-4 w-4" /> Platform Admin
-      </Link>
       <header className="flex items-center justify-between">
         <div>
           <h1 className="text-2xl font-bold">Statistiques</h1>
@@ -238,5 +227,6 @@ function PlatformStatsPage() {
         </>
       )}
     </div>
+    </PlatformShell>
   );
 }
