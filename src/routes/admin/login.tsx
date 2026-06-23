@@ -64,6 +64,10 @@ function AdminLoginPage() {
       }
 
       toast.success(`Bienvenue${profile.display_name ? `, ${profile.display_name}` : ""} !`);
+      // Stocker l'email pour usePlatformAuth fast-path (évite le spinner)
+      if (destination === "/platform") {
+        sessionStorage.setItem("__vc_platform_email", authData.user.email ?? "");
+      }
       // Navigation dure pour les cross-section jumps (admin → platform)
       window.location.href = destination;
     } finally {

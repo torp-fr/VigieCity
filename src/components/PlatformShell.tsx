@@ -7,7 +7,7 @@ import {
   Newspaper, Package, BarChart3, Network,
 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
-import { usePlatformAuth } from "@/hooks/usePlatformAuth";
+import { usePlatformAuth, PLATFORM_SESSION_KEY } from "@/hooks/usePlatformAuth";
 
 // ── Nav sections (groupées) ───────────────────────────────────────────────────
 
@@ -76,6 +76,7 @@ export function PlatformShell({ activePath, children }: PlatformShellProps) {
   }, [auth.status]); // eslint-disable-line react-hooks/exhaustive-deps
 
   async function handleSignOut() {
+    sessionStorage.removeItem(PLATFORM_SESSION_KEY);
     await supabase.auth.signOut();
     navigate({ to: "/admin/login" });
   }
