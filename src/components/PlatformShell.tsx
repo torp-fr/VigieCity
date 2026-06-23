@@ -4,7 +4,7 @@ import {
   LayoutDashboard, Building2, Users, Rss,
   BookOpen, Settings, LogOut, Shield, Loader2,
   CreditCard, Euro, UserPlus, TrendingUp,
-  Newspaper, Package, BarChart3,
+  Newspaper, Package, BarChart3, Network,
 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { usePlatformAuth } from "@/hooks/usePlatformAuth";
@@ -16,8 +16,9 @@ const NAV_SECTIONS = [
     label: "COMMUNES",
     items: [
       { icon: LayoutDashboard, label: "Tableau de bord",  path: "/platform"                },
-      { icon: Building2,       label: "Collectivités",    path: "/platform/collectivites"  },
-      { icon: UserPlus,        label: "Onboarding",       path: "/platform/onboarding"     },
+      { icon: Building2,       label: "Collectivités",    path: "/platform/collectivites"      },
+      { icon: Network,         label: "Intercommunalités", path: "/platform/intercommunalites" },
+      { icon: UserPlus,        label: "Onboarding",       path: "/platform/onboarding"         },
       { icon: TrendingUp,      label: "Rétention",        path: "/platform/retention"      },
       { icon: Users,           label: "Utilisateurs",     path: "/platform/users"          },
     ],
@@ -153,10 +154,4 @@ export function PlatformShell({ activePath, children }: PlatformShellProps) {
         </div>
       </aside>
 
-      {/* ── Main content ─────────────────────────────────────────────────── */}
-      <main className="ml-60 flex-1 overflow-auto p-8">
-        {children}
-      </main>
-    </div>
-  );
-}
+      {/* ── Main content ─────────────────────────────────────────────────�
