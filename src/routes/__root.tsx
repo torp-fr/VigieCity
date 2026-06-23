@@ -203,8 +203,8 @@ function RootComponent() {
         event !== "USER_UPDATED"
       ) return;
 
-      // Sur les routes admin/platform les données sont gérées par React Query —
-      // router.invalidate() (rechargement SSR Nitro) provoquerait un spinner infini.
+      // admin/platform routes use React Query -
+      // skip router.invalidate() (SSR reload causes infinite spinner)
       const isAdminOrPlatform =
         pathname.startsWith("/admin") || pathname.startsWith("/platform");
       if (!isAdminOrPlatform) router.invalidate();
@@ -274,4 +274,16 @@ function RootComponent() {
       {isShellFree || isAdminRoute ? (
         <Outlet />
       ) : (
-        <div className="flex min-h
+        <div className="flex min-h-[100dvh] flex-col bg-background pb-[calc(4rem+env(safe-area-inset-bottom))]">
+          <AppHeader />
+          <main className="flex-1">
+            <Outlet />
+          </main>
+          <BottomNav />
+        </div>
+      )}
+      <Toaster />
+      <CookieBanner />
+    </QueryClientProvider>
+  );
+}
