@@ -5,8 +5,6 @@ import {
   Info, Shield, Database, Bell, Rss, RefreshCw, Users, Building2,
 } from "lucide-react";
 import { PlatformShell } from "@/components/PlatformShell";
-import { formatDistanceToNow } from "date-fns";
-import { fr } from "date-fns/locale";
 
 export const Route = createFileRoute("/platform/settings")({
   component: PlatformSettingsPage,
@@ -15,27 +13,22 @@ export const Route = createFileRoute("/platform/settings")({
 // ── Data ──────────────────────────────────────────────────────────────────────
 
 async function fetchPlatformStats() {
-  const [articlesRes, sourcesRes, collRes, profilesRes, latestRes] = await Promise.all([
-    supabase.from("news_articles").select("id", { count: "exact", head: true }),
-    supabase.from("rss_sources").select("id, active"),
+  const [pubsRes, licRes, collRes, profilesRes, reportsRes] = await Promise.all([
+    supabase.from("publications").select("id", { count: "exact", head: true }),
+    supabase.from("commune_licenses").select("id, status"),
     supabase.from("collectivities").select("id", { count: "exact", head: true }),
     supabase.from("profiles").select("id", { count: "exact", head: true }),
-    supabase
-      .from("news_articles")
-      .select("created_at")
-      .order("created_at", { ascending: false })
-      .limit(1)
-      .maybeSingle(),
+    supabase.from("reports").select("id", { count: "exact", head: true }),
   ]);
 
-  const sources = sourcesRes.data ?? [];
+  const licences = licRes.data ?? [];
   return {
-    articleCount:   articlesRes.count ?? 0,
-    activeSources:  sources.filter((s: any) => s.active).length,
-    totalSources:   sources.length,
-    communeCount:   collRes.count ?? 0,
-    userCount:      profilesRes.count ?? 0,
-    lastArticleAt:  latestRes.data?.created_at ?? null,
+    pubCount:      pubsRes.count ?? 0,
+    activeLic:     licences.filter((l: any) => l.status === "active").length,
+    totalLic:      licences.length,
+    communeCount:  collRes.count ?? 0,
+    userCount:     profilesRes.count ?? 0,
+    reportCount:   reportsRes.count ?? 0,
   };
 }
 
@@ -51,11 +44,6 @@ function PlatformSettingsPage() {
   const val = (v: string | number | null | undefined, loading = isLoading) =>
     loading ? "…" : String(v ?? "—");
 
-  const lastIngested = isLoading
-    ? "…"
-    : stats?.lastArticleAt
-    ? formatDistanceToNow(new Date(stats.lastArticleAt), { addSuffix: true, locale: fr })
-    : "—";
 
   return (
     <PlatformShell activePath="/platform/settings">
@@ -83,13 +71,13 @@ function PlatformSettingsPage() {
             icon={<Users className="h-4 w-4 text-violet-600" />}
           />
           <MetricCard
-            label="Articles RSS"
-            value={val(stats?.articleCount)}
+            label="Publications"
+            value={val(stats?.pubCount)}
             icon={<Rss className="h-4 w-4 text-orange-500" />}
           />
           <MetricCard
             label="Sources actives"
-            value={isLoading ? "…" : `${stats?.activeSources ?? "—"}/${stats?.totalSources ?? "—"}`}
+            value={isLoading ? "…" : `${stats?.activeLic ?? "—"}/${stats?.totalLic ?? "—"}`}
             icon={<RefreshCw className="h-4 w-4 text-emerald-600" />}
           />
         </div>
@@ -131,13 +119,10 @@ function PlatformSettingsPage() {
         </Card>
 
         {/* Sync RSS */}
-        <Card icon={<Database className="h-5 w-5 text-violet-600" />} title="Synchronisation RSS">
-          <Row label="Fréquence"          value="Toutes les heures (pg_cron)"           />
-          <Row label="Edge Function"      value="fetch-rss v3 — verify_jwt: false"      />
-          <Row label="Cron status"        value="✅ Actif"                               />
-          <Row label="Sources actives"    value={isLoading ? "…" : `${stats?.activeSources ?? "—"} sources`} />
-          <Row label="Articles indexés"   value={isLoading ? "…" : `${stats?.articleCount ?? "—"} articles`} />
-          <Row label="Dernier article"    value={lastIngested}                           />
+        <Card icon={<Database className="h-5 w-5 text-violet-600" />} title="Metriques plateforme">
+          <Row label="Publications"       value={isLoading ? "..." : `${stats?.pubCount ?? "--"} publiees`} />
+          <Row label="Licences actives"   value={isLoading ? "..." : `${stats?.activeLic ?? "--"} / ${stats?.totalLic ?? "--"} licences`} />
+          <Row label="Signalements"       value={isLoading ? "..." : `${stats?.reportCount ?? "--"} total`} />
         </Card>
 
         {/* Notifications push */}

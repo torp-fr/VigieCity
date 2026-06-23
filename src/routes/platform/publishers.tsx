@@ -1,6 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
-import { BookOpen, ExternalLink, Loader2 } from "lucide-react";
+import { FileText, Loader2, Building2, Calendar } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { PlatformShell } from "@/components/PlatformShell";
 
@@ -8,46 +8,52 @@ export const Route = createFileRoute("/platform/publishers")({
   component: PlatformPublishersPage,
 });
 
-// ── Types ─────────────────────────────────────────────────────────────────────
-
-type Publisher = {
+type Publication = {
   id: string;
-  name: string;
-  website_url: string | null;
-  description: string | null;
-  logo_url: string | null;
-  created_at: string;
-  publisher_posts: { count: number }[];
+  title: string;
+  type: string | null;
+  published_at: string | null;
+  is_published: boolean;
+  collectivities: { name: string } | null;
 };
 
-// ── Page ──────────────────────────────────────────────────────────────────────
+function fmtDate(iso: string | null) {
+  if (!iso) return "—";
+  return new Date(iso).toLocaleDateString("fr-FR", {
+    day: "numeric", month: "short", year: "numeric",
+  });
+}
+
+const TYPE_COLORS: Record<string, string> = {
+  news:        "bg-blue-100 text-blue-700",
+  event:       "bg-purple-100 text-purple-700",
+  alert:       "bg-red-100 text-red-700",
+  information: "bg-slate-100 text-slate-600",
+};
 
 function PlatformPublishersPage() {
-  const { data: publishers = [], isLoading } = useQuery<Publisher[]>({
-    queryKey: ["platform/publishers"],
+  const { data: publications = [], isLoading } = useQuery<Publication[]>({
+    queryKey: ["platform/publications-list"],
     queryFn: async () => {
       const { data, error } = await supabase
-        .from("publishers")
-        .select("*, publisher_posts(count)")
-        .order("name");
+        .from("publications")
+        .select("id, title, type, published_at, is_published, collectivities(name)")
+        .order("published_at", { ascending: false })
+        .limit(50);
       if (error) throw error;
-      return data as Publisher[];
+      return data as Publication[];
     },
+    staleTime: 2 * 60_000,
   });
 
-  const totalPosts = publishers.reduce(
-    (sum, p) => sum + (p.publisher_posts?.[0]?.count ?? 0),
-    0,
-  );
+  const published = publications.filter((p) => p.is_published).length;
 
   return (
     <PlatformShell activePath="/platform/publishers">
-
-      {/* Header */}
       <div className="mb-8">
-        <h1 className="text-2xl font-bold text-slate-900">Éditeurs</h1>
+        <h1 className="text-2xl font-bold text-slate-900">Publications</h1>
         <p className="mt-1 text-sm text-slate-500">
-          {publishers.length} éditeur{publishers.length !== 1 ? "s" : ""} · {totalPosts} article{totalPosts !== 1 ? "s" : ""} au total
+          {publications.length} publication{publications.length !== 1 ? "s" : ""} · {published} publiee{published !== 1 ? "s" : ""}
         </p>
       </div>
 
@@ -55,70 +61,64 @@ function PlatformPublishersPage() {
         <div className="flex items-center justify-center py-20">
           <Loader2 className="h-6 w-6 animate-spin text-blue-600" />
         </div>
-      ) : publishers.length === 0 ? (
+      ) : publications.length === 0 ? (
         <div className="flex flex-col items-center gap-4 py-20 text-center">
           <div className="flex h-16 w-16 items-center justify-center rounded-2xl bg-slate-100">
-            <BookOpen className="h-8 w-8 text-slate-400" />
+            <FileText className="h-8 w-8 text-slate-400" />
           </div>
           <div>
-            <p className="font-semibold text-slate-700">Aucun éditeur</p>
+            <p className="font-semibold text-slate-700">Aucune publication</p>
             <p className="mt-1 text-sm text-slate-400">
-              Les éditeurs apparaissent ici une fois ajoutés en base.
+              Les publications des communes apparaissent ici.
             </p>
           </div>
         </div>
       ) : (
-        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-          {publishers.map(p => {
-            const postCount = p.publisher_posts?.[0]?.count ?? 0;
-            return (
-              <div
-                key={p.id}
-                className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm transition hover:shadow-md"
-              >
-                <div className="mb-3 flex items-start gap-3">
-                  {p.logo_url ? (
-                    <img
-                      src={p.logo_url}
-                      alt={p.name}
-                      className="h-10 w-10 rounded-xl object-cover"
-                    />
-                  ) : (
-                    <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-slate-100">
-                      <BookOpen className="h-5 w-5 text-slate-400" />
-                    </div>
-                  )}
-                  <div className="min-w-0 flex-1">
-                    <p className="truncate font-semibold text-slate-900">{p.name}</p>
-                    {p.website_url && (
-                      <a
-                        href={p.website_url}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="mt-0.5 flex items-center gap-1 text-xs text-blue-500 hover:underline"
-                      >
-                        Site web <ExternalLink className="h-3 w-3" />
-                      </a>
+        <div className="overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm">
+          <table className="w-full text-sm">
+            <thead>
+              <tr className="border-b border-slate-100 bg-slate-50 text-left text-xs font-semibold uppercase tracking-wide text-slate-500">
+                <th className="px-5 py-3">Titre</th>
+                <th className="px-5 py-3">Commune</th>
+                <th className="px-5 py-3">Type</th>
+                <th className="px-5 py-3">Statut</th>
+                <th className="px-5 py-3">Date</th>
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-slate-50">
+              {publications.map((p) => (
+                <tr key={p.id} className="transition-colors hover:bg-slate-50/60">
+                  <td className="px-5 py-3.5 font-medium text-slate-900 max-w-xs truncate">
+                    {p.title ?? "—"}
+                  </td>
+                  <td className="px-5 py-3.5">
+                    <span className="flex items-center gap-1.5 text-slate-600">
+                      <Building2 className="h-3.5 w-3.5 shrink-0 text-slate-400" />
+                      {(p.collectivities as any)?.name ?? "—"}
+                    </span>
+                  </td>
+                  <td className="px-5 py-3.5">
+                    <span className={`rounded-full px-2 py-0.5 text-xs font-semibold capitalize ${TYPE_COLORS[p.type ?? ""] ?? "bg-slate-100 text-slate-600"}`}>
+                      {p.type ?? "—"}
+                    </span>
+                  </td>
+                  <td className="px-5 py-3.5">
+                    {p.is_published ? (
+                      <span className="text-xs font-medium text-emerald-600">Publiee</span>
+                    ) : (
+                      <span className="text-xs font-medium text-slate-400">Brouillon</span>
                     )}
-                  </div>
-                </div>
-
-                {p.description && (
-                  <p className="mb-3 line-clamp-2 text-sm text-slate-500">
-                    {p.description}
-                  </p>
-                )}
-
-                <div className="flex items-center justify-between border-t border-slate-100 pt-3 text-xs text-slate-400">
-                  <span>
-                    <span className="font-semibold text-slate-700">{postCount}</span>{" "}
-                    article{postCount !== 1 ? "s" : ""}
-                  </span>
-                  <span>{new Date(p.created_at).toLocaleDateString("fr-FR")}</span>
-                </div>
-              </div>
-            );
-          })}
+                  </td>
+                  <td className="px-5 py-3.5">
+                    <span className="flex items-center gap-1.5 text-xs text-slate-500">
+                      <Calendar className="h-3.5 w-3.5 shrink-0" />
+                      {fmtDate(p.published_at)}
+                    </span>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
         </div>
       )}
     </PlatformShell>

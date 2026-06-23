@@ -1,3 +1,4 @@
+import { PlatformShell } from "@/components/PlatformShell";
 import { createFileRoute, Link, useNavigate } from '@tanstack/react-router';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useEffect, useState } from 'react';
@@ -18,8 +19,8 @@ type Commune = {
 };
 
 const PLAN_LABELS: Record<string, string> = {
-  trial: 'Trial', decouverte: 'Découverte', essentiel: 'Essentiel',
-  standard: 'Standard', pro: 'Pro', intercommunal: 'Intercommunal',
+  trial: 'Trial', nano: 'Nano', micro: 'Micro',
+  local: 'Local', urbain: 'Urbain', metropole: 'Metropole',
 };
 const STATUS_COLOR: Record<string, string> = {
   active: 'text-green-600', suspended: 'text-amber-600', cancelled: 'text-red-600',
@@ -28,7 +29,6 @@ const STATUS_COLOR: Record<string, string> = {
 function PlatformCommunesPage() {
   const navigate = useNavigate();
   const qc = useQueryClient();
-  const [isAdmin, setIsAdmin] = useState<boolean | null>(null);
 
   const [editId,     setEditId]     = useState<string | null>(null);
   const [editName,   setEditName]   = useState('');
@@ -48,7 +48,6 @@ function PlatformCommunesPage() {
 
   const { data, isLoading } = useQuery({
     queryKey: ['platform_communes'],
-    enabled: isAdmin === true,
     queryFn: async () => {
       const [colRes, licRes] = await Promise.all([
         supabase.from('collectivities').select('id, name, department_code, postal_code').order('name'),
@@ -101,16 +100,9 @@ function PlatformCommunesPage() {
     onError: (e: Error) => toast.error('Erreur : ' + e.message),
   });
 
-  if (isAdmin === null) return <div className="flex justify-center pt-20"><Loader2 className="h-6 w-6 animate-spin text-muted-foreground" /></div>;
-  if (!isAdmin) return (
-    <div className="px-4 pt-10 text-center">
-      <Shield className="mx-auto h-10 w-10 text-muted-foreground" />
-      <p className="mt-4 text-sm text-muted-foreground">Accès refusé.</p>
-      <button onClick={() => navigate({ to: '/' })} className="mt-4 text-sm text-primary underline">Retour</button>
-    </div>
-  );
 
   return (
+    <PlatformShell activePath="/platform/communes">
     <div className="space-y-4 px-4 pt-5">
       <Link to="/platform" className="inline-flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground">
         <ArrowLeft className="h-4 w-4" /> Platform Admin
@@ -254,5 +246,6 @@ function PlatformCommunesPage() {
         </ul>
       )}
     </div>
+    </PlatformShell>
   );
 }

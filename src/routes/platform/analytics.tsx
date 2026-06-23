@@ -43,10 +43,10 @@ const REGION_COORDS: Record<string, [number, number]> = {
 // ── Fetch Supabase (métriques globales) ───────────────────────────────────────
 
 async function fetchSupabaseStats() {
-  const [collRes, profilesRes, articlesRes, reportsRes] = await Promise.all([
+  const [collRes, profilesRes, pubsRes, reportsRes] = await Promise.all([
     supabase.from("collectivities").select("id", { count: "exact", head: true }).eq("status", "active"),
     supabase.from("profiles").select("id", { count: "exact", head: true }),
-    supabase.from("news_articles").select("id", { count: "exact", head: true }),
+    supabase.from("publications").select("id", { count: "exact", head: true }),
     supabase.from("reports").select("id", { count: "exact", head: true })
       .gte("created_at", new Date(Date.now() - 30 * 86400_000).toISOString()),
   ]);
@@ -81,7 +81,7 @@ async function fetchSupabaseStats() {
   return {
     activeCommunes: collRes.count ?? 0,
     totalUsers:     profilesRes.count ?? 0,
-    totalArticles:  articlesRes.count ?? 0,
+    totalArticles:  pubsRes.count ?? 0,
     reports30d:     reportsRes.count ?? 0,
     chartData:      Object.entries(byDay).map(([date, count]) => ({ date, count })),
     topRegions,

@@ -138,21 +138,9 @@ function PlatformCollectivitesPage() {
   });
 
   // ── Fetch last invite for the commune being edited ─────────────────────────
-  const { data: lastInvite, refetch: refetchInvite } = useQuery({
-    queryKey: ["platform/commune_invites", editTarget?.id],
-    enabled:  !!editTarget,
-    queryFn:  async () => {
-      const { data } = await supabase
-        .from("commune_invites")
-        .select("id, email, expires_at, accepted_at, created_at")
-        .eq("collectivity_id", editTarget!.id)
-        .order("created_at", { ascending: false })
-        .limit(1)
-        .maybeSingle();
-      return (data ?? null) as CommuneInvite | null;
-    },
-    staleTime: 30_000,
-  });
+  // invite system not yet implemented -- stub
+  const lastInvite: CommuneInvite | null = null;
+  const refetchInvite = () => Promise.resolve();
 
   const totalPages = Math.ceil((data?.total ?? 0) / PAGE_SIZE);
 
