@@ -177,7 +177,7 @@ function AdminRadioPage() {
   // ─── Render ───────────────────────────────────────────────────────────────
   return (
     <AdminShell activePath="/admin/radio">
-    <div className="space-y-8 px-4 py-6">
+      <div className="mx-auto max-w-7xl px-8 py-8 space-y-8">
       {/* En-tête */}
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-3">
@@ -386,6 +386,6 @@ function Field({ label, children }: { label: string; children: React.ReactNode }
     <div>
       <label className="mb-1.5 block text-xs font-semibold text-muted-foreground uppercase tracking-wide">{label}</label>
       {children}
-    </div>
+      </div>
   );
 }

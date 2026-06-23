@@ -160,7 +160,7 @@ function AdminAlertesPage() {
 
   return (
     <AdminShell activePath="/admin/alertes">
-    <div className="p-8">
+      <div className="mx-auto max-w-7xl px-8 py-8">
 
       {/* Header */}
       <div className="mb-8">

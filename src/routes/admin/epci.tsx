@@ -234,7 +234,7 @@ function EpciAdminPage() {
 
   return (
     <AdminShell activePath="/admin/epci">
-    <div className="space-y-5 px-4 pt-5 pb-10">
+      <div className="mx-auto max-w-7xl px-8 py-8 space-y-5">
       {/* ── Header interco ────────────────────────────────────────────────── */}
       <header className="rounded-2xl bg-gradient-to-br from-primary to-blue-700 p-5 text-white shadow-card">
         <div className="flex items-start gap-3">
@@ -658,7 +658,7 @@ function StatCard({
       <p className={`mt-2 text-2xl font-bold leading-none ${valueCls}`}>{value}</p>
       <p className="mt-1 text-xs font-medium text-foreground">{label}</p>
       {sub && <p className="mt-0.5 text-xs text-muted-foreground">{sub}</p>}
-    </div>
+      </div>
   );
 }
 
