@@ -40,10 +40,11 @@ const BASE_NAV = [
   { icon: Radio,           label: "Radio locale",     path: "/admin/radio"        },
   { icon: Megaphone,       label: "Alertes",          path: "/admin/alertes"       },
   { icon: BarChart2,       label: "Consultations",    path: "/admin/consultations"  },
-  { icon: ShieldAlert,     label: "Voisins vigilants", path: "/admin/voisins"       },
-  { icon: Tablet,          label: "Mode terrain",     path: "/admin/terrain"        },
-  { icon: BarChart3,       label: "Analytics",         path: "/admin/analytics"    },
-  { icon: Settings,        label: "Paramètres",        path: "/admin/settings"     },
+  { icon: ShieldAlert,     label: "Voisins vigilants", path: "/admin/voisins"        },
+  { icon: Shield,          label: "Opérateurs",        path: "/admin/habilitations"  },
+  { icon: Tablet,          label: "Mode terrain",      path: "/admin/terrain"        },
+  { icon: BarChart3,       label: "Analytics",         path: "/admin/analytics"      },
+  { icon: Settings,        label: "Paramètres",        path: "/admin/settings"       },
 ] as const;
 
 const EPCI_ITEM = { icon: Building2, label: "Intercommunal", path: "/admin/epci" } as const;
@@ -261,8 +262,4 @@ export function AdminShell({ activePath, children }: AdminShellProps) {
         </div>
       </aside>
 
-      {/* ── Main ── */}
-      <main className="ml-60 flex-1 overflow-auto">{children}</main>
-    </div>
-  );
-}
+      {/* ── Main ─

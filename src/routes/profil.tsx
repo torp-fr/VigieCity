@@ -54,7 +54,8 @@ function ProfilPage() {
       <CommuneSection userId={userId} qc={qc} navigate={navigate} />
       <AddressSection userId={userId} qc={qc} />
       <VoisinVigilantSection userId={userId} qc={qc} />
-      <PushNotificationsSection />
+      <PushNotificationsSection userId={userId} />
+      <EmailNotificationsSection userId={userId} />
       <TrustedContactsSection userId={userId} />
       <SignOutSection navigate={navigate} />
     </div>
@@ -363,55 +364,118 @@ function VoisinVigilantSection({ userId, qc }: { userId: string; qc: ReturnType<
 }
 
 // ── Push Notifications ────────────────────────────────────────────────────────
-function PushNotificationsSection() {
-  const { state, error, subscribe, unsubscribe } = usePushNotifications();
+function PushNotificationsSection({ userId }: { userId: string }) {
+  const { status, loading, subscribe, unsubscribe, isSupported } = usePushNotifications(userId);
 
-  const label: Record<typeof state, string> = {
-    loading:      "Chargement…",
-    unsupported:  "Non supporté",
-    denied:       "Bloquées",
-    subscribed:   "Activées",
-    unsubscribed: "Désactivées",
-  };
+  const isSubscribed = status === "granted";
+  const isDenied     = status === "denied";
+  const isDefault    = status === "default";
+
+  if (!isSupported) return null;
 
   return (
     <section className="rounded-2xl border border-border bg-card p-4 shadow-card space-y-3">
       <h2 className="flex items-center gap-2 text-sm font-semibold uppercase tracking-wider text-muted-foreground">
         <Bell className="h-4 w-4" /> Notifications push
       </h2>
-
       <div className="flex items-start gap-4">
-        <div className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-full ${state === "subscribed" ? "bg-primary/10" : "bg-muted"}`}>
-          {state === "subscribed"
+        <div className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-full ${isSubscribed ? "bg-primary/10" : "bg-muted"}`}>
+          {isSubscribed
             ? <Bell className="h-5 w-5 text-primary" />
             : <BellOff className="h-5 w-5 text-muted-foreground" />}
         </div>
         <div className="flex-1 min-w-0">
           <p className="font-semibold">
-            {label[state]}
-            {state === "loading" && <Loader2 className="ml-2 inline h-4 w-4 animate-spin" />}
+            {isSubscribed ? "Activées" : isDenied ? "Bloquées" : "Désactivées"}
+            {loading && <Loader2 className="ml-2 inline h-4 w-4 animate-spin" />}
           </p>
           <p className="mt-0.5 text-xs text-muted-foreground">
-            {state === "unsupported" && "Votre navigateur ne supporte pas les notifications push."}
-            {state === "denied" && "Débloquées dans les paramètres de votre navigateur."}
-            {state === "subscribed" && "Vous recevrez les alertes importantes de votre commune."}
-            {state === "unsubscribed" && "Recevez les alertes de votre commune en temps réel."}
+            {isDenied   && "Débloquées dans les paramètres de votre navigateur."}
+            {isSubscribed && "Vous recevrez les mises à jour de vos signalements."}
+            {isDefault  && "Recevez les mises à jour de vos signalements en temps réel."}
           </p>
-          {error && <p className="mt-1 text-xs text-sos">{error}</p>}
         </div>
-        {(state === "subscribed" || state === "unsubscribed") && (
+        {!isDenied && (
           <button
             type="button"
-            onClick={state === "subscribed" ? unsubscribe : subscribe}
-            className={`relative h-7 w-12 overflow-hidden rounded-full transition-colors ${state === "subscribed" ? "bg-primary" : "bg-muted"}`}
+            onClick={isSubscribed ? unsubscribe : subscribe}
+            disabled={loading}
+            className={`relative h-7 w-12 overflow-hidden rounded-full transition-colors disabled:opacity-50 ${isSubscribed ? "bg-primary" : "bg-muted"}`}
             role="switch"
-            aria-checked={state === "subscribed"}
+            aria-checked={isSubscribed}
           >
             <span
-              className={`absolute top-0.5 left-0.5 h-6 w-6 rounded-full bg-white shadow transition-transform ${state === "subscribed" ? "translate-x-5" : "translate-x-0"}`}
+              className={`absolute top-0.5 left-0.5 h-6 w-6 rounded-full bg-white shadow transition-transform ${isSubscribed ? "translate-x-5" : "translate-x-0"}`}
             />
           </button>
         )}
+      </div>
+    </section>
+  );
+}
+
+// ── Email notifications (opt-in, désactivé par défaut) ────────────────────────
+function EmailNotificationsSection({ userId }: { userId: string }) {
+  const qc = useQueryClient();
+
+  const { data: prefs, isLoading } = useQuery({
+    queryKey: ["user-preferences", userId],
+    queryFn: async () => {
+      const { data } = await supabase
+        .from("user_preferences")
+        .select("email_notif_reports")
+        .eq("user_id", userId)
+        .maybeSingle();
+      return data;
+    },
+    enabled: !!userId,
+  });
+
+  const emailEnabled = prefs?.email_notif_reports ?? false;
+
+  const toggleEmail = useMutation({
+    mutationFn: async (value: boolean) => {
+      await supabase
+        .from("user_preferences")
+        .upsert({ user_id: userId, email_notif_reports: value }, { onConflict: "user_id" });
+    },
+    onSuccess: (_data, value) => {
+      qc.setQueryData(["user-preferences", userId], { email_notif_reports: value });
+      toast.success(value ? "Notifications email activées" : "Notifications email désactivées");
+    },
+  });
+
+  return (
+    <section className="rounded-2xl border border-border bg-card p-4 shadow-card space-y-3">
+      <h2 className="flex items-center gap-2 text-sm font-semibold uppercase tracking-wider text-muted-foreground">
+        <Bell className="h-4 w-4" /> Notifications email
+      </h2>
+      <div className="flex items-start gap-4">
+        <div className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-full ${emailEnabled ? "bg-primary/10" : "bg-muted"}`}>
+          {emailEnabled
+            ? <Bell className="h-5 w-5 text-primary" />
+            : <BellOff className="h-5 w-5 text-muted-foreground" />}
+        </div>
+        <div className="flex-1 min-w-0">
+          <p className="font-semibold">{emailEnabled ? "Activées" : "Désactivées"}</p>
+          <p className="mt-0.5 text-xs text-muted-foreground">
+            {emailEnabled
+              ? "Vous recevrez un email à chaque mise à jour de vos signalements."
+              : "Recevez un email quand la mairie traite vos signalements. (opt-in)"}
+          </p>
+        </div>
+        <button
+          type="button"
+          onClick={() => toggleEmail.mutate(!emailEnabled)}
+          disabled={isLoading || toggleEmail.isPending}
+          className={`relative h-7 w-12 overflow-hidden rounded-full transition-colors disabled:opacity-50 ${emailEnabled ? "bg-primary" : "bg-muted"}`}
+          role="switch"
+          aria-checked={emailEnabled}
+        >
+          <span
+            className={`absolute top-0.5 left-0.5 h-6 w-6 rounded-full bg-white shadow transition-transform ${emailEnabled ? "translate-x-5" : "translate-x-0"}`}
+          />
+        </button>
       </div>
     </section>
   );
@@ -500,69 +564,4 @@ function TrustedContactsSection({ userId }: { userId: string }) {
             <button
               type="button"
               onClick={() => add.mutate()}
-              disabled={add.isPending}
-              className="flex flex-1 items-center justify-center gap-1 rounded-lg bg-primary py-2 text-sm font-medium text-primary-foreground disabled:opacity-50"
-            >
-              {add.isPending ? <Loader2 className="h-4 w-4 animate-spin" /> : "Enregistrer"}
-            </button>
-            <button type="button" onClick={() => setShowAdd(false)} className="rounded-lg border border-border px-3 py-2 text-sm">
-              Annuler
-            </button>
-          </div>
-        </div>
-      )}
-
-      {contacts?.length === 0 && !showAdd && (
-        <p className="text-sm text-muted-foreground">Aucun contact de confiance enregistré.</p>
-      )}
-
-      <ul className="space-y-2">
-        {contacts?.map((c) => (
-          <li key={c.id} className="flex items-center justify-between rounded-xl border border-border bg-background p-3">
-            <div>
-              <p className="text-sm font-medium">{c.name}</p>
-              <p className="text-xs text-muted-foreground">{c.phone}</p>
-            </div>
-            <div className="flex gap-2">
-              <a href={`tel:${c.phone.replace(/\s/g, "")}`} className="rounded-lg bg-primary/10 p-2 text-primary">
-                <Phone className="h-4 w-4" />
-              </a>
-              <button
-                type="button"
-                onClick={() => remove.mutate(c.id)}
-                disabled={remove.isPending}
-                className="rounded-lg bg-sos/10 p-2 text-sos disabled:opacity-50"
-              >
-                <Trash2 className="h-4 w-4" />
-              </button>
-            </div>
-          </li>
-        ))}
-      </ul>
-    </section>
-  );
-}
-
-// ── Sign Out ──────────────────────────────────────────────────────────────────
-function SignOutSection({ navigate }: { navigate: ReturnType<typeof useNavigate> }) {
-  const signOut = useMutation({
-    mutationFn: async () => {
-      const { error } = await supabase.auth.signOut();
-      if (error) throw error;
-    },
-    onSuccess: () => navigate({ to: "/" }),
-    onError: (e: Error) => toast.error(e.message),
-  });
-
-  return (
-    <button
-      type="button"
-      onClick={() => signOut.mutate()}
-      disabled={signOut.isPending}
-      className="flex w-full items-center justify-center gap-2 rounded-2xl border border-sos/30 bg-sos/5 p-4 text-sm font-medium text-sos disabled:opacity-50"
-    >
-      {signOut.isPending ? <Loader2 className="h-4 w-4 animate-spin" /> : <LogOut className="h-4 w-4" />}
-      Se déconnecter
-    </button>
-  );
-}
+            
