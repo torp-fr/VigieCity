@@ -324,4 +324,6 @@ function HabilitationsAdmin() {
           Sans SMS_GATEWAY_URL configuré, le code est envoyé par email en fallback automatique.
         </p>
       </div>
-  
+    </div>
+  );
+}
