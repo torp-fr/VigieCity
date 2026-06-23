@@ -745,17 +745,17 @@ type CommuneResult = { nom: string; code: string; population: number };
 
 function getPopulationTierIndex(population: number): number {
   if (population < 1000)  return 0;
-  if (population < 2500)  return 1;
-  if (population < 10000) return 2;
-  if (population < 50000) return 3;
+  if (population < 3501)  return 1;
+  if (population < 10001) return 2;
+  if (population < 50001) return 3;
   return 4;
 }
 
 const TIER_DATA = [
   { name: "Nano",      range: "< 1 000 hab.",         monthly: 49,  annual: 490  },
-  { name: "Micro",     range: "1 000 – 2 500 hab.",   monthly: 99,  annual: 990  },
-  { name: "Local",     range: "2 500 – 10 000 hab.",  monthly: 189, annual: 1890 },
-  { name: "Urbain",    range: "10 000 – 50 000 hab.", monthly: 490, annual: 4900 },
+  { name: "Micro",     range: "1 001 – 3 500 hab.",   monthly: 99,  annual: 990  },
+  { name: "Local",     range: "3 501 – 10 000 hab.",  monthly: 189, annual: 1890 },
+  { name: "Urbain",    range: "10 001 – 50 000 hab.", monthly: 490, annual: 4900 },
   { name: "Métropole", range: "> 50 000 hab.",         monthly: null, annual: null },
 ] as const;
 
@@ -923,9 +923,9 @@ function CommuneCalculatorSection() {
 
 const PRICING_TIERS = [
   { name: "Nano", range: "< 1 000 hab.", monthly: 49, annual: 490 },
-  { name: "Micro", range: "1 000 – 2 500 hab.", monthly: 99, annual: 990 },
-  { name: "Local",   range: "2 500 – 10 000 hab.", monthly: 189, annual: 1890 },
-  { name: "Urbain", range: "10 000 – 50 000 hab.", monthly: 490, annual: 4900 },
+  { name: "Micro", range: "1 001 – 3 500 hab.", monthly: 99, annual: 990 },
+  { name: "Local",   range: "3 501 – 10 000 hab.", monthly: 189, annual: 1890 },
+  { name: "Urbain", range: "10 001 – 50 000 hab.", monthly: 490, annual: 4900 },
   { name: "Métropole", range: "> 50 000 hab.", monthly: null, annual: null },
 ] as const;
 
