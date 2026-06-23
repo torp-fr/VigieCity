@@ -33,12 +33,14 @@ function StatsPage() {
     queryKey: ["admin-stats"],
     queryFn: async () => {
       const { data: { user } } = await supabase.auth.getUser();
+      if (!user) throw new Error("Non authentifié");
       const { data: profile } = await supabase
         .from("profiles")
         .select("collectivity_id")
-        .eq("id", user!.id)
+        .eq("id", user.id)
         .single();
-      const cid = profile!.collectivity_id!;
+      const cid = profile?.collectivity_id;
+      if (!cid) throw new Error("Collectivité non configurée");
 
       const since30 = subDays(new Date(), 30).toISOString();
       const { data: reports } = await supabase
@@ -93,6 +95,7 @@ function StatsPage() {
 
       return {
         weekData, catData, statusData,
+        reports: all,
         total: all.length,
         resolutionRate,
         alertsThisMonth: alerts?.length ?? 0,
@@ -102,14 +105,25 @@ function StatsPage() {
   });
 
   function exportCsv() {
-    const rows = [["ID", "Date", "Catégorie", "Statut", "Sévérité"]];
-    const csv = rows.map((r) => r.join(",")).join("\n");
-    const blob = new Blob([csv], { type: "text/csv;charset=utf-8" });
+    const reports = data?.reports ?? [];
+    const rows: string[][] = [
+      ["ID", "Date", "Catégorie", "Statut", "Sévérité"],
+      ...reports.map((r) => [
+        r.id,
+        format(new Date(r.created_at), "dd/MM/yyyy HH:mm"),
+        CATEGORY_LABELS[r.category ?? ""] ?? (r.category ?? ""),
+        r.status ?? "",
+        r.severity ?? "",
+      ]),
+    ];
+    const csv = rows.map((r) => r.map((c) => `"${c}"`).join(",")).join("\n");
+    const blob = new Blob(["﻿" + csv], { type: "text/csv;charset=utf-8" });
     const url = URL.createObjectURL(blob);
     const a = document.createElement("a");
     a.href = url;
     a.download = `signalements-${format(new Date(), "yyyy-MM-dd")}.csv`;
     a.click();
+    URL.revokeObjectURL(url);
   }
 
   if (isLoading) return <div className="text-center py-12 text-muted-foreground">Chargement…</div>;
@@ -187,17 +201,4 @@ function StatsPage() {
           ) : (
             <ResponsiveContainer width="100%" height={200}>
               <PieChart>
-                <Pie data={data?.statusData} dataKey="value" nameKey="name" cx="50%" cy="50%" outerRadius={80} label={({ name, percent }) => `${name} ${(percent * 100).toFixed(0)}%`} labelLine={false}>
-                  {data?.statusData.map((_, i) => (
-                    <Cell key={i} fill={COLORS[i % COLORS.length]} />
-                  ))}
-                </Pie>
-                <Tooltip />
-              </PieChart>
-            </ResponsiveContainer>
-          )}
-        </div>
-      </div>
-    </div>
-  );
-}
+                <Pie da

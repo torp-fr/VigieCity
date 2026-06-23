@@ -29,12 +29,14 @@ function RoutagePage() {
     queryKey: ["admin-routage"],
     queryFn: async () => {
       const { data: { user } } = await supabase.auth.getUser();
+      if (!user) throw new Error("Non authentifié");
       const { data: profile } = await supabase
         .from("profiles")
         .select("collectivity_id")
-        .eq("id", user!.id)
+        .eq("id", user.id)
         .single();
-      const cid = profile!.collectivity_id!;
+      const cid = profile?.collectivity_id;
+      if (!cid) throw new Error("Collectivité non configurée");
 
       const [{ data: routes }, { data: services }] = await Promise.all([
         supabase.from("report_routing").select("*").eq("collectivity_id", cid),
@@ -175,9 +177,4 @@ function RoutagePage() {
       {data?.services.length === 0 && (
         <p className="text-sm text-muted-foreground text-center">
           Aucun service actif — créez d'abord des services dans{" "}
-          <a href="/admin/services" className="text-primary underline">Mes services</a>.
-        </p>
-      )}
-    </div>
-  );
-}
+          <

@@ -3,7 +3,7 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useState } from "react";
 import {
   Megaphone, Send, Loader2, Clock, ChevronDown,
-  AlertTriangle, Info, Zap, Bell,
+  AlertTriangle, Info, Zap, Bell, MapPin, Users,
 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
@@ -29,9 +29,15 @@ type FormData = {
   title: string;
   body: string;
   severity: "info" | "warning" | "critical";
+  district: string;
+  area_label: string;
+  expires_at: string;
 };
 
-const BLANK: FormData = { title: "", body: "", severity: "info" };
+const BLANK: FormData = {
+  title: "", body: "", severity: "info",
+  district: "", area_label: "", expires_at: "",
+};
 
 // ── Severity config ────────────────────────────────────────────────────────────
 
@@ -58,8 +64,9 @@ function AdminAlertesPage() {
   const qc = useQueryClient();
   const [form, setForm] = useState<FormData>(BLANK);
   const [showHistory, setShowHistory] = useState(false);
+  const [lastResult, setLastResult] = useState<{ count: number; total: number } | null>(null);
 
-  // ── Fetch collectivity ─────────────────────────────────────────────────────
+  // ── Fetch collectivity + districts disponibles ─────────────────────────────
 
   const { data: meta } = useQuery({
     queryKey: ["admin-alertes-meta"],
@@ -71,9 +78,24 @@ function AdminAlertesPage() {
         .select("collectivity_id, collectivities(name)")
         .eq("id", user.id)
         .single();
+      const cid = profile?.collectivity_id as string;
+      if (!cid) throw new Error("Collectivité non configurée");
+
+      // Quartiers distincts (citizens de cette commune)
+      const { data: districtRows } = await supabase
+        .from("profiles")
+        .select("district")
+        .eq("collectivity_id", cid)
+        .not("district", "is", null);
+
+      const districts = [...new Set(
+        (districtRows ?? []).map((r) => r.district as string).filter(Boolean)
+      )].sort();
+
       return {
-        collectivityId: profile?.collectivity_id as string,
+        collectivityId: cid,
         communeName: (profile as any)?.collectivities?.name as string ?? "",
+        districts,
       };
     },
   });
@@ -97,36 +119,33 @@ function AdminAlertesPage() {
     },
   });
 
-  // ── Send alert ─────────────────────────────────────────────────────────────
+  // ── Send alert via EF send-alert (gere le ciblage geo + batch push) ─────────
 
   const sendAlert = useMutation({
     mutationFn: async (f: FormData) => {
       if (!collectivityId) throw new Error("Commune non résolue");
 
-      // 1. Log in DB
-      const { error: logErr } = await supabase
-        .from("push_notifications_log")
-        .insert({
-          collectivity_id: collectivityId,
-          title:    f.title.trim(),
-          body:     f.body.trim(),
-          severity: f.severity,
-          sent_at:  new Date().toISOString(),
-        });
-      if (logErr) throw logErr;
-
-      // 2. Broadcast push to all subscribers of this collectivity
-      await supabase.functions.invoke("send-push-notification", {
+      const res = await supabase.functions.invoke("send-alert", {
         body: {
           collectivity_id: collectivityId,
-          title:   f.title.trim(),
-          message: f.body.trim(),
-          url:     "/alertes",
+          title:      f.title.trim(),
+          message:    f.body.trim(),
+          severity:   f.severity,
+          district:   f.district || undefined,
+          area_label: f.area_label.trim() || undefined,
+          expires_at: f.expires_at || undefined,
+          url:        "/urgences",
         },
       });
+
+      if (res.error) throw new Error(res.error.message ?? "Erreur serveur");
+      const data = res.data as { success?: boolean; error?: string; recipient_count?: number; total_subscribers?: number };
+      if (!data?.success) throw new Error(data?.error ?? "Erreur inconnue");
+      return { count: data.recipient_count ?? 0, total: data.total_subscribers ?? 0 };
     },
-    onSuccess: () => {
-      toast.success("Alerte diffusée aux abonnés de la commune");
+    onSuccess: (result) => {
+      setLastResult(result);
+      toast.success(`Alerte diffusée — ${result.count} / ${result.total} abonnés notifiés`);
       setForm(BLANK);
       qc.invalidateQueries({ queryKey: ["admin-alerts-history", collectivityId] });
     },
@@ -215,6 +234,58 @@ function AdminAlertesPage() {
               <p className="mt-1 text-right text-xs text-slate-400">{form.body.length}/400</p>
             </div>
 
+            {/* Geographic targeting */}
+            <div className="rounded-xl border border-slate-200 bg-slate-50 p-4 space-y-3">
+              <div className="flex items-center gap-2 text-sm font-medium text-slate-700">
+                <MapPin className="h-4 w-4 text-slate-400" />
+                Ciblage géographique
+              </div>
+
+              <div>
+                <label className="mb-1 block text-xs font-medium text-slate-600">Quartier (optionnel)</label>
+                <select
+                  value={form.district}
+                  onChange={e => setForm(f => ({ ...f, district: e.target.value }))}
+                  className="w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm outline-none focus:border-emerald-400"
+                >
+                  <option value="">Commune entière</option>
+                  {(meta?.districts ?? []).map((d) => (
+                    <option key={d} value={d}>{d}</option>
+                  ))}
+                </select>
+              </div>
+
+              <div>
+                <label className="mb-1 block text-xs font-medium text-slate-600">Libellé zone affiché</label>
+                <input
+                  type="text"
+                  maxLength={60}
+                  value={form.area_label}
+                  onChange={e => setForm(f => ({ ...f, area_label: e.target.value }))}
+                  placeholder={form.district ? `Quartier ${form.district}` : "Commune entière"}
+                  className="w-full rounded-lg border border-slate-200 px-3 py-2 text-sm outline-none focus:border-emerald-400"
+                />
+              </div>
+
+              <div>
+                <label className="mb-1 block text-xs font-medium text-slate-600">Expiration (optionnel)</label>
+                <input
+                  type="datetime-local"
+                  value={form.expires_at}
+                  onChange={e => setForm(f => ({ ...f, expires_at: e.target.value }))}
+                  className="w-full rounded-lg border border-slate-200 px-3 py-2 text-sm outline-none focus:border-emerald-400"
+                />
+              </div>
+            </div>
+
+            {/* Last result */}
+            {lastResult && (
+              <div className="flex items-center gap-2 rounded-xl bg-emerald-50 border border-emerald-200 px-4 py-3 text-sm text-emerald-700">
+                <Users className="h-4 w-4 shrink-0" />
+                Dernière diffusion : <strong>{lastResult.count}</strong> / {lastResult.total} abonnés notifiés
+              </div>
+            )}
+
             {/* Send btn */}
             <button
               onClick={() => sendAlert.mutate(form)}
@@ -228,68 +299,4 @@ function AdminAlertesPage() {
         </div>
 
         {/* Preview */}
-        <div>
-          <h2 className="mb-3 font-semibold text-slate-900">Aperçu notification</h2>
-          <div className={`rounded-2xl border p-4 ${sevConf.color}`}>
-            <div className="flex items-start gap-3">
-              <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-white/60">
-                <SevIcon className="h-4 w-4" />
-              </div>
-              <div>
-                <p className="font-semibold">{form.title || "Titre de l'alerte"}</p>
-                <p className="mt-0.5 text-sm opacity-80">{form.body || "Message de l'alerte…"}</p>
-              </div>
-            </div>
-            <div className="mt-3 flex items-center gap-2">
-              <Bell className="h-3 w-3 opacity-50" />
-              <span className="text-xs opacity-60">VigieCity · {meta?.communeName || "Commune"}</span>
-            </div>
-          </div>
-
-          <div className="mt-4 rounded-xl bg-slate-50 p-4 text-xs text-slate-500">
-            <p className="font-medium text-slate-700">Comment ça fonctionne ?</p>
-            <p className="mt-1">Les citoyens abonnés aux notifications push recevront cette alerte en temps réel sur leur téléphone. L'alerte sera aussi visible dans l'onglet Alertes de l'application.</p>
-          </div>
-
-          {/* History toggle */}
-          <button
-            onClick={() => setShowHistory(h => !h)}
-            className="mt-6 flex w-full items-center justify-between rounded-xl border border-slate-200 px-4 py-3 text-sm font-medium text-slate-700 transition hover:bg-slate-50"
-          >
-            <span className="flex items-center gap-2"><Clock className="h-4 w-4 text-slate-400" /> Historique des alertes</span>
-            <ChevronDown className={`h-4 w-4 text-slate-400 transition ${showHistory ? "rotate-180" : ""}`} />
-          </button>
-
-          {showHistory && (
-            <div className="mt-2 overflow-hidden rounded-xl border border-slate-200 bg-white">
-              {loadingAlerts ? (
-                <div className="flex justify-center py-6"><Loader2 className="h-5 w-5 animate-spin text-slate-400" /></div>
-              ) : alerts.length === 0 ? (
-                <p className="py-6 text-center text-sm text-slate-400">Aucune alerte envoyée</p>
-              ) : (
-                <ul className="divide-y divide-slate-100">
-                  {alerts.map(a => (
-                    <li key={a.id} className="px-4 py-3">
-                      <div className="flex items-start justify-between gap-2">
-                        <div className="min-w-0">
-                          <SevBadge severity={a.severity} />
-                          <p className="mt-1 font-medium text-slate-800 text-sm">{a.title}</p>
-                          <p className="text-xs text-slate-500 line-clamp-2">{a.body}</p>
-                        </div>
-                        <span className="shrink-0 text-xs text-slate-400">
-                          {new Date(a.sent_at).toLocaleDateString("fr-FR", { day: "numeric", month: "short", hour: "2-digit", minute: "2-digit" })}
-                        </span>
-                      </div>
-                    </li>
-                  ))}
-                </ul>
-              )}
-            </div>
-          )}
-        </div>
-
-      </div>
-    </div>
-    </AdminShell>
-  );
-}
+    
