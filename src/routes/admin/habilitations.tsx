@@ -1,6 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useState, useEffect, useCallback } from "react";
-import { supabase } from "@/lib/supabase";
+import { supabase } from "@/integrations/supabase/client";
 
 export const Route = createFileRoute("/admin/habilitations")({
   head: () => ({
@@ -324,6 +324,4 @@ function HabilitationsAdmin() {
           Sans SMS_GATEWAY_URL configuré, le code est envoyé par email en fallback automatique.
         </p>
       </div>
-    </div>
-  );
-}
+  

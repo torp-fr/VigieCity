@@ -1,6 +1,6 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useState, useRef, useEffect } from "react";
-import { supabase } from "@/lib/supabase";
+import { supabase } from "@/integrations/supabase/client";
 
 export const Route = createFileRoute("/operateur/")({
   head: () => ({
@@ -277,6 +277,4 @@ function OperateurLogin() {
           Accès réservé aux agents habilités · VigieCity
         </p>
       </div>
-    </div>
-  );
-}
+  

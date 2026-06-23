@@ -1,6 +1,6 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useState, useEffect, useCallback } from "react";
-import { supabase } from "@/lib/supabase";
+import { supabase } from "@/integrations/supabase/client";
 
 export const Route = createFileRoute("/operateur/tableau")({
   head: () => ({
@@ -399,6 +399,4 @@ function OperateurTableau() {
           </div>
         </div>
       )}
-    </div>
-  );
-}
+  
