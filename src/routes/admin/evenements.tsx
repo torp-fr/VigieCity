@@ -514,7 +514,6 @@ function AdminEvenementsPage() {
           </div>
         </div>
       )}
-    </>
     </AdminShell>
   );
 }

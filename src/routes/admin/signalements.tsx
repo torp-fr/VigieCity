@@ -336,7 +336,6 @@ function SignalementsAdmin() {
           isPending={updateStatus.isPending}
         />
       )}
-    </>
     </AdminShell>
   );
 }
