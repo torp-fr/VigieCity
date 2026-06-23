@@ -154,4 +154,8 @@ export function PlatformShell({ activePath, children }: PlatformShellProps) {
         </div>
       </aside>
 
-      {/* ── Main content ─────────────────────────────────────────────────�
+      {/* ── Main content ── */}
+      <main className="ml-64 flex-1 overflow-auto">{children}</main>
+    </div>
+  );
+}

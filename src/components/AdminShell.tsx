@@ -262,4 +262,8 @@ export function AdminShell({ activePath, children }: AdminShellProps) {
         </div>
       </aside>
 
-      {/* ── Main ─
+      {/* ── Main ── */}
+      <main className="ml-60 flex-1 overflow-auto">{children}</main>
+    </div>
+  );
+}
