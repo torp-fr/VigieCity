@@ -12,7 +12,6 @@ export const Route = createFileRoute("/operateur/tableau")({
 // ── Types ────────────────────────────────────────────────────────────────────
 interface OpSession {
   session_token:      string;
-  expires_at:         string;
   operator_name:      string;
   collectivity_id:    string;
   collectivity_name:  string;
@@ -71,15 +70,11 @@ function OperateurTableau() {
 
   // ── Auth check ──────────────────────────────────────────────────────────────
   useEffect(() => {
-    const stored = sessionStorage.getItem("op_session");
+    const stored = localStorage.getItem("op_session");
     if (!stored) { navigate({ to: "/operateur" }); return; }
     try {
       const s = JSON.parse(stored) as OpSession;
-      if (new Date(s.expires_at) <= new Date()) {
-        sessionStorage.removeItem("op_session");
-        navigate({ to: "/operateur" });
-        return;
-      }
+      if (!s.session_token) { navigate({ to: "/operateur" }); return; }
       setSession(s);
     } catch {
       navigate({ to: "/operateur" });
@@ -125,7 +120,7 @@ function OperateurTableau() {
   };
 
   const handleLogout = () => {
-    sessionStorage.removeItem("op_session");
+    localStorage.removeItem("op_session");
     navigate({ to: "/operateur" });
   };
 
@@ -402,3 +397,4 @@ function OperateurTableau() {
     </div>
   );
 }
+                                                                                                                             

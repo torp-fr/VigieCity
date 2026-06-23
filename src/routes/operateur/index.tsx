@@ -13,7 +13,6 @@ type Step = "phone" | "otp" | "loading";
 
 interface OtpSession {
   session_token:      string;
-  expires_at:         string;
   operator_name:      string;
   collectivity_id:    string;
   collectivity_name:  string;
@@ -33,13 +32,11 @@ function OperateurLogin() {
 
   // Rediriger si déjà connecté
   useEffect(() => {
-    const stored = sessionStorage.getItem("op_session");
+    const stored = localStorage.getItem("op_session");
     if (!stored) return;
     try {
       const s = JSON.parse(stored) as OtpSession;
-      if (new Date(s.expires_at) > new Date()) {
-        navigate({ to: "/operateur/tableau" });
-      }
+      if (s.session_token) navigate({ to: "/operateur/tableau" });
     } catch { /* ignore */ }
   }, [navigate]);
 
@@ -77,7 +74,7 @@ function OperateurLogin() {
       if (fnErr || !data?.session_token) {
         throw new Error(data?.error ?? "Code incorrect");
       }
-      sessionStorage.setItem("op_session", JSON.stringify(data));
+      localStorage.setItem("op_session", JSON.stringify(data));
       navigate({ to: "/operateur/tableau" });
     } catch (err: unknown) {
       setError(err instanceof Error ? err.message : "Erreur réseau");
@@ -113,7 +110,7 @@ function OperateurLogin() {
         { body: { phone, code } },
       );
       if (fnErr || !data?.session_token) throw new Error(data?.error ?? "Code incorrect");
-      sessionStorage.setItem("op_session", JSON.stringify(data));
+      localStorage.setItem("op_session", JSON.stringify(data));
       navigate({ to: "/operateur/tableau" });
     } catch (err: unknown) {
       setError(err instanceof Error ? err.message : "Code incorrect");
@@ -280,3 +277,4 @@ function OperateurLogin() {
     </div>
   );
 }
+                                                                          
