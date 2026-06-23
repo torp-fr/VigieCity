@@ -4,8 +4,8 @@
  * useState (pas React Query) -- immunise contre queryClient.invalidateQueries()
  * global de __root.tsx.
  *
- * Fast-path: sessionStorage alimente par login.tsx -> status "ready" instantane,
- * aucun spinner. Verification reseau en arriere-plan, timeout 10s.
+ * Fast-path: sessionStorage lu dans le premier useEffect (apres hydration),
+ * pas dans le lazy initializer -- evite le mismatch SSR/client #418.
  */
 import { useEffect, useRef, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
@@ -18,17 +18,20 @@ export type PlatformAuthResult =
   | { status: "ready"; email: string };
 
 export function usePlatformAuth(): PlatformAuthResult {
-  const [result, setResult] = useState<PlatformAuthResult>(() => {
-    if (typeof window === "undefined") return { status: "loading" };
-    const cached = sessionStorage.getItem(PLATFORM_SESSION_KEY);
-    return cached ? { status: "ready", email: cached } : { status: "loading" };
-  });
-
+  // Toujours "loading" au premier render (server ET client) pour eviter l hydration mismatch.
+  const [result, setResult] = useState<PlatformAuthResult>({ status: "loading" });
   const cancelled = useRef(false);
 
   useEffect(() => {
     cancelled.current = false;
 
+    // Fast-path synchrone : si le cache est la on passe "ready" immediatement apres hydration.
+    const cached = sessionStorage.getItem(PLATFORM_SESSION_KEY);
+    if (cached) {
+      setResult({ status: "ready", email: cached });
+    }
+
+    // Verification reseau en arriere-plan, timeout 10 s.
     (async () => {
       try {
         const verified = await Promise.race<{ email: string } | null>([
@@ -52,8 +55,8 @@ export function usePlatformAuth(): PlatformAuthResult {
 
         if (!verified) {
           // Timeout ou session invalide -- si cache present on garde "ready"
-          const cached = sessionStorage.getItem(PLATFORM_SESSION_KEY);
-          if (!cached) setResult({ status: "unauthorized" });
+          const still = sessionStorage.getItem(PLATFORM_SESSION_KEY);
+          if (!still) setResult({ status: "unauthorized" });
           return;
         }
 
@@ -62,8 +65,8 @@ export function usePlatformAuth(): PlatformAuthResult {
           setResult({ status: "ready", email: verified.email });
       } catch {
         if (cancelled.current) return;
-        const cached = sessionStorage.getItem(PLATFORM_SESSION_KEY);
-        if (!cached) {
+        const still = sessionStorage.getItem(PLATFORM_SESSION_KEY);
+        if (!still) {
           sessionStorage.removeItem(PLATFORM_SESSION_KEY);
           setResult({ status: "unauthorized" });
         }
