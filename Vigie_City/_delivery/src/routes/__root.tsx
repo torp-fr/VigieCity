@@ -179,9 +179,14 @@ function RootComponent() {
   const navigate = useNavigate();
   const pathname = useRouterState({ select: (s) => s.location.pathname });
 
-  // BUG-010: éviter le closure stale de pathname dans onAuthStateChange (deps=[])
+  // BUG-010: eviter le closure stale de pathname dans onAuthStateChange (deps=[])
   const pathnameRef = useRef(pathname);
   useEffect(() => { pathnameRef.current = pathname; }, [pathname]);
+
+  // Guard anti-SIGNED_OUT parasite : apres un SIGNED_IN, ignorer les SIGNED_OUT
+  // pendant 5s (400 sur refresh_token stale qui efface la nouvelle session).
+  const recentlySignedIn    = useRef(false);
+  const recentlySignedInTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const isShellFree  = SHELL_FREE_ROUTES.some((r) => pathname === r || pathname.startsWith(r + "/"));
   const isAdminRoute = pathname.startsWith("/admin") || pathname.startsWith("/platform");
@@ -208,16 +213,25 @@ function RootComponent() {
         event !== "USER_UPDATED"
       ) return;
 
-      // SIGNED_OUT : vider le cache platform-auth uniquement.
-      // PAS de router.invalidate() : la navigation est geree par PlatformShell
-      // (navigate explicite). router.invalidate() bloquerait handleLogin si
-      // signOut({ scope:'local' }) est appele en debut de connexion.
+      // SIGNED_OUT : vider le cache, sauf si on vient juste de se connecter.
+      // Apres signInWithPassword, Supabase peut declencher un 400 sur un ancien
+      // refresh_token stale -> _removeSession() efface la nouvelle session ->
+      // SIGNED_OUT parasite. Le guard recentlySignedIn absorbe cette race condition.
       if (event === "SIGNED_OUT") {
+        if (recentlySignedIn.current) return; // SIGNED_OUT parasite post-reconnexion
         queryClient.removeQueries({ queryKey: ["platform-auth"] });
         posthog.reset();
         return;
       }
 
+      // SIGNED_IN : marquer "vient de se connecter" pour 5 secondes
+      if (event === "SIGNED_IN" && session?.user) {
+        recentlySignedIn.current = true;
+        if (recentlySignedInTimer.current) clearTimeout(recentlySignedInTimer.current);
+        recentlySignedInTimer.current = setTimeout(() => {
+          recentlySignedIn.current = false;
+        }, 5_000);
+      }
 
       // SIGNED_IN : PostHog identify + redirect onboarding citoyen uniquement
       // Le formulaire /admin/login gere lui-meme le redirect admin, pas d'interference
