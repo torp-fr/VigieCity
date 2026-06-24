@@ -208,12 +208,12 @@ function RootComponent() {
         event !== "USER_UPDATED"
       ) return;
 
-      // SIGNED_OUT : vider le cache platform-auth + invalider le router
-      // removeQueries assure que sur la reconnexion suivante, la query
-      // repart de zero (isPending:true) et non d'un etat isError stale
+      // SIGNED_OUT : vider le cache platform-auth uniquement.
+      // PAS de router.invalidate() : la navigation est geree par PlatformShell
+      // (navigate explicite). router.invalidate() bloquerait handleLogin si
+      // signOut({ scope:'local' }) est appele en debut de connexion.
       if (event === "SIGNED_OUT") {
         queryClient.removeQueries({ queryKey: ["platform-auth"] });
-        router.invalidate();
         posthog.reset();
         return;
       }
