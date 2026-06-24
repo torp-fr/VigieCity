@@ -47,7 +47,7 @@ const ADMIN_ROLES = ["commune_admin", "interco_admin", "super_admin"] as const;
 
 // Routes rendered without the app shell (header / bottom nav)
 const SHELL_FREE_ROUTES = [
-  "/", "/landing", "/auth",
+  "/", "/landing", "/auth", "/demo",
   "/admin/login", "/admin/reset-password", "/admin/accept-invite",
   "/mentions-legales", "/confidentialite", "/cgu",
 ];
@@ -269,37 +269,4 @@ function RootComponent() {
 
       // Admin : le formulaire /admin/login a deja redirige, rien a faire ici
       const role = profile?.role as string;
-      if (ADMIN_ROLES.includes(role as typeof ADMIN_ROLES[number])) return;
-
-      // Citoyen : certaines routes ne declenchent pas le redirect onboarding
-      if (SKIP_ONBOARDING_ROUTES.includes(pathnameRef.current)) return;
-
-      // Citoyen sans commune -> onboarding
-      if (!profile?.collectivity_id) {
-        navigate({ to: "/onboarding" });
-      }
-    });
-
-    return () => data.subscription.unsubscribe();
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
-
-  // -- Render ------------------------------------------------------------------
-  return (
-    <QueryClientProvider client={queryClient}>
-      {isShellFree || isAdminRoute ? (
-        <Outlet />
-      ) : (
-        <div className="flex min-h-[100dvh] flex-col bg-background pb-[calc(4rem+env(safe-area-inset-bottom))]">
-          <AppHeader />
-          <main className="flex-1">
-            <Outlet />
-          </main>
-          <BottomNav />
-        </div>
-      )}
-      <CookieBanner />
-      <Toaster richColors position="top-center" />
-    </QueryClientProvider>
-  );
-}
+      if (ADMIN_ROLES.in

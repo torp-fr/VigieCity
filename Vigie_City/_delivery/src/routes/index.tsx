@@ -6,6 +6,7 @@ import {
   Home, Network, Building2,
   LayoutDashboard, CheckSquare, BarChart3, Map as MapIcon, Users,
   X, Sparkles, ToggleLeft, ToggleRight,
+  Loader2, Send, Phone, Mail, CheckCircle,
 } from "lucide-react";
 
 export const Route = createFileRoute("/")({
@@ -1239,6 +1240,210 @@ function PromoBanner() {
 
 // ── Page ──────────────────────────────────────────────────────────────────────
 
+
+// ── Formulaire contact ────────────────────────────────────────────────────────
+
+const EF_BASE = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1`;
+
+type ContactStatus = "idle" | "sending" | "success" | "error";
+
+const POPULATIONS = [
+  "Moins de 500 hab.",
+  "500 - 1 000 hab.",
+  "1 000 - 2 500 hab.",
+  "2 500 - 10 000 hab.",
+  "10 000 - 50 000 hab.",
+  "Plus de 50 000 hab.",
+];
+
+function ContactSection() {
+  const [form, setForm] = useState({
+    nom: "", commune: "", email: "", telephone: "", population: "", message: "",
+  });
+  const [status, setStatus] = useState<ContactStatus>("idle");
+
+  function update(field: string, value: string) {
+    setForm((f) => ({ ...f, [field]: value }));
+  }
+
+  async function handleSubmit(e: React.FormEvent) {
+    e.preventDefault();
+    if (!form.nom || !form.commune || !form.email) return;
+    setStatus("sending");
+    try {
+      const res = await fetch(`${EF_BASE}/send-contact`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          apikey: import.meta.env.VITE_SUPABASE_ANON_KEY,
+        },
+        body: JSON.stringify(form),
+      });
+      const json = await res.json();
+      setStatus(json.success ? "success" : "error");
+    } catch {
+      setStatus("error");
+    }
+  }
+
+  if (status === "success") {
+    return (
+      <section id="contact" className="py-20" style={{ backgroundColor: "#1e3a8a" }}>
+        <div className="mx-auto max-w-xl px-6 text-center">
+          <div className="mx-auto mb-6 flex h-16 w-16 items-center justify-center rounded-full bg-green-400/20">
+            <CheckCircle className="h-8 w-8 text-green-300" />
+          </div>
+          <h2 className="text-2xl font-extrabold text-white">Message envoyé !</h2>
+          <p className="mt-3 text-blue-200">
+            Nous vous recontacterons sous 24h à <strong className="text-white">{form.email}</strong>.
+          </p>
+          <p className="mt-2 text-sm text-blue-300">Sans engagement · Devis gratuit</p>
+        </div>
+      </section>
+    );
+  }
+
+  return (
+    <section id="contact" className="py-20" style={{ backgroundColor: "#1e3a8a" }}>
+      <div className="mx-auto max-w-3xl px-6">
+        {/* Titre */}
+        <div className="mb-10 text-center">
+          <h2 className="text-3xl font-extrabold text-white md:text-4xl">
+            Demander une démo gratuite
+          </h2>
+          <p className="mt-4 text-lg text-blue-200">
+            Nous configurons une démo personnalisée pour votre commune en 24h.
+            Sans engagement.
+          </p>
+        </div>
+
+        {/* Formulaire */}
+        <form
+          onSubmit={handleSubmit}
+          className="rounded-2xl bg-white/10 p-6 backdrop-blur-sm md:p-8"
+        >
+          <div className="grid gap-4 sm:grid-cols-2">
+            {/* Nom */}
+            <div>
+              <label className="mb-1.5 block text-xs font-semibold uppercase tracking-wide text-blue-200">
+                Nom / Prénom *
+              </label>
+              <input
+                type="text"
+                required
+                value={form.nom}
+                onChange={(e) => update("nom", e.target.value)}
+                placeholder="Marie Dupont"
+                className="w-full rounded-xl bg-white/15 px-4 py-3 text-sm text-white placeholder-blue-300/60 outline-none ring-1 ring-white/20 focus:ring-2 focus:ring-white/50 transition"
+              />
+            </div>
+            {/* Commune */}
+            <div>
+              <label className="mb-1.5 block text-xs font-semibold uppercase tracking-wide text-blue-200">
+                Commune *
+              </label>
+              <input
+                type="text"
+                required
+                value={form.commune}
+                onChange={(e) => update("commune", e.target.value)}
+                placeholder="Saint-Martin-des-Champs"
+                className="w-full rounded-xl bg-white/15 px-4 py-3 text-sm text-white placeholder-blue-300/60 outline-none ring-1 ring-white/20 focus:ring-2 focus:ring-white/50 transition"
+              />
+            </div>
+            {/* Email */}
+            <div>
+              <label className="mb-1.5 block text-xs font-semibold uppercase tracking-wide text-blue-200">
+                Email *
+              </label>
+              <div className="relative">
+                <Mail className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-blue-300/60" />
+                <input
+                  type="email"
+                  required
+                  value={form.email}
+                  onChange={(e) => update("email", e.target.value)}
+                  placeholder="mairie@saint-martin.fr"
+                  className="w-full rounded-xl bg-white/15 py-3 pl-10 pr-4 text-sm text-white placeholder-blue-300/60 outline-none ring-1 ring-white/20 focus:ring-2 focus:ring-white/50 transition"
+                />
+              </div>
+            </div>
+            {/* Téléphone */}
+            <div>
+              <label className="mb-1.5 block text-xs font-semibold uppercase tracking-wide text-blue-200">
+                Téléphone
+              </label>
+              <div className="relative">
+                <Phone className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-blue-300/60" />
+                <input
+                  type="tel"
+                  value={form.telephone}
+                  onChange={(e) => update("telephone", e.target.value)}
+                  placeholder="06 12 34 56 78"
+                  className="w-full rounded-xl bg-white/15 py-3 pl-10 pr-4 text-sm text-white placeholder-blue-300/60 outline-none ring-1 ring-white/20 focus:ring-2 focus:ring-white/50 transition"
+                />
+              </div>
+            </div>
+            {/* Population */}
+            <div className="sm:col-span-2">
+              <label className="mb-1.5 block text-xs font-semibold uppercase tracking-wide text-blue-200">
+                Tranche de population
+              </label>
+              <select
+                value={form.population}
+                onChange={(e) => update("population", e.target.value)}
+                className="w-full rounded-xl bg-white/15 px-4 py-3 text-sm text-white outline-none ring-1 ring-white/20 focus:ring-2 focus:ring-white/50 transition appearance-none"
+              >
+                <option value="" style={{ background: "#1e3a8a" }}>Sélectionner...</option>
+                {POPULATIONS.map((p) => (
+                  <option key={p} value={p} style={{ background: "#1e3a8a" }}>{p}</option>
+                ))}
+              </select>
+            </div>
+            {/* Message */}
+            <div className="sm:col-span-2">
+              <label className="mb-1.5 block text-xs font-semibold uppercase tracking-wide text-blue-200">
+                Message (facultatif)
+              </label>
+              <textarea
+                rows={3}
+                value={form.message}
+                onChange={(e) => update("message", e.target.value)}
+                placeholder="Questions, besoins spécifiques, date souhaitée pour la démo..."
+                className="w-full rounded-xl bg-white/15 px-4 py-3 text-sm text-white placeholder-blue-300/60 outline-none ring-1 ring-white/20 focus:ring-2 focus:ring-white/50 transition resize-none"
+              />
+            </div>
+          </div>
+
+          {status === "error" && (
+            <p className="mt-3 text-center text-sm text-red-300">
+              Une erreur est survenue. Envoyez-nous un email à{" "}
+              <a href="mailto:contact@vigiecity.fr" className="underline">
+                contact@vigiecity.fr
+              </a>
+            </p>
+          )}
+
+          <div className="mt-6 flex flex-col items-center gap-3">
+            <button
+              type="submit"
+              disabled={status === "sending" || !form.nom || !form.commune || !form.email}
+              className="inline-flex items-center gap-2 rounded-xl bg-white px-10 py-4 text-base font-bold text-blue-900 shadow-lg transition hover:bg-blue-50 disabled:opacity-60 disabled:cursor-not-allowed"
+            >
+              {status === "sending" ? (
+                <><Loader2 className="h-4 w-4 animate-spin" /> Envoi en cours...</>
+              ) : (
+                <><Send className="h-4 w-4" /> Demander ma démo gratuite</>
+              )}
+            </button>
+            <p className="text-xs text-blue-300">Réponse sous 24h · Sans engagement · Gratuit</p>
+          </div>
+        </form>
+      </div>
+    </section>
+  );
+}
+
 function LandingPage() {
   return (
     <div
@@ -1457,29 +1662,7 @@ function LandingPage() {
       <PricingSection />
 
       {/* ── Contact ──────────────────────────────────── */}
-      <section id="contact" className="py-20" style={{ backgroundColor: "#1e3a8a" }}>
-        <div className="mx-auto max-w-3xl px-6 text-center">
-          <h2 className="text-3xl font-extrabold text-white md:text-4xl">
-            Prêt à connecter votre commune ?
-          </h2>
-          <p className="mt-4 text-lg text-blue-200">
-            Notre équipe vous accompagne de la configuration au lancement.
-            Contactez-nous pour un devis personnalisé.
-          </p>
-          <div className="mt-10 flex flex-col items-center gap-4 sm:flex-row sm:justify-center">
-            <a
-              href="mailto:contact@vigiecity.fr"
-              className="inline-flex items-center gap-2 rounded-xl bg-white px-8 py-4 text-base font-bold text-blue-900 shadow-lg transition hover:bg-blue-50"
-            >
-              contact@vigiecity.fr
-              <ArrowRight className="h-4 w-4" />
-            </a>
-          </div>
-          <p className="mt-6 text-sm text-blue-300">
-            Réponse sous 24h · Sans engagement
-          </p>
-        </div>
-      </section>
+      <ContactSection />
 
       {/* ── Footer ────────────────────────────────────── */}
       <footer style={{ backgroundColor: "#0f172a" }} className="py-10">
