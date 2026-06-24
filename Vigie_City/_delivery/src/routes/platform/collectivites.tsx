@@ -67,6 +67,15 @@ const STATUS_META: Record<string, { label: string; cls: string }> = {
 // ── Page ──────────────────────────────────────────────────────────────────────
 
 function PlatformCollectivitesPage() {
+  return (
+    <PlatformShell activePath="/platform/collectivites">
+      <PlatformCollectivitesContent />
+    </PlatformShell>
+  );
+}
+
+
+function PlatformCollectivitesContent() {
   const qc = useQueryClient();
 
   // ── State ──────────────────────────────────────────────────────────────────
@@ -266,8 +275,7 @@ function PlatformCollectivitesPage() {
 
   // ─── Render ───────────────────────────────────────────────────────────────
   return (
-    <PlatformShell activePath="/platform/collectivites">
-
+    <>
       {/* Header */}
       <div className="mb-6">
         <h1 className="text-2xl font-bold text-slate-900">Collectivités</h1>
@@ -703,7 +711,7 @@ function PlatformCollectivitesPage() {
           </div>
         </div>
       )}
-    </PlatformShell>
+    </>
   );
 }
 

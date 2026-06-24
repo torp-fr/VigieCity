@@ -59,6 +59,15 @@ function catMeta(cat: string) {
 
 // ─── Composant ────────────────────────────────────────────────────────────────
 function KnowledgePlatform() {
+  return (
+    <PlatformShell activePath="/platform/knowledge">
+      <KnowledgePlatformContent />
+    </PlatformShell>
+  );
+}
+
+
+function KnowledgePlatformContent() {
   const qc = useQueryClient();
 
   const [showForm,     setShowForm]     = useState(false);
@@ -201,7 +210,7 @@ function KnowledgePlatform() {
 
   // ─── UI ──────────────────────────────────────────────────────────────────
   return (
-    <PlatformShell activePath="/platform/knowledge">
+    <>
     <div className="space-y-5">
       {/* En-tête */}
       <div className="flex items-center justify-between">
@@ -542,6 +551,6 @@ function KnowledgePlatform() {
         </div>
       )}
     </div>
-    </PlatformShell>
+    </>
   );
 }

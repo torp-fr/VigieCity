@@ -42,6 +42,15 @@ async function fetchPlatformStats() {
 // ── Page ──────────────────────────────────────────────────────────────────────
 
 function PlatformSettingsPage() {
+  return (
+    <PlatformShell activePath="/platform/settings">
+      <PlatformSettingsContent />
+    </PlatformShell>
+  );
+}
+
+
+function PlatformSettingsContent() {
   const { data: stats, isLoading } = useQuery({
     queryKey: ["platform-settings-stats"],
     queryFn:  fetchPlatformStats,
@@ -58,8 +67,7 @@ function PlatformSettingsPage() {
     : "—";
 
   return (
-    <PlatformShell activePath="/platform/settings">
-
+    <>
       {/* Header */}
       <div className="mb-8">
         <h1 className="text-2xl font-bold text-slate-900">Paramètres</h1>
@@ -150,7 +158,7 @@ function PlatformSettingsPage() {
         </Card>
 
       </div>
-    </PlatformShell>
+    </>
   );
 }
 

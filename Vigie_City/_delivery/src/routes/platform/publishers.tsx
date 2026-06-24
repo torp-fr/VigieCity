@@ -23,6 +23,15 @@ type Publisher = {
 // ── Page ──────────────────────────────────────────────────────────────────────
 
 function PlatformPublishersPage() {
+  return (
+    <PlatformShell activePath="/platform/publishers">
+      <PlatformPublishersContent />
+    </PlatformShell>
+  );
+}
+
+
+function PlatformPublishersContent() {
   const { data: publishers = [], isLoading } = useQuery<Publisher[]>({
     queryKey: ["platform/publishers"],
     queryFn: async () => {
@@ -41,8 +50,7 @@ function PlatformPublishersPage() {
   );
 
   return (
-    <PlatformShell activePath="/platform/publishers">
-
+    <>
       {/* Header */}
       <div className="mb-8">
         <h1 className="text-2xl font-bold text-slate-900">Éditeurs</h1>
@@ -121,6 +129,6 @@ function PlatformPublishersPage() {
           })}
         </div>
       )}
-    </PlatformShell>
+    </>
   );
 }

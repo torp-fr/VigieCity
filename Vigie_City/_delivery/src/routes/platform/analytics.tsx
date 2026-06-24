@@ -212,6 +212,15 @@ function useLeafletMap(
 // ── Page ──────────────────────────────────────────────────────────────────────
 
 function AnalyticsPage() {
+  return (
+    <PlatformShell activePath="/platform/analytics">
+      <AnalyticsPageContent />
+    </PlatformShell>
+  );
+}
+
+
+function AnalyticsPageContent() {
   const mapContainerRef = useRef<HTMLDivElement>(null);
 
   const { data: sb, isLoading: sbLoading, refetch, isFetching } = useQuery({
@@ -236,8 +245,7 @@ function AnalyticsPage() {
   }, []);
 
   return (
-    <PlatformShell activePath="/platform/analytics">
-
+    <>
       {/* Header */}
       <div className="mb-6 flex items-start justify-between">
         <div>
@@ -422,7 +430,7 @@ function AnalyticsPage() {
         </div>
 
       </div>
-    </PlatformShell>
+    </>
   );
 }
 

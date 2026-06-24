@@ -51,6 +51,15 @@ const ROLE_BADGE: Record<string, string> = {
 // ── Page ──────────────────────────────────────────────────────────────────────
 
 function PlatformUsersPage() {
+  return (
+    <PlatformShell activePath="/platform/users">
+      <PlatformUsersContent />
+    </PlatformShell>
+  );
+}
+
+
+function PlatformUsersContent() {
   const qc = useQueryClient();
   const [search,     setSearch]     = useState("");
   const [filterRole, setFilterRole] = useState("all");
@@ -98,8 +107,7 @@ function PlatformUsersPage() {
   // ── Render ────────────────────────────────────────────────────────────────
 
   return (
-    <PlatformShell activePath="/platform/users">
-
+    <>
       {/* Header */}
       <div className="mb-8">
         <h1 className="text-2xl font-bold text-slate-900">Utilisateurs</h1>
@@ -203,6 +211,6 @@ function PlatformUsersPage() {
           </table>
         </div>
       )}
-    </PlatformShell>
+    </>
   );
 }

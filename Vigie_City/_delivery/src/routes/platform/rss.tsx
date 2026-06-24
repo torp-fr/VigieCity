@@ -53,6 +53,15 @@ function fmtDt(s: string | null) {
 // ── Page ──────────────────────────────────────────────────────────────────────
 
 function PlatformRssPage() {
+  return (
+    <PlatformShell activePath="/platform/rss">
+      <PlatformRssContent />
+    </PlatformShell>
+  );
+}
+
+
+function PlatformRssContent() {
   const qc = useQueryClient();
   const [addOpen, setAddOpen] = useState(false);
 
@@ -118,8 +127,7 @@ function PlatformRssPage() {
   // ── Render ───────────────────────────────────────────────────────────────
 
   return (
-    <PlatformShell activePath="/platform/rss">
-
+    <>
       {/* Header */}
       <div className="mb-8 flex items-start justify-between">
         <div>
@@ -192,7 +200,7 @@ function PlatformRssPage() {
           categories={CATEGORIES}
         />
       )}
-    </PlatformShell>
+    </>
   );
 }
 

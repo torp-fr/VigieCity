@@ -26,6 +26,15 @@ const COLORS = {
 // ── Main component ────────────────────────────────────────────────────────────
 
 function PlatformDashboard() {
+  return (
+    <PlatformShell activePath="/platform">
+      <PlatformDashboardContent />
+    </PlatformShell>
+  );
+}
+
+
+function PlatformDashboardContent() {
   const queryClient = useQueryClient();
 
   // ── Stats ───────────────────────────────────────────────────────────────────
@@ -95,8 +104,7 @@ function PlatformDashboard() {
 
   // ── Render ──────────────────────────────────────────────────────────────────
   return (
-    <PlatformShell activePath="/platform">
-
+    <>
       {/* Top bar */}
       <div className="mb-8 flex items-center justify-between">
         <div>
@@ -273,7 +281,7 @@ function PlatformDashboard() {
         </section>
 
       </div>
-    </PlatformShell>
+    </>
   );
 }
 

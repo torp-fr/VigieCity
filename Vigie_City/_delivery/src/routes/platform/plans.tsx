@@ -54,6 +54,15 @@ const SUPPORT_OPTIONS = ["none", "email", "prioritaire", "dedié"] as const;
 // ── Page ───────────────────────────────────────────────────────────────────────
 
 function PlansPage() {
+  return (
+    <PlatformShell activePath="/platform/plans">
+      <PlansPageContent />
+    </PlatformShell>
+  );
+}
+
+
+function PlansPageContent() {
   const qc = useQueryClient();
   const [editingId, setEditingId] = useState<string | null>(null);
   const [editDraft, setEditDraft] = useState<Plan | null>(null);
@@ -135,7 +144,7 @@ function PlansPage() {
   }
 
   return (
-    <PlatformShell activePath="/platform/plans">
+    <>
       {/* Header */}
       <div className="mb-8 flex items-start justify-between">
         <div>
@@ -195,7 +204,7 @@ function PlansPage() {
           nextOrder={(plans[plans.length - 1]?.display_order ?? 0) + 1}
         />
       )}
-    </PlatformShell>
+    </>
   );
 }
 

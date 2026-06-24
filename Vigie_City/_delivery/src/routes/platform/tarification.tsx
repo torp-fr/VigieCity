@@ -28,6 +28,15 @@ type Tranche = {
 // ── Page ───────────────────────────────────────────────────────────────────────
 
 function TarificationPage() {
+  return (
+    <PlatformShell activePath="/platform/tarification">
+      <TarificationPageContent />
+    </PlatformShell>
+  );
+}
+
+
+function TarificationPageContent() {
   const qc = useQueryClient();
   const [editingId, setEditingId] = useState<string | null>(null);
   const [editDraft, setEditDraft] = useState<Tranche | null>(null);
@@ -87,7 +96,7 @@ function TarificationPage() {
   }
 
   return (
-    <PlatformShell activePath="/platform/tarification">
+    <>
       {/* Header */}
       <div className="mb-8 flex items-start justify-between">
         <div>
@@ -181,7 +190,7 @@ function TarificationPage() {
           nextOrder={(tranches[tranches.length - 1]?.display_order ?? 0) + 1}
         />
       )}
-    </PlatformShell>
+    </>
   );
 }
 
