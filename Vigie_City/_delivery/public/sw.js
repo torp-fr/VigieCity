@@ -1,9 +1,10 @@
-// VigieCity Service Worker — v4
+// VigieCity Service Worker — v5
 // Gère : multi-stratégie cache + offline shell + Web Push notifications
-// rebuild: 2026-06-21
+// rebuild: 2026-06-24
+// v5 : force-reload des tabs /admin et /platform après activation (BUG-005)
 
 // ── Cache names ────────────────────────────────────────────────────────────────
-const V             = 'v4';
+const V             = 'v5';
 const CACHE_STATIC  = `vigiecity-${V}-static`;   // JS/CSS/fonts — cache-first
 const CACHE_PAGES   = `vigiecity-${V}-pages`;    // HTML navigation — stale-while-revalidate
 const CACHE_IMAGES  = `vigiecity-${V}-images`;   // Images/icons   — cache-first
@@ -49,15 +50,29 @@ self.addEventListener('install', (event) => {
 // ── Activation — nettoyage des anciens caches ─────────────────────────────────
 self.addEventListener('activate', (event) => {
   event.waitUntil(
-    caches.keys().then((keys) =>
-      Promise.all(
-        keys
-          .filter((k) => !ALL_CACHES.includes(k))
-          .map((k) => caches.delete(k))
+    caches.keys()
+      .then((keys) =>
+        Promise.all(
+          keys
+            .filter((k) => !ALL_CACHES.includes(k))
+            .map((k) => caches.delete(k))
+        )
       )
-    )
+      .then(() => self.clients.claim())
+      .then(() =>
+        // BUG-005 : apres skipWaiting + clients.claim(), les tabs /admin et /platform
+        // peuvent avoir des chunks JS issus du SW precedent (mismatch version).
+        // On force un reload de ces tabs pour garantir la coherence des bundles.
+        self.clients.matchAll({ type: 'window', includeUncontrolled: true }).then((clients) => {
+          for (const client of clients) {
+            const url = new URL(client.url);
+            if (url.pathname.startsWith('/admin') || url.pathname.startsWith('/platform')) {
+              client.navigate(client.url);
+            }
+          }
+        })
+      )
   );
-  self.clients.claim();
 });
 
 // ── Fetch ──────────────────────────────────────────────────────────────────────

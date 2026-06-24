@@ -107,8 +107,7 @@ function TarificationPageContent() {
         </div>
         <button
           onClick={() => setAddOpen(true)}
-          className="flex items-center gap-2 rounded-xl px-4 py-2 text-sm font-semibold text-white shadow-sm transition hover:opacity-90"
-          style={{ backgroundColor: "#1e3a8a" }}
+          className="flex items-center gap-2 rounded-xl bg-primary px-4 py-2 text-sm font-semibold text-white shadow-sm transition hover:opacity-90"
         >
           <Plus className="h-4 w-4" />
           Nouvelle tranche

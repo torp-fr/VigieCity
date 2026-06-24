@@ -1,8 +1,10 @@
 import { createFileRoute } from "@tanstack/react-router";
+import { useQuery } from "@tanstack/react-query";
 import {
   Shield, Megaphone, Wrench, MapPin, Bell, BarChart3,
-  Code2, Palette, CheckCircle2, XCircle, Minus,
+  Code2, Palette, CheckCircle2, XCircle, Minus, Loader2,
 } from "lucide-react";
+import { supabase } from "@/integrations/supabase/client";
 import { PlatformShell } from "@/components/PlatformShell";
 
 export const Route = createFileRoute("/platform/modules")({
@@ -137,17 +139,80 @@ const MODULES: Module[] = [
   },
 ];
 
-// ─── Plans ────────────────────────────────────────────────────────────────────
-const PLANS: { key: PlanKey; name: string; color: string; price: string }[] = [
-  { key: "starter",    name: "Starter",    color: "bg-muted",           price: "Gratuit" },
-  { key: "pro",        name: "Pro",        color: "bg-primary",         price: "99 €/mois" },
-  { key: "enterprise", name: "Enterprise", color: "bg-purple-600",      price: "Sur devis" },
+// ─── Plans (matrice fonctionnelle — nommage simplifié pour la doc) ────────────
+// NOTE: Ces clés (starter/pro/enterprise) sont illustratives pour la matrice de
+// fonctionnalités. Les vrais plans commerciaux (Nano/Micro/Local/Urbain/Métropole)
+// sont gérés dans la table `plans` et visibles sur /platform/plans.
+const FEATURE_PLANS: { key: PlanKey; name: string; color: string }[] = [
+  { key: "starter",    name: "Starter",    color: "bg-muted"      },
+  { key: "pro",        name: "Pro",        color: "bg-primary"    },
+  { key: "enterprise", name: "Enterprise", color: "bg-purple-600" },
 ];
 
 function PlanBadge({ status }: { status: boolean | "partial" }) {
   if (status === true)      return <CheckCircle2 className="mx-auto h-5 w-5 text-green-500" />;
   if (status === "partial") return <Minus        className="mx-auto h-5 w-5 text-yellow-500" />;
   return                           <XCircle      className="mx-auto h-5 w-5 text-muted-foreground/40" />;
+}
+
+// ─── Section tarifs dynamique (table plans) ───────────────────────────────────
+function PlansTarifsSection() {
+  const { data: plans, isLoading } = useQuery({
+    queryKey: ["platform-plans-list"],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("plans")
+        .select("id, name, price_monthly, max_users, max_communes, is_active, display_order")
+        .eq("is_active", true)
+        .order("display_order");
+      if (error) throw error;
+      return data ?? [];
+    },
+    staleTime: 5 * 60_000,
+  });
+
+  return (
+    <section className="space-y-3">
+      <h2 className="text-base font-semibold">Tarifs commerciaux</h2>
+      <p className="text-xs text-muted-foreground">
+        Plans actifs en base · Modifiables depuis{" "}
+        <a href="/platform/plans" className="underline hover:text-foreground">/platform/plans</a>
+      </p>
+      {isLoading ? (
+        <div className="flex justify-center py-8">
+          <Loader2 className="h-5 w-5 animate-spin text-muted-foreground" />
+        </div>
+      ) : (
+        <div className="grid gap-3 sm:grid-cols-3 lg:grid-cols-5">
+          {(plans ?? []).map((p, i) => {
+            const colors = [
+              "bg-slate-500", "bg-blue-500", "bg-primary",
+              "bg-purple-600", "bg-amber-600",
+            ];
+            const color = colors[i % colors.length];
+            const priceLabel = p.price_monthly != null
+              ? `${p.price_monthly} €/mois`
+              : "Sur devis";
+            const usersLabel = p.max_users != null
+              ? `${p.max_users.toLocaleString("fr-FR")} utilisateurs max`
+              : "Illimité";
+            return (
+              <div
+                key={p.id}
+                className="rounded-2xl border border-border bg-card p-5 text-center"
+              >
+                <span className={`rounded-full px-3 py-1 text-xs font-bold text-white ${color}`}>
+                  {p.name}
+                </span>
+                <div className="mt-3 text-xl font-extrabold">{priceLabel}</div>
+                <p className="mt-1 text-xs text-muted-foreground">{usersLabel}</p>
+              </div>
+            );
+          })}
+        </div>
+      )}
+    </section>
+  );
 }
 
 // ─── Composant ────────────────────────────────────────────────────────────────
@@ -173,7 +238,7 @@ function ModulesPlatform() {
                 <th className="px-4 py-3 text-left font-semibold text-muted-foreground">
                   Module
                 </th>
-                {PLANS.map((p) => (
+                {FEATURE_PLANS.map((p) => (
                   <th key={p.key} className="px-3 py-3 text-center">
                     <span
                       className={[
@@ -201,7 +266,7 @@ function ModulesPlatform() {
                         <span className="font-medium">{mod.name}</span>
                       </div>
                     </td>
-                    {PLANS.map((p) => (
+                    {FEATURE_PLANS.map((p) => (
                       <td key={p.key} className="px-3 py-3 text-center">
                         <PlanBadge status={mod.plans[p.key]} />
                       </td>
@@ -224,7 +289,6 @@ function ModulesPlatform() {
         <div className="grid gap-4 md:grid-cols-2">
           {MODULES.map((mod) => {
             const Icon = mod.icon;
-            const availablePlans = PLANS.filter((p) => mod.plans[p.key] !== false);
             return (
               <div
                 key={mod.id}
@@ -255,7 +319,7 @@ function ModulesPlatform() {
 
                 {/* Plans */}
                 <div className="flex flex-wrap gap-1.5 pt-1 border-t border-border mt-2">
-                  {PLANS.map((p) => {
+                  {FEATURE_PLANS.map((p) => {
                     const status = mod.plans[p.key];
                     if (status === false) return null;
                     return (
@@ -279,35 +343,8 @@ function ModulesPlatform() {
         </div>
       </section>
 
-      {/* Tarifs */}
-      <section className="space-y-3">
-        <h2 className="text-base font-semibold">Tarifs</h2>
-        <div className="grid gap-3 sm:grid-cols-3">
-          {PLANS.map((p) => (
-            <div
-              key={p.key}
-              className="rounded-2xl border border-border bg-card p-5 text-center"
-            >
-              <span
-                className={[
-                  "rounded-full px-4 py-1.5 text-sm font-bold text-white",
-                  p.color,
-                ].join(" ")}
-              >
-                {p.name}
-              </span>
-              <div className="mt-3 text-2xl font-extrabold">{p.price}</div>
-              <p className="mt-1 text-xs text-muted-foreground">
-                {p.key === "starter"
-                  ? "1 commune · 50 utilisateurs"
-                  : p.key === "pro"
-                  ? "Communes illimitées · SLA 99,9 %"
-                  : "Multi-tenant · Support dédié · SLA 99,99 %"}
-              </p>
-            </div>
-          ))}
-        </div>
-      </section>
+      {/* Tarifs — chargés depuis la table plans */}
+      <PlansTarifsSection />
     </div>
     </PlatformShell>
   );

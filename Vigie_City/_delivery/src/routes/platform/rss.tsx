@@ -147,8 +147,7 @@ function PlatformRssContent() {
           </button>
           <button
             onClick={() => setAddOpen(true)}
-            className="flex items-center gap-2 rounded-xl px-4 py-2 text-sm font-semibold text-white shadow-sm transition hover:opacity-90"
-            style={{ backgroundColor: "#1e3a8a" }}
+            className="flex items-center gap-2 rounded-xl bg-primary px-4 py-2 text-sm font-semibold text-white shadow-sm transition hover:opacity-90"
           >
             <Plus className="h-4 w-4" />
             Ajouter
@@ -439,8 +438,7 @@ function AddSourceModal({
             </button>
             <button
               type="submit" disabled={loading}
-              className="flex-1 rounded-xl py-2 text-sm font-semibold text-white transition disabled:opacity-60 hover:opacity-90"
-              style={{ backgroundColor: "#1e3a8a" }}
+              className="flex-1 rounded-xl bg-primary py-2 text-sm font-semibold text-white transition disabled:opacity-60 hover:opacity-90"
             >
               {loading ? <Loader2 className="mx-auto h-4 w-4 animate-spin" /> : "Ajouter"}
             </button>

@@ -1,3 +1,11 @@
+// ⚠️  RELIQUES STRIPE — NE JAMAIS UTILISER
+// Les tables stripe_customers, stripe_subscriptions, stripe_webhook_events
+// et la colonne commune_licenses.stripe_customer_id sont des résidus de
+// l'architecture initiale. VigieCity utilise CHORUS PRO pour les paiements.
+// Ne créez aucun code qui lit ou écrit ces tables.
+// BUG-015 — audit 2026-06-24
+// ─────────────────────────────────────────────────────────────────────────────
+
 export type Json =
   | string
   | number
