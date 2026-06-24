@@ -208,13 +208,17 @@ function RootComponent() {
         event !== "USER_UPDATED"
       ) return;
 
-      router.invalidate();
-      if (event !== "SIGNED_OUT") queryClient.invalidateQueries();
-
+      // SIGNED_OUT : invalider le router + reset analytics, puis sortir
       if (event === "SIGNED_OUT") {
+        router.invalidate();
         posthog.reset();
         return;
       }
+
+      // SIGNED_IN / USER_UPDATED : invalider le cache données (pas le router
+      // — router.invalidate() pendant une navigation en cours provoque un race
+      // condition qui interrompt le redirect vers /platform/ sur reconnexion)
+      queryClient.invalidateQueries();
 
       if (event === "SIGNED_IN" && session?.user) {
         await new Promise((r) => setTimeout(r, 500));

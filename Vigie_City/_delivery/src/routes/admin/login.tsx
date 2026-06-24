@@ -12,9 +12,9 @@ export const Route = createFileRoute("/admin/login")({
 });
 
 const ROLE_REDIRECT: Record<string, string> = {
-  commune_admin: "/admin",
+  commune_admin: "/admin/",
   interco_admin: "/admin/epci",
-  super_admin:   "/platform",
+  super_admin:   "/platform/",
 };
 
 type View = "login" | "forgot" | "forgot-sent";
