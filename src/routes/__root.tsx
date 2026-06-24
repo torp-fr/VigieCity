@@ -249,11 +249,19 @@ function RootComponent() {
           });
         }
 
-        // Admin roles → redirect to /admin/ (dashboard)
+        // Admin roles → redirect to appropriate dashboard
         const role = profile?.role as string;
         if (ADMIN_ROLES.includes(role as typeof ADMIN_ROLES[number])) {
-          if (!pathnameRef.current.startsWith("/admin") && !pathnameRef.current.startsWith("/platform")) {
-            navigate({ to: "/admin/" });
+          if (role === "super_admin") {
+            // Super admin → plateforme opérateur
+            if (!pathnameRef.current.startsWith("/platform")) {
+              navigate({ to: "/platform/" });
+            }
+          } else {
+            // commune_admin / interco_admin → tableau de bord mairie
+            if (!pathnameRef.current.startsWith("/admin") && !pathnameRef.current.startsWith("/platform")) {
+              navigate({ to: "/admin/" });
+            }
           }
           return;
         }
