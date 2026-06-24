@@ -215,69 +215,51 @@ function RootComponent() {
         return;
       }
 
-      // SIGNED_IN / USER_UPDATED : invalider le cache données
-      queryClient.invalidateQueries();
-      // Effacer l'état d'erreur de platform-auth : après un signOut(),
-      // fetchPlatformAuth échoue (getUser → null) et laisse la query en isError=true.
-      // Sans ce reset, PlatformShell voit "unauthorized" et redirige vers
-      // /admin/login avant que le refetch post-connexion ait pu aboutir.
-      queryClient.resetQueries({ queryKey: ["platform-auth"] });
 
-      if (event === "SIGNED_IN" && session?.user) {
-        await new Promise((r) => setTimeout(r, 500));
+      // SIGNED_IN : PostHog identify + redirect onboarding citoyen uniquement
+      // Le formulaire /admin/login gere lui-meme le redirect admin, pas d'interference
+      if (event !== "SIGNED_IN" || !session?.user) return;
 
-        const { data: profile } = await supabase
-          .from("profiles")
-          .select("collectivity_id, role")
-          .eq("id", session.user.id)
+      await new Promise((r) => setTimeout(r, 300));
+
+      const { data: profile } = await supabase
+        .from("profiles")
+        .select("collectivity_id, role")
+        .eq("id", session.user.id)
+        .single();
+
+      // PostHog identify avec commune pour filtrage analytics
+      if (profile?.collectivity_id) {
+        const { data: coll } = await supabase
+          .from("collectivities")
+          .select("name, department_code, region")
+          .eq("id", profile.collectivity_id)
           .single();
+        posthog.identify(session.user.id, {
+          email:           session.user.email,
+          role:            profile.role ?? "citizen",
+          collectivity_id: profile.collectivity_id,
+          commune:         coll?.name ?? null,
+          department:      coll?.department_code ?? null,
+          region:          coll?.region ?? null,
+        });
+      } else {
+        posthog.identify(session.user.id, {
+          email: session.user.email,
+          role:  profile?.role ?? "citizen",
+        });
+      }
 
-        // PostHog identify avec commune pour filtrage analytics
-        if (profile?.collectivity_id) {
-          const { data: coll } = await supabase
-            .from("collectivities")
-            .select("name, department_code, region")
-            .eq("id", profile.collectivity_id)
-            .single();
-          posthog.identify(session.user.id, {
-            email:           session.user.email,
-            role:            profile.role ?? "citizen",
-            collectivity_id: profile.collectivity_id,
-            commune:         coll?.name ?? null,
-            department:      coll?.department_code ?? null,
-            region:          coll?.region ?? null,
-          });
-        } else {
-          posthog.identify(session.user.id, {
-            email: session.user.email,
-            role:  profile?.role ?? "citizen",
-          });
-        }
+      // Admin : le formulaire /admin/login a deja redirige, rien a faire ici
+      const role = profile?.role as string;
+      if (ADMIN_ROLES.includes(role as typeof ADMIN_ROLES[number])) return;
 
-        // Admin roles → redirect to appropriate dashboard
-        const role = profile?.role as string;
-        if (ADMIN_ROLES.includes(role as typeof ADMIN_ROLES[number])) {
-          if (role === "super_admin") {
-            // Super admin → plateforme opérateur
-            if (!pathnameRef.current.startsWith("/platform")) {
-              navigate({ to: "/platform/" });
-            }
-          } else {
-            // commune_admin / interco_admin → tableau de bord mairie
-            if (!pathnameRef.current.startsWith("/admin") && !pathnameRef.current.startsWith("/platform")) {
-              navigate({ to: "/admin/" });
-            }
-          }
-          return;
-        }
+      // Citoyen : certaines routes ne declenchent pas le redirect onboarding
+      if (SKIP_ONBOARDING_ROUTES.includes(pathnameRef.current)) return;
 
-        // Non-admin : certaines routes ne déclenchent pas le redirect onboarding
-        if (SKIP_ONBOARDING_ROUTES.includes(pathnameRef.current)) return;
-
-        // Citoyen sans commune → onboarding
-        if (!profile?.collectivity_id) {
-          navigate({ to: "/onboarding" });
-        }
+      // Citoyen sans commune -> onboarding
+      if (!profile?.collectivity_id) {
+        navigate({ to: "/onboarding" });
       }
     });
 
@@ -285,7 +267,7 @@ function RootComponent() {
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  // ── Render ────────────────────────────────────────────────────────────────
+  // -- Render ------------------------------------------------------------------
   return (
     <QueryClientProvider client={queryClient}>
       {isShellFree || isAdminRoute ? (
@@ -299,8 +281,8 @@ function RootComponent() {
           <BottomNav />
         </div>
       )}
-      <Toaster />
       <CookieBanner />
+      <Toaster richColors position="top-center" />
     </QueryClientProvider>
   );
 }

@@ -49,7 +49,7 @@ export function usePlatformAuth(): PlatformAuthResult {
     return () => subscription.unsubscribe();
   }, [queryClient]);
 
-  const { data, isPending, isError } = useQuery({
+  const { data, isPending, isError, isFetching } = useQuery({
     queryKey: ["platform-auth"],
     queryFn: fetchPlatformAuth,
     staleTime: 4 * 60_000,   // 4 min — re-fetch avant expiry JWT (1h Supabase)
@@ -58,7 +58,10 @@ export function usePlatformAuth(): PlatformAuthResult {
     retryDelay: 1000,
   });
 
-  if (isPending) return { status: "loading" };
+  // isError peut rester en cache apres un sign-out (getUser retourne null).
+  // Si la query refetch activement (apres reconnexion), on attend plutot que
+  // de retourner "unauthorized" immediatement et declencher un redirect parasite.
+  if (isPending || (isError && isFetching)) return { status: "loading" };
   if (isError || !data) return { status: "unauthorized" };
   return { status: "ready", email: data.email };
 }
