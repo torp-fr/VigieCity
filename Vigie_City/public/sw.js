@@ -1,13 +1,27 @@
-// VigieCity Service Worker — v4
+// VigieCity Service Worker — v5
 // Gère : multi-stratégie cache + offline shell + Web Push notifications
-// rebuild: 2026-06-21
+// rebuild: 2026-06-24
+// CHANGEMENTS v5:
+//   - Bypass total /admin/* et /platform/* (network-only, jamais mis en cache)
+//   - Bump version v4 -> v5 pour invalider les anciens caches
+//   - Suppression du stale-while-revalidate sur les routes authentifiées
 
 // ── Cache names ────────────────────────────────────────────────────────────────
-const V             = 'v4';
+const V             = 'v5';
 const CACHE_STATIC  = `vigiecity-${V}-static`;   // JS/CSS/fonts — cache-first
 const CACHE_PAGES   = `vigiecity-${V}-pages`;    // HTML navigation — stale-while-revalidate
 const CACHE_IMAGES  = `vigiecity-${V}-images`;   // Images/icons   — cache-first
 const ALL_CACHES    = [CACHE_STATIC, CACHE_PAGES, CACHE_IMAGES];
+
+// ── Routes admin/platform — jamais mises en cache ─────────────────────────────
+// Ces routes sont protégées par auth (Supabase session). Le cache des
+// navigations ou du JS associé causerait des états stale après déploiement.
+function isAuthRoute(pathname) {
+  return (
+    pathname.startsWith('/admin') ||
+    pathname.startsWith('/platform')
+  );
+}
 
 // ── Precache : shell critique garantie offline ─────────────────────────────────
 const PRECACHE_PAGES = [
@@ -86,6 +100,13 @@ self.addEventListener('fetch', (event) => {
 
   const path = url.pathname;
 
+  // ── BYPASS ADMIN / PLATFORM — toujours depuis le réseau ───────────────────
+  // Ces routes nécessitent du code à jour et une session auth valide.
+  // On ne met jamais en cache ni le HTML ni les assets associés à ces paths.
+  if (isAuthRoute(path)) {
+    return; // Browser gère directement — pas de SW cache
+  }
+
   // ── 1. Static assets — Cache-first (JS/CSS/fonts/manifest) ───────────────
   if (/\.(js|css|woff2?|ttf|otf|webmanifest)$/.test(path)) {
     event.respondWith(cacheFirst(request, CACHE_STATIC));
@@ -98,7 +119,7 @@ self.addEventListener('fetch', (event) => {
     return;
   }
 
-  // ── 3. Navigation HTML — Stale-while-revalidate ───────────────────────────
+  // ── 3. Navigation HTML — Stale-while-revalidate (routes publiques) ─────────
   if (request.mode === 'navigate') {
     event.respondWith(staleWhileRevalidate(request));
     return;
@@ -125,7 +146,7 @@ async function cacheFirst(request, cacheName) {
   }
 }
 
-// ── Stratégie : Stale-while-revalidate (navigation) ──────────────────────────
+// ── Stratégie : Stale-while-revalidate (navigation publique) ──────────────────
 async function staleWhileRevalidate(request) {
   const cached = await caches.match(request);
 
