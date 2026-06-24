@@ -58,13 +58,16 @@ function PlatformUsersPage() {
   const { data: profiles = [], isLoading } = useQuery<Profile[]>({
     queryKey: ["platform/users"],
     queryFn: async () => {
+      await supabase.auth.getSession();
       const { data, error } = await supabase
         .from("profiles")
         .select("id, display_name, role, collectivity_id, created_at, collectivities(name)")
         .order("created_at", { ascending: false });
       if (error) throw error;
-      return data as Profile[];
+      return (data ?? []) as Profile[];
     },
+    staleTime: 60_000,
+    retry: 2,
   });
 
   const changeRoleMut = useMutation({

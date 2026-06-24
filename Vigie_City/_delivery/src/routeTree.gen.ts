@@ -46,6 +46,12 @@ import { Route as AdminUrgencesRouteImport } from './routes/admin/urgences'
 import { Route as AdminRadioRouteImport } from './routes/admin/radio'
 import { Route as AdminConsultationsRouteImport } from './routes/admin/consultations'
 import { Route as AdminVoisinsRouteImport } from './routes/admin/voisins'
+import { Route as AdminAnalyticsRouteImport } from './routes/admin/analytics'
+import { Route as AdminSettingsRouteImport } from './routes/admin/settings'
+import { Route as AdminTerrainIndexRouteImport } from './routes/admin/terrain/index'
+import { Route as AdminTerrainTraitesRouteImport } from './routes/admin/terrain/traites'
+import { Route as AdminResetPasswordRouteImport } from './routes/admin/reset-password'
+import { Route as AdminAcceptInviteRouteImport } from './routes/admin/accept-invite'
 
 // ── Routes plateforme (backoffice opérateur) ──────────────────────────────────
 import { Route as PlatformIndexRouteImport } from './routes/platform/index'
@@ -58,6 +64,9 @@ import { Route as PlatformKnowledgeRouteImport } from './routes/platform/knowled
 import { Route as PlatformModulesRouteImport } from './routes/platform/modules'
 import { Route as PlatformOnboardingRouteImport } from './routes/platform/onboarding'
 import { Route as PlatformRetentionRouteImport } from './routes/platform/retention'
+import { Route as PlatformAnalyticsRouteImport } from './routes/platform/analytics'
+import { Route as PlatformPlansRouteImport } from './routes/platform/plans'
+import { Route as PlatformTarificationRouteImport } from './routes/platform/tarification'
 
 // ── Déclarations de routes ────────────────────────────────────────────────────
 const IndexRoute = IndexRouteImport.update({
@@ -221,6 +230,36 @@ const AdminVoisinsRoute = AdminVoisinsRouteImport.update({
   path: '/admin/voisins',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AdminAnalyticsRoute = AdminAnalyticsRouteImport.update({
+  id: '/admin/analytics',
+  path: '/admin/analytics',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AdminSettingsRoute = AdminSettingsRouteImport.update({
+  id: '/admin/settings',
+  path: '/admin/settings',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AdminTerrainIndexRoute = AdminTerrainIndexRouteImport.update({
+  id: '/admin/terrain/',
+  path: '/admin/terrain',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AdminTerrainTraitesRoute = AdminTerrainTraitesRouteImport.update({
+  id: '/admin/terrain/traites',
+  path: '/admin/terrain/traites',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AdminResetPasswordRoute = AdminResetPasswordRouteImport.update({
+  id: '/admin/reset-password',
+  path: '/admin/reset-password',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AdminAcceptInviteRoute = AdminAcceptInviteRouteImport.update({
+  id: '/admin/accept-invite',
+  path: '/admin/accept-invite',
+  getParentRoute: () => rootRouteImport,
+} as any)
 
 const PlatformIndexRoute = PlatformIndexRouteImport.update({
   id: '/platform/',
@@ -272,6 +311,21 @@ const PlatformRetentionRoute = PlatformRetentionRouteImport.update({
   path: '/platform/retention',
   getParentRoute: () => rootRouteImport,
 } as any)
+const PlatformAnalyticsRoute = PlatformAnalyticsRouteImport.update({
+  id: '/platform/analytics',
+  path: '/platform/analytics',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const PlatformPlansRoute = PlatformPlansRouteImport.update({
+  id: '/platform/plans',
+  path: '/platform/plans',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const PlatformTarificationRoute = PlatformTarificationRouteImport.update({
+  id: '/platform/tarification',
+  path: '/platform/tarification',
+  getParentRoute: () => rootRouteImport,
+} as any)
 
 // ── Interfaces de types ───────────────────────────────────────────────────────
 export interface FileRoutesByFullPath {
@@ -307,6 +361,12 @@ export interface FileRoutesByFullPath {
   '/admin/services': typeof AdminServicesRoute
   '/admin/signalements': typeof AdminSignalementsRoute
   '/admin/urgences': typeof AdminUrgencesRoute
+  '/admin/analytics': typeof AdminAnalyticsRoute
+  '/admin/settings': typeof AdminSettingsRoute
+  '/admin/terrain/': typeof AdminTerrainIndexRoute
+  '/admin/terrain/traites': typeof AdminTerrainTraitesRoute
+  '/admin/reset-password': typeof AdminResetPasswordRoute
+  '/admin/accept-invite': typeof AdminAcceptInviteRoute
   '/platform/': typeof PlatformIndexRoute
   '/platform/collectivites': typeof PlatformCollectivitesRoute
   '/platform/users': typeof PlatformUsersRoute
@@ -317,6 +377,9 @@ export interface FileRoutesByFullPath {
   '/platform/modules': typeof PlatformModulesRoute
   '/platform/onboarding': typeof PlatformOnboardingRoute
   '/platform/retention': typeof PlatformRetentionRoute
+  '/platform/analytics': typeof PlatformAnalyticsRoute
+  '/platform/plans': typeof PlatformPlansRoute
+  '/platform/tarification': typeof PlatformTarificationRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -350,6 +413,12 @@ export interface FileRoutesByTo {
   '/admin/services': typeof AdminServicesRoute
   '/admin/signalements': typeof AdminSignalementsRoute
   '/admin/urgences': typeof AdminUrgencesRoute
+  '/admin/analytics': typeof AdminAnalyticsRoute
+  '/admin/settings': typeof AdminSettingsRoute
+  '/admin/terrain': typeof AdminTerrainIndexRoute
+  '/admin/terrain/traites': typeof AdminTerrainTraitesRoute
+  '/admin/reset-password': typeof AdminResetPasswordRoute
+  '/admin/accept-invite': typeof AdminAcceptInviteRoute
   '/platform': typeof PlatformIndexRoute
   '/platform/collectivites': typeof PlatformCollectivitesRoute
   '/platform/users': typeof PlatformUsersRoute
@@ -360,6 +429,9 @@ export interface FileRoutesByTo {
   '/platform/modules': typeof PlatformModulesRoute
   '/platform/onboarding': typeof PlatformOnboardingRoute
   '/platform/retention': typeof PlatformRetentionRoute
+  '/platform/analytics': typeof PlatformAnalyticsRoute
+  '/platform/plans': typeof PlatformPlansRoute
+  '/platform/tarification': typeof PlatformTarificationRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -394,6 +466,12 @@ export interface FileRoutesById {
   '/admin/services': typeof AdminServicesRoute
   '/admin/signalements': typeof AdminSignalementsRoute
   '/admin/urgences': typeof AdminUrgencesRoute
+  '/admin/analytics': typeof AdminAnalyticsRoute
+  '/admin/settings': typeof AdminSettingsRoute
+  '/admin/terrain/': typeof AdminTerrainIndexRoute
+  '/admin/terrain/traites': typeof AdminTerrainTraitesRoute
+  '/admin/reset-password': typeof AdminResetPasswordRoute
+  '/admin/accept-invite': typeof AdminAcceptInviteRoute
   '/platform/': typeof PlatformIndexRoute
   '/platform/collectivites': typeof PlatformCollectivitesRoute
   '/platform/users': typeof PlatformUsersRoute
@@ -404,6 +482,9 @@ export interface FileRoutesById {
   '/platform/modules': typeof PlatformModulesRoute
   '/platform/onboarding': typeof PlatformOnboardingRoute
   '/platform/retention': typeof PlatformRetentionRoute
+  '/platform/analytics': typeof PlatformAnalyticsRoute
+  '/platform/plans': typeof PlatformPlansRoute
+  '/platform/tarification': typeof PlatformTarificationRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -440,6 +521,12 @@ export interface FileRouteTypes {
     | '/admin/services'
     | '/admin/signalements'
     | '/admin/urgences'
+    | '/admin/analytics'
+    | '/admin/settings'
+    | '/admin/terrain/'
+    | '/admin/terrain/traites'
+    | '/admin/reset-password'
+    | '/admin/accept-invite'
     | '/platform/'
     | '/platform/collectivites'
     | '/platform/users'
@@ -450,6 +537,9 @@ export interface FileRouteTypes {
     | '/platform/modules'
     | '/platform/onboarding'
     | '/platform/retention'
+    | '/platform/analytics'
+    | '/platform/plans'
+    | '/platform/tarification'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -484,6 +574,12 @@ export interface FileRouteTypes {
     | '/admin/services'
     | '/admin/signalements'
     | '/admin/urgences'
+    | '/admin/analytics'
+    | '/admin/settings'
+    | '/admin/terrain'
+    | '/admin/terrain/traites'
+    | '/admin/reset-password'
+    | '/admin/accept-invite'
     | '/platform'
     | '/platform/collectivites'
     | '/platform/users'
@@ -494,6 +590,9 @@ export interface FileRouteTypes {
     | '/platform/modules'
     | '/platform/onboarding'
     | '/platform/retention'
+    | '/platform/analytics'
+    | '/platform/plans'
+    | '/platform/tarification'
   id:
     | '__root__'
     | '/'
@@ -528,6 +627,12 @@ export interface FileRouteTypes {
     | '/admin/services'
     | '/admin/signalements'
     | '/admin/urgences'
+    | '/admin/analytics'
+    | '/admin/settings'
+    | '/admin/terrain/'
+    | '/admin/terrain/traites'
+    | '/admin/reset-password'
+    | '/admin/accept-invite'
     | '/platform/'
     | '/platform/collectivites'
     | '/platform/users'
@@ -538,6 +643,9 @@ export interface FileRouteTypes {
     | '/platform/modules'
     | '/platform/onboarding'
     | '/platform/retention'
+    | '/platform/analytics'
+    | '/platform/plans'
+    | '/platform/tarification'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -573,6 +681,12 @@ export interface RootRouteChildren {
   AdminServicesRoute: typeof AdminServicesRoute
   AdminSignalementsRoute: typeof AdminSignalementsRoute
   AdminUrgencesRoute: typeof AdminUrgencesRoute
+  AdminAnalyticsRoute: typeof AdminAnalyticsRoute
+  AdminSettingsRoute: typeof AdminSettingsRoute
+  AdminTerrainIndexRoute: typeof AdminTerrainIndexRoute
+  AdminTerrainTraitesRoute: typeof AdminTerrainTraitesRoute
+  AdminResetPasswordRoute: typeof AdminResetPasswordRoute
+  AdminAcceptInviteRoute: typeof AdminAcceptInviteRoute
   PlatformIndexRoute: typeof PlatformIndexRoute
   PlatformCollectivitesRoute: typeof PlatformCollectivitesRoute
   PlatformUsersRoute: typeof PlatformUsersRoute
@@ -583,6 +697,9 @@ export interface RootRouteChildren {
   PlatformModulesRoute: typeof PlatformModulesRoute
   PlatformOnboardingRoute: typeof PlatformOnboardingRoute
   PlatformRetentionRoute: typeof PlatformRetentionRoute
+  PlatformAnalyticsRoute: typeof PlatformAnalyticsRoute
+  PlatformPlansRoute: typeof PlatformPlansRoute
+  PlatformTarificationRoute: typeof PlatformTarificationRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -804,11 +921,46 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminUrgencesRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/admin/radio': {
-      id: '/admin/radio'
-      path: '/admin/radio'
-      fullPath: '/admin/radio'
-      preLoaderRoute: typeof AdminRadioRouteImport
+    '/admin/analytics': {
+      id: '/admin/analytics'
+      path: '/admin/analytics'
+      fullPath: '/admin/analytics'
+      preLoaderRoute: typeof AdminAnalyticsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/admin/settings': {
+      id: '/admin/settings'
+      path: '/admin/settings'
+      fullPath: '/admin/settings'
+      preLoaderRoute: typeof AdminSettingsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/admin/terrain/': {
+      id: '/admin/terrain/'
+      path: '/admin/terrain'
+      fullPath: '/admin/terrain/'
+      preLoaderRoute: typeof AdminTerrainIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/admin/terrain/traites': {
+      id: '/admin/terrain/traites'
+      path: '/admin/terrain/traites'
+      fullPath: '/admin/terrain/traites'
+      preLoaderRoute: typeof AdminTerrainTraitesRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/admin/reset-password': {
+      id: '/admin/reset-password'
+      path: '/admin/reset-password'
+      fullPath: '/admin/reset-password'
+      preLoaderRoute: typeof AdminResetPasswordRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/admin/accept-invite': {
+      id: '/admin/accept-invite'
+      path: '/admin/accept-invite'
+      fullPath: '/admin/accept-invite'
+      preLoaderRoute: typeof AdminAcceptInviteRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/platform/': {
@@ -881,6 +1033,27 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof PlatformRetentionRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/platform/analytics': {
+      id: '/platform/analytics'
+      path: '/platform/analytics'
+      fullPath: '/platform/analytics'
+      preLoaderRoute: typeof PlatformAnalyticsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/platform/plans': {
+      id: '/platform/plans'
+      path: '/platform/plans'
+      fullPath: '/platform/plans'
+      preLoaderRoute: typeof PlatformPlansRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/platform/tarification': {
+      id: '/platform/tarification'
+      path: '/platform/tarification'
+      fullPath: '/platform/tarification'
+      preLoaderRoute: typeof PlatformTarificationRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
@@ -918,6 +1091,12 @@ const rootRouteChildren: RootRouteChildren = {
   AdminServicesRoute,
   AdminSignalementsRoute,
   AdminUrgencesRoute,
+  AdminAnalyticsRoute,
+  AdminSettingsRoute,
+  AdminTerrainIndexRoute,
+  AdminTerrainTraitesRoute,
+  AdminResetPasswordRoute,
+  AdminAcceptInviteRoute,
   PlatformIndexRoute,
   PlatformCollectivitesRoute,
   PlatformUsersRoute,
@@ -928,6 +1107,9 @@ const rootRouteChildren: RootRouteChildren = {
   PlatformModulesRoute,
   PlatformOnboardingRoute,
   PlatformRetentionRoute,
+  PlatformAnalyticsRoute,
+  PlatformPlansRoute,
+  PlatformTarificationRoute,
 }
 
 export const routeTree = rootRouteImport

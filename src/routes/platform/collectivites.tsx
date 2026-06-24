@@ -5,7 +5,7 @@ import {
   Search, ToggleLeft, ToggleRight, Loader2,
   ChevronLeft, ChevronRight, Building2, Users,
   TrendingUp, Zap, Mail, Phone, Globe, Edit2,
-  X, Save, MapPin, UserPlus, Send, Clock, CheckCircle2,
+  X, Save, MapPin, UserPlus, Send, Clock, CheckCircle2, Wrench,
 } from "lucide-react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
@@ -36,6 +36,7 @@ type Collectivity = {
   website:         string | null;
   mayor_name:      string | null;
   created_at:      string;
+  maintenance_mode: boolean;
 };
 
 type EditForm = {
@@ -95,10 +96,11 @@ function PlatformCollectivitesPage() {
   const { data, isLoading, isFetching } = useQuery({
     queryKey: ["platform/collectivites", page, debSearch, statusTab, deptFilter],
     queryFn:  async () => {
+      await supabase.auth.getSession();
       let q = supabase
         .from("collectivities")
         .select(
-          "id, name, insee_code, postal_code, department_code, region, population, is_active, status, email, phone, website, mayor_name, created_at",
+          "id, name, insee_code, postal_code, department_code, region, population, is_active, status, email, phone, website, mayor_name, maintenance_mode, created_at",
           { count: "exact" },
         )
         .order("status", { ascending: false }) // active first
@@ -121,6 +123,7 @@ function PlatformCollectivitesPage() {
   const { data: stats } = useQuery({
     queryKey: ["platform/collectivites/stats"],
     queryFn: async () => {
+      await supabase.auth.getSession();
       const [totalRes, activeRes, dormantRes, activePopRes] = await Promise.all([
         supabase.from("collectivities").select("id", { count: "exact", head: true }),
         supabase.from("collectivities").select("id", { count: "exact", head: true }).eq("status", "active"),
@@ -158,6 +161,21 @@ function PlatformCollectivitesPage() {
       toast.success("Visibilité mise à jour");
     },
     onError: () => toast.error("Erreur lors de la mise à jour"),
+  });
+  // ── Toggle maintenance_mode ─────────────────────────────────────────────────
+  const maintenanceMut = useMutation({
+    mutationFn: async ({ id, maintenance_mode }: { id: string; maintenance_mode: boolean }) => {
+      const { error } = await supabase
+        .from("collectivities")
+        .update({ maintenance_mode: !maintenance_mode, updated_at: new Date().toISOString() })
+        .eq("id", id);
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ["platform/collectivites"] });
+      toast.success("Mode maintenance mis a jour");
+    },
+    onError: () => toast.error("Erreur mise a jour maintenance"),
   });
 
   // ── Save CRM edit ───────────────────────────────────────────────────────────
@@ -371,6 +389,7 @@ function PlatformCollectivitesPage() {
                 <th className="px-4 py-3 text-right">Population</th>
                 <th className="px-4 py-3">Contact</th>
                 <th className="px-4 py-3">Statut</th>
+                <th className="px-4 py-3" title="Maintenance">Maint.</th>
                 <th className="w-10 px-4 py-3"></th>
               </tr>
             </thead>
@@ -446,6 +465,23 @@ function PlatformCollectivitesPage() {
                         <span className={`rounded-full px-2.5 py-0.5 text-[11px] font-semibold ${sm.cls}`}>
                           {sm.label}
                         </span>
+                      </td>
+
+
+                      {/* Maintenance toggle */}
+                      <td className="px-4 py-2.5">
+                        <button
+                          onClick={() => maintenanceMut.mutate({ id: c.id, maintenance_mode: c.maintenance_mode ?? false })}
+                          title={c.maintenance_mode ? "Desactiver maintenance" : "Activer maintenance"}
+                          className={`flex items-center gap-1 rounded-lg px-2 py-1 text-[11px] font-semibold transition ${
+                            c.maintenance_mode
+                              ? "bg-orange-100 text-orange-700 hover:bg-orange-200"
+                              : "bg-slate-100 text-slate-400 hover:bg-slate-200"
+                          }`}
+                        >
+                          <Wrench className="h-3 w-3" />
+                          {c.maintenance_mode ? "ON" : "OFF"}
+                        </button>
                       </td>
 
                       {/* Edit button */}

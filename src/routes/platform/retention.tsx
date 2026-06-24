@@ -57,6 +57,7 @@ function fmtDate(iso: string | null) {
 
 // ─── Fetch principal ──────────────────────────────────────────────────────────
 async function fetchRetention(): Promise<CommuneStats[]> {
+  await supabase.auth.getSession();
   const since30 = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString();
 
   const [colRes, profRes, repRes, pubRes] = await Promise.all([

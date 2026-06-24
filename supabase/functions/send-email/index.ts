@@ -23,6 +23,7 @@ const SUBJECTS: Record<string, string> = {
   report_notification:  "Nouveau signalement dans votre commune",
   alert_broadcast:      "⚠️ Alerte de sécurité — VigieCity",
   weekly_digest:        "Résumé de la semaine — VigieCity",
+  operator_otp:         "🔐 Votre code d'accès opérateur VigieCity",
 };
 
 function renderTemplate(template: string, data: Record<string, string> = {}): string {
@@ -122,6 +123,18 @@ function renderTemplate(template: string, data: Record<string, string> = {}): st
           </div>
         </div>
         <a href="https://vigiecity.fr/platform" class="btn">Voir le tableau de bord →</a>
+      `);
+
+    case "operator_otp":
+      return base(`
+        <span class="badge" style="background:#ede9fe;color:#6d28d9;">🔐 Code OTP</span>
+        <h1>Votre code d'accès opérateur</h1>
+        <p>Bonjour${data.name ? " <strong>" + data.name + "</strong>" : ""}, voici votre code de connexion VigieCity :</p>
+        <div style="background:#f8fafc;border-radius:16px;padding:28px;text-align:center;margin:20px 0;border:2px dashed #e2e8f0;">
+          <div style="font-size:42px;font-weight:900;letter-spacing:12px;color:#1e3a8a;font-family:monospace;">${data.code ?? "------"}</div>
+          <div style="font-size:12px;color:#94a3b8;margin-top:8px;">Valable ${data.expires_in ?? "10 minutes"}</div>
+        </div>
+        <p style="font-size:13px;color:#64748b;">Ce code est à usage unique. Ne le communiquez à personne. Si vous n'avez pas demandé ce code, ignorez cet email.</p>
       `);
 
     default:

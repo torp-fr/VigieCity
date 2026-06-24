@@ -180,4 +180,75 @@ Deno.serve(async (req) => {
         );
       }
 
-   
+      return json({ ok: true });
+    }
+
+    // ── add_note ─────────────────────────────────────────────────────────────
+    if (action === "add_note") {
+      const { text } = params as { text: string };
+      if (!text?.trim()) return json({ error: "Note vide" }, 400);
+
+      // Vérifier appartenance collectivité
+      const { data: report } = await supabase
+        .from("reports")
+        .select("id")
+        .eq("id", report_id)
+        .eq("collectivity_id", sess.collectivity_id)
+        .maybeSingle();
+
+      if (!report) return json({ error: "Signalement introuvable" }, 404);
+
+      const { data: comment } = await supabase
+        .from("report_timeline_comments")
+        .insert({
+          report_id,
+          text:        text.trim(),
+          author_id:   sess.user_id,
+          is_internal: true,
+          is_approved: true,
+        })
+        .select("id, text, created_at")
+        .single();
+
+      return json({ ok: true, comment });
+    }
+
+    // ── fetch_detail ──────────────────────────────────────────────────────────
+    if (action === "fetch_detail") {
+      // Notes internes
+      const { data: notes } = await supabase
+        .from("report_timeline_comments")
+        .select("id, text, is_internal, created_at")
+        .eq("report_id", report_id)
+        .eq("is_internal", true)
+        .order("created_at", { ascending: false });
+
+      // Historique statuts
+      const { data: history } = await supabase
+        .from("report_status_history")
+        .select("id, old_status, new_status, comment, changed_at")
+        .eq("report_id", report_id)
+        .order("changed_at", { ascending: false });
+
+      // URLs photos (bucket public "reports-media" ou "reports")
+      const { data: report } = await supabase
+        .from("reports")
+        .select("media_paths")
+        .eq("id", report_id)
+        .eq("collectivity_id", sess.collectivity_id)
+        .maybeSingle();
+
+      const photoUrls = (report?.media_paths ?? []).map((p: string) =>
+        p.startsWith("http") ? p : `${STORAGE_URL}/reports/${p}`
+      );
+
+      return json({ notes: notes ?? [], history: history ?? [], photoUrls });
+    }
+
+    return json({ error: "Action inconnue" }, 400);
+
+  } catch (err) {
+    console.error("operator-action error:", err);
+    return json({ error: "Erreur serveur" }, 500);
+  }
+});

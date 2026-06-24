@@ -208,7 +208,11 @@ function RootComponent() {
       const isAdminOrPlatform =
         pathname.startsWith("/admin") || pathname.startsWith("/platform");
       if (!isAdminOrPlatform) router.invalidate();
-      if (event !== "SIGNED_OUT") queryClient.invalidateQueries();
+      // Ne pas invalider les queries /platform lors du SIGNED_IN (restauration session localStorage)
+      // car cela cancel toutes les queries en cours et cause un etat de chargement infini.
+      if (event !== "SIGNED_OUT" && !pathname.startsWith("/platform")) {
+        queryClient.invalidateQueries();
+      }
 
       if (event === "SIGNED_OUT") {
         posthog.reset();

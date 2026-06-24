@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Résumé — {{commune_name}} - Semaine du {{week_start}}</title>
+</head>
+<body style="margin:0;padding:0;background-color:#F1F5F9;font-family:Arial,Helvetica,sans-serif;">
+
+  <!-- Outer wrapper -->
+  <table width="100%" cellpadding="0" cellspacing="0" border="0" style="background-color:#F1F5F9;padding:32px 16px;">
+    <tr>
+      <td align="center">
+
+        <!-- Email card -->
+        <table width="600" cellpadding="0" cellspacing="0" border="0" style="max-width:600px;width:100%;background-color:#FFFFFF;border-radius:8px;overflow:hidden;border:1px solid #E5E7EB;">
+
+          <!-- Top accent bar -->
+          <tr>
+            <td style="background-color:#1D4ED8;height:8px;font-size:0;line-height:0;">&nbsp;</td>
+          </tr>
+
+          <!-- Logo header -->
+          <tr>
+            <td style="background-color:#FFFFFF;padding:24px 32px;border-bottom:1px solid #E5E7EB;">
+              <table width="100%" cellpadding="0" cellspacing="0" border="0">
+                <tr>
+                  <td>
+                    <span style="font-size:22px;font-weight:bold;color:#1D4ED8;">&#127963;&#65039; VigieCity</span><br>
+                    <span style="font-size:12px;color:#6B7280;">La commune connectée</span>
+                  </td>
+                  <td align="right">
+                    <span style="display:inline-block;background-color:#EFF6FF;color:#1D4ED8;font-size:11px;font-weight:bold;padding:4px 10px;border-radius:20px;border:1px solid #BFDBFE;">&#128202; Résumé hebdomadaire</span>
+                  </td>
+                </tr>
+              </table>
+            </td>
+          </tr>
+
+          <!-- Main content -->
+          <tr>
+            <td style="padding:40px 32px;">
+
+              <!-- H1 -->
+              <h1 style="margin:0 0 6px 0;font-size:24px;font-weight:bold;color:#1F2937;">Résumé de la semaine</h1>
+              <p style="margin:0 0 32px 0;font-size:14px;color:#6B7280;">{{commune_name}} &mdash; du <strong>{{week_start}}</strong> au <strong>{{week_end}}</strong></p>
+
+              <!-- 4 stat boxes (2x2 grid) -->
+              <table width="100%" cellpadding="0" cellspacing="0" border="0" style="margin-bottom:8px;">
+                <tr>
+                  <td width="50%" style="padding:0 6px 12px 0;">
+                    <table width="100%" cellpadding="0" cellspacing="0" border="0">
+                      <tr>
+                        <td style="background-color:#EFF6FF;border:1px solid #BFDBFE;border-radius:8px;padding:20px 16px;text-align:center;">
+                          <div style="font-size:36px;font-weight:bold;color:#1D4ED8;line-height:1;">{{total_reports}}</div>
+                          <div style="font-size:12px;color:#6B7280;margin-top:6px;font-weight:600;">Signalements</div>
+                          <div style="font-size:11px;color:#9CA3AF;margin-top:2px;">Total reçus</div>
+                        </td>
+                      </tr>
+                    </table>
+                  </td>
+                  <td width="50%" style="padding:0 0 12px 6px;">
+                    <table width="100%" cellpadding="0" cellspacing="0" border="0">
+                      <tr>
+                        <td style="background-color:#F0FDF4;border:1px solid #BBF7D0;border-radius:8px;padding:20px 16px;text-align:center;">
+                          <div style="font-size:36px;font-weight:bold;color:#16A34A;line-height:1;">{{resolved_reports}}</div>
+                          <div style="font-size:12px;color:#6B7280;margin-top:6px;font-weight:600;">Résolus</div>
+                          <div style="font-size:11px;color:#9CA3AF;margin-top:2px;">Cette semaine</div>
+                        </td>
+                      </tr>
+                    </table>
+                  </td>
+                </tr>
+                <tr>
+                  <td width="50%" style="padding:0 6px 0 0;">
+                    <table width="100%" cellpadding="0" cellspacing="0" border="0">
+                      <tr>
+                        <td style="background-color:#FFFBEB;border:1px solid #FDE68A;border-radius:8px;padding:20px 16px;text-align:center;">
+                          <div style="font-size:36px;font-weight:bold;color:#D97706;line-height:1;">{{pending_reports}}</div>
+                          <div style="font-size:12px;color:#6B7280;margin-top:6px;font-weight:600;">En attente</div>
+                          <div style="font-size:11px;color:#9CA3AF;margin-top:2px;">À traiter</div>
+                        </td>
+                      </tr>
+                    </table>
+                  </td>
+                  <td width="50%" style="padding:0 0 0 6px;">
+                    <table width="100%" cellpadding="0" cellspacing="0" border="0">
+                      <tr>
+                        <td style="background-color:#FAF5FF;border:1px solid #E9D5FF;border-radius:8px;padding:20px 16px;text-align:center;">
+                          <div style="font-size:36px;font-weight:bold;color:#7C3AED;line-height:1;">{{new_registrations}}</div>
+                          <div style="font-size:12px;color:#6B7280;margin-top:6px;font-weight:600;">Nouveaux citoyens</div>
+                          <div style="font-size:11px;color:#9CA3AF;margin-top:2px;">Inscrits</div>
+                        </td>
+                      </tr>
+                    </table>
+                  </td>
+                </tr>
+              </table>
+
+              <!-- Divider -->
+              <table width="100%" cellpadding="0" cellspacing="0" border="0" style="margin:28px 0;">
+                <tr>
+                  <td style="border-top:1px solid #E5E7EB;font-size:0;line-height:0;">&nbsp;</td>
+                </tr>
+              </table>
+
+              <!-- Category highlight -->
+              <table width="100%" cellpadding="0" cellspacing="0" border="0" style="margin-bottom:16px;">
+                <tr>
+                  <td style="background-color:#F9FAFB;border:1px solid #E5E7EB;border-left:4px solid #1D4ED8;border-radius:4px;padding:14px 20px;">
+                    <table width="100%" cellpadding="0" cellspacing="0" border="0">
+                      <tr>
+                        <td>
+                          <div style="font-size:11px;color:#6B7280;font-weight:bold;text-transform:uppercase;margin-bottom:4px;">Catégorie principale cette semaine</div>
+                          <div style="font-size:15px;font-weight:bold;color:#1D4ED8;">&#127942; {{top_category}}</div>
+                        </td>
+                      </tr>
+                    </table>
+                  </td>
+                </tr>
+              </table>
+
+              <!-- Events count -->
+              <table width="100%" cellpadding="0" cellspacing="0" border="0" style="margin-bottom:32px;">
+                <tr>
+                  <td style="background-color:#F9FAFB;border:1px solid #E5E7EB;border-left:4px solid #16A34A;border-radius:4px;padding:14px 20px;">
+                    <table width="100%" cellpadding="0" cellspacing="0" border="0">
+                      <tr>
+                        <td>
+                          <div style="font-size:11px;color:#6B7280;font-weight:bold;text-transform:uppercase;margin-bottom:4px;">Événements à venir</div>
+                          <div style="font-size:15px;font-weight:bold;color:#16A34A;">&#128197; {{events_count}} événements programmés</div>
+                        </td>
+                      </tr>
+                    </table>
+                  </td>
+                </tr>
+              </table>
+
+              <!-- Active alerts indicator -->
+              <table width="100%" cellpadding="0" cellspacing="0" border="0" style="margin-bottom:32px;">
+                <tr>
+                  <td style="background-color:#F9FAFB;border:1px solid #E5E7EB;border-left:4px solid #DC2626;border-radius:4px;padding:14px 20px;">
+                    <table width="100%" cellpadding="0" cellspacing="0" border="0">
+                      <tr>
+                        <td>
+                          <div style="font-size:11px;color:#6B7280;font-weight:bold;text-transform:uppercase;margin-bottom:4px;">Alertes actives</div>
+                          <div style="font-size:15px;font-weight:bold;color:#DC2626;">&#128680; {{active_alerts}} alertes en cours</div>
+                        </td>
+                      </tr>
+                    </table>
+                  </td>
+                </tr>
+              </table>
+
+              <!-- CTA Button -->
+              <table width="100%" cellpadding="0" cellspacing="0" border="0">
+                <tr>
+                  <td align="center">
+                    <a href="{{digest_url}}" style="display:inline-block;background-color:#1D4ED8;color:#FFFFFF;text-decoration:none;font-size:15px;font-weight:bold;padding:14px 32px;border-radius:6px;">Voir le tableau de bord complet &rarr;</a>
+                  </td>
+                </tr>
+              </table>
+
+            </td>
+          </tr>
+
+          <!-- Footer -->
+          <tr>
+            <td style="background-color:#F8FAFC;border-top:1px solid #E5E7EB;padding:20px 32px;text-align:center;">
+              <p style="margin:0 0 6px 0;font-size:11px;color:#9CA3AF;">© 2025 VigieCity — La commune connectée</p>
+              <p style="margin:0 0 6px 0;font-size:11px;color:#9CA3AF;">Vous recevez cet email car vous êtes inscrit sur VigieCity.</p>
+              <p style="margin:0;font-size:11px;"><a href="#" style="color:#6B7280;text-decoration:underline;">Se désabonner</a></p>
+            </td>
+          </tr>
+
+        </table>
+      </td>
+    </tr>
+  </table>
+
+</body>
+</html>

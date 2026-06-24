@@ -501,6 +501,7 @@ function IntercommunalitesPage() {
   const { data: epciList = [], isLoading } = useQuery<Intercommunality[]>({
     queryKey: ["platform-intercommunalites"],
     queryFn: async () => {
+      await supabase.auth.getSession();
       const { data, error } = await supabase
         .from("intercommunalities")
         .select("*")

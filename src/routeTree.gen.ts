@@ -1598,4 +1598,25 @@ const rootRouteChildren: RootRouteChildren = {
   PlatformCollectivitesRoute: PlatformCollectivitesRoute,
   PlatformIntercommunalitesRoute: PlatformIntercommunalitesRoute,
   PlatformCommunesRoute: PlatformCommunesRoute,
-  PlatformFacturationRoute: PlatformFacturationRout
+  PlatformFacturationRoute: PlatformFacturationRoute,
+  PlatformFeaturesRoute: PlatformFeaturesRoute,
+  PlatformKnowledgeRoute: PlatformKnowledgeRoute,
+  PlatformLicencesRoute: PlatformLicencesRoute,
+  PlatformModulesRoute: PlatformModulesRoute,
+  PlatformOnboardingRoute: PlatformOnboardingRoute,
+  PlatformPlansRoute: PlatformPlansRoute,
+  PlatformPublishersRoute: PlatformPublishersRoute,
+  PlatformRetentionRoute: PlatformRetentionRoute,
+  PlatformRssRoute: PlatformRssRoute,
+  PlatformSettingsRoute: PlatformSettingsRoute,
+  PlatformStatsRoute: PlatformStatsRoute,
+  PlatformSupportRoute: PlatformSupportRoute,
+  PlatformTarificationRoute: PlatformTarificationRoute,
+  PlatformTrialsRoute: PlatformTrialsRoute,
+  PlatformUsersRoute: PlatformUsersRoute,
+  PlatformIndexRoute: PlatformIndexRoute,
+  AdminIndexRoute: AdminIndexRoute,
+  OperateurIndexRoute: OperateurIndexRoute,
+}
+
+export const routeTree = rootRoute._addFileChildren(rootRouteChildren)

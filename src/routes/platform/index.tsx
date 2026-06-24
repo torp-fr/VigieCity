@@ -38,12 +38,15 @@ function PlatformDashboard() {
   const { data: stats, isLoading: statsLoading } = useQuery({
     queryKey: ["platform-dashboard-stats"],
     queryFn: async () => {
+      await supabase.auth.getSession();
       const [usersRes, communesRes, licencesRes, pubsRes] = await Promise.all([
         supabase.from("profiles").select("id", { count: "exact", head: true }),
         supabase.from("collectivities").select("id", { count: "exact", head: true }),
         supabase.from("commune_licenses").select("id", { count: "exact", head: true }),
         supabase.from("publications").select("id", { count: "exact", head: true }),
       ]);
+      if (usersRes.error)    throw usersRes.error;
+      if (communesRes.error) throw communesRes.error;
       return {
         users:    usersRes.count    ?? 0,
         communes: communesRes.count ?? 0,
@@ -52,11 +55,14 @@ function PlatformDashboard() {
       };
     },
     staleTime: 60_000,
+    placeholderData: (prev: any) => prev,
+    retry: 2,
   });
 
   const { data: licences, isLoading: licLoading } = useQuery({
     queryKey: ["platform-dashboard-licences"],
     queryFn: async () => {
+      await supabase.auth.getSession();
       const { data, error } = await supabase
         .from("commune_licenses")
         .select("id, plan, status, started_at, expires_at, collectivities(name)")
@@ -66,11 +72,14 @@ function PlatformDashboard() {
       return data ?? [];
     },
     staleTime: 5 * 60_000,
+    placeholderData: (prev: any) => prev,
+    retry: 2,
   });
 
   const { data: collectivities, isLoading: collLoading } = useQuery({
     queryKey: ["platform-dashboard-collectivities"],
     queryFn: async () => {
+      await supabase.auth.getSession();
       const { data, error } = await supabase
         .from("collectivities")
         .select("id, name, insee_code, status, created_at")
@@ -80,6 +89,8 @@ function PlatformDashboard() {
       return data ?? [];
     },
     staleTime: 5 * 60_000,
+    placeholderData: (prev: any) => prev,
+    retry: 2,
   });
 
   return (

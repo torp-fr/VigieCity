@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Nouvelle consultation : {{consultation_title}}</title>
+</head>
+<body style="margin:0;padding:0;background-color:#F1F5F9;font-family:Arial,Helvetica,sans-serif;">
+
+  <!-- Outer wrapper -->
+  <table width="100%" cellpadding="0" cellspacing="0" border="0" style="background-color:#F1F5F9;padding:32px 16px;">
+    <tr>
+      <td align="center">
+
+        <!-- Email card -->
+        <table width="600" cellpadding="0" cellspacing="0" border="0" style="max-width:600px;width:100%;background-color:#FFFFFF;border-radius:8px;overflow:hidden;border:1px solid #E5E7EB;">
+
+          <!-- Top accent bar -->
+          <tr>
+            <td style="background-color:#7C3AED;height:8px;font-size:0;line-height:0;">&nbsp;</td>
+          </tr>
+
+          <!-- Logo header -->
+          <tr>
+            <td style="background-color:#FFFFFF;padding:24px 32px;border-bottom:1px solid #E5E7EB;">
+              <table width="100%" cellpadding="0" cellspacing="0" border="0">
+                <tr>
+                  <td>
+                    <span style="font-size:22px;font-weight:bold;color:#1D4ED8;">&#127963;&#65039; VigieCity</span><br>
+                    <span style="font-size:12px;color:#6B7280;">La commune connectée</span>
+                  </td>
+                  <td align="right">
+                    <span style="display:inline-block;background-color:#FAF5FF;color:#7C3AED;font-size:11px;font-weight:bold;padding:4px 10px;border-radius:20px;border:1px solid #E9D5FF;">&#128483;&#65039; Consultation citoyenne</span>
+                  </td>
+                </tr>
+              </table>
+            </td>
+          </tr>
+
+          <!-- Main content -->
+          <tr>
+            <td style="padding:40px 32px;">
+
+              <!-- Megaphone icon -->
+              <div style="text-align:center;margin-bottom:20px;">
+                <span style="font-size:48px;">&#128483;&#65039;</span>
+              </div>
+
+              <!-- H1 -->
+              <h1 style="margin:0 0 8px 0;font-size:26px;font-weight:bold;color:#1F2937;text-align:center;">Votre avis compte&nbsp;!</h1>
+
+              <!-- Subtitle -->
+              <p style="margin:0 0 32px 0;font-size:15px;color:#6B7280;text-align:center;">
+                Bonjour <strong style="color:#1F2937;">{{first_name}}</strong>,<br>
+                <strong style="color:#7C3AED;">{{commune_name}}</strong> lance une consultation citoyenne et souhaite recueillir votre opinion.
+              </p>
+
+              <!-- Consultation card -->
+              <table width="100%" cellpadding="0" cellspacing="0" border="0" style="margin-bottom:28px;">
+                <tr>
+                  <td style="background-color:#FAF5FF;border:1px solid #E9D5FF;border-left:4px solid #7C3AED;border-radius:6px;padding:24px 24px;">
+
+                    <!-- Consultation title -->
+                    <h2 style="margin:0 0 14px 0;font-size:18px;font-weight:bold;color:#4C1D95;">&#128221; {{consultation_title}}</h2>
+
+                    <!-- Description -->
+                    <p style="margin:0 0 20px 0;font-size:14px;line-height:1.6;color:#374151;">{{consultation_description}}</p>
+
+                    <!-- Deadline -->
+                    <table width="100%" cellpadding="0" cellspacing="0" border="0">
+                      <tr>
+                        <td style="background-color:#EDE9FE;border-radius:4px;padding:10px 14px;">
+                          <span style="font-size:13px;color:#5B21B6;font-weight:bold;">&#9201;&#65039; Date limite de participation : {{deadline}}</span>
+                        </td>
+                      </tr>
+                    </table>
+
+                  </td>
+                </tr>
+              </table>
+
+              <!-- Organizer -->
+              <table width="100%" cellpadding="0" cellspacing="0" border="0" style="margin-bottom:32px;">
+                <tr>
+                  <td style="background-color:#F9FAFB;border:1px solid #E5E7EB;border-radius:6px;padding:12px 20px;">
+                    <span style="font-size:13px;color:#6B7280;">&#127963;&#65039; Consultation organisée par <strong style="color:#1F2937;">{{organizer_name}}</strong></span>
+                  </td>
+                </tr>
+              </table>
+
+              <!-- CTA Button (purple) -->
+              <table width="100%" cellpadding="0" cellspacing="0" border="0" style="margin-bottom:20px;">
+                <tr>
+                  <td align="center">
+                    <a href="{{participation_url}}" style="display:inline-block;background-color:#7C3AED;color:#FFFFFF;text-decoration:none;font-size:15px;font-weight:bold;padding:14px 32px;border-radius:6px;">Participer maintenant &rarr;</a>
+                  </td>
+                </tr>
+              </table>
+
+              <!-- Anonymity note -->
+              <table width="100%" cellpadding="0" cellspacing="0" border="0">
+                <tr>
+                  <td style="text-align:center;">
+                    <p style="margin:0;font-size:12px;color:#9CA3AF;">
+                      &#128274; Votre participation est <strong>anonyme et confidentielle</strong>. Vos réponses ne pourront pas être associées à votre identité.
+                    </p>
+                  </td>
+                </tr>
+              </table>
+
+            </td>
+          </tr>
+
+          <!-- Footer -->
+          <tr>
+            <td style="background-color:#F8FAFC;border-top:1px solid #E5E7EB;padding:20px 32px;text-align:center;">
+              <p style="margin:0 0 6px 0;font-size:11px;color:#9CA3AF;">© 2025 VigieCity — La commune connectée</p>
+              <p style="margin:0 0 6px 0;font-size:11px;color:#9CA3AF;">Vous recevez cet email car vous êtes inscrit sur VigieCity.</p>
+              <p style="margin:0;font-size:11px;"><a href="#" style="color:#6B7280;text-decoration:underline;">Se désabonner</a></p>
+            </td>
+          </tr>
+
+        </table>
+      </td>
+    </tr>
+  </table>
+
+</body>
+</html>
