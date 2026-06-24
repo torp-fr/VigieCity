@@ -217,8 +217,6 @@ function RootComponent() {
       }
 
       if (event === "SIGNED_IN" && session?.user) {
-        if (SKIP_ONBOARDING_ROUTES.includes(pathnameRef.current)) return;
-
         await new Promise((r) => setTimeout(r, 500));
 
         const { data: profile } = await supabase
@@ -265,6 +263,9 @@ function RootComponent() {
           }
           return;
         }
+
+        // Non-admin : certaines routes ne déclenchent pas le redirect onboarding
+        if (SKIP_ONBOARDING_ROUTES.includes(pathnameRef.current)) return;
 
         // Citoyen sans commune → onboarding
         if (!profile?.collectivity_id) {
