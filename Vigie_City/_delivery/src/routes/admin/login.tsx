@@ -36,6 +36,12 @@ function AdminLoginPage() {
     setError(null);
     setLoading(true);
     try {
+      // Nettoyer l'etat auth local avant connexion.
+      // Previent un ancien refresh token stale (session precedente) de declencher
+      // un SIGNED_OUT parasite via un 400 sur /token?grant_type=refresh_token,
+      // ce qui efface la nouvelle session juste apres signInWithPassword.
+      await supabase.auth.signOut({ scope: 'local' });
+
       const { data: authData, error: authError } =
         await supabase.auth.signInWithPassword({ email: email.trim(), password });
 

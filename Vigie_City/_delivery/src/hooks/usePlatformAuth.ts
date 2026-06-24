@@ -41,8 +41,9 @@ export function usePlatformAuth(): PlatformAuthResult {
   // Écouter les changements de session Supabase (expiry, logout, refresh)
   useEffect(() => {
     const { data: { subscription } } = supabase.auth.onAuthStateChange((event) => {
-      if (event === "SIGNED_OUT" || event === "TOKEN_REFRESHED" || event === "USER_UPDATED") {
-        // Invalider le cache pour forcer une re-vérification
+      // SIGNED_OUT est gere exclusivement par __root.tsx (removeQueries + router.invalidate).
+      // Double-handler = race condition sur la reconnexion : on l'evite ici.
+      if (event === "TOKEN_REFRESHED" || event === "USER_UPDATED") {
         queryClient.invalidateQueries({ queryKey: ["platform-auth"] });
       }
     });
