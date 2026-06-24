@@ -28,8 +28,18 @@ function last30Days() {
 }
 
 function PlatformStatsPage() {
+  return (
+    <PlatformShell activePath="/platform/stats">
+      <PlatformStatsPageContent />
+    </PlatformShell>
+  );
+}
+
+function PlatformStatsPageContent() {
   const navigate = useNavigate();
   const [refreshKey, setRefreshKey] = useState(0);
+
+  const [isAdmin, setIsAdmin] = useState(false);
 
   useEffect(() => {
     supabase.auth.getSession().then(async ({ data: { session } }) => {
@@ -102,7 +112,6 @@ function PlatformStatsPage() {
 
 
   return (
-    <PlatformShell activePath="/platform/stats">
     <div className="space-y-6 px-4 pt-5 pb-8">
       <header className="flex items-center justify-between">
         <div>
@@ -227,6 +236,5 @@ function PlatformStatsPage() {
         </>
       )}
     </div>
-    </PlatformShell>
-  );
+    );
 }

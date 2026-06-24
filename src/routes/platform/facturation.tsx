@@ -35,6 +35,14 @@ type Invoice = {
 };
 
 function FacturationPage() {
+  return (
+    <PlatformShell activePath="/platform/facturation">
+      <FacturationPageContent />
+    </PlatformShell>
+  );
+}
+
+function FacturationPageContent() {
   const qc = useQueryClient();
   const [showForm, setShowForm] = useState(false);
   const [selectedCommune, setSelectedCommune] = useState("");
@@ -160,7 +168,6 @@ function FacturationPage() {
   if (isLoading) return <div className="text-center py-12 text-muted-foreground">Chargement…</div>;
 
   return (
-    <PlatformShell activePath="/platform/facturation">
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <div>
@@ -326,6 +333,5 @@ function FacturationPage() {
         </div>
       )}
     </div>
-    </PlatformShell>
-  );
+    );
 }

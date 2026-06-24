@@ -44,22 +44,18 @@ function fmtDate(iso: string) {
 }
 
 function PlatformSupportPage() {
-  const navigate = useNavigate();
+  return (
+    <PlatformShell activePath="/platform/support">
+      <PlatformSupportPageContent />
+    </PlatformShell>
+  );
+}
+
+function PlatformSupportPageContent() {
   const qc = useQueryClient();
   const [expandedId, setExpandedId] = useState<string | null>(null);
   const [filterStatus, setFilterStatus] = useState<string>("open");
   const [resolution, setResolution] = useState("");
-
-  useEffect(() => {
-    supabase.auth.getUser().then(async ({ data }) => {
-      const uid = data.user?.id ?? null;
-      if (!uid) { setIsAdmin(false); return; }
-      const { data: roles } = await supabase
-        .from("user_roles").select("id")
-        .eq("user_id", uid).eq("role", "admin").is("collectivity_id", null);
-      setIsAdmin((roles?.length ?? 0) > 0);
-    });
-  }, []);
 
   const { data, isLoading } = useQuery({
     queryKey: ["platform_support", filterStatus],
@@ -99,7 +95,6 @@ function PlatformSupportPage() {
 
 
   return (
-    <PlatformShell activePath="/platform/support">
     <div className="space-y-4 px-4 pt-5">
       <header>
         <h1 className="text-2xl font-bold">Support</h1>
@@ -214,6 +209,5 @@ function PlatformSupportPage() {
         </ul>
       )}
     </div>
-    </PlatformShell>
   );
 }

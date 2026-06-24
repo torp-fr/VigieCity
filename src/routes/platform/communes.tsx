@@ -27,6 +27,14 @@ const STATUS_COLOR: Record<string, string> = {
 };
 
 function PlatformCommunesPage() {
+  return (
+    <PlatformShell activePath="/platform/communes">
+      <PlatformCommunesPageContent />
+    </PlatformShell>
+  );
+}
+
+function PlatformCommunesPageContent() {
   const navigate = useNavigate();
   const qc = useQueryClient();
 
@@ -35,6 +43,8 @@ function PlatformCommunesPage() {
   const [editPostal, setEditPostal] = useState('');
   const [editDept,   setEditDept]   = useState('');
   const [deleteTarget, setDeleteTarget] = useState<{ id: string; name: string } | null>(null);
+
+  const [isAdmin, setIsAdmin] = useState(false);
 
   useEffect(() => {
     supabase.auth.getSession().then(async ({ data: { session } }) => {
@@ -102,7 +112,6 @@ function PlatformCommunesPage() {
 
 
   return (
-    <PlatformShell activePath="/platform/communes">
     <div className="space-y-4 px-4 pt-5">
       <Link to="/platform" className="inline-flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground">
         <ArrowLeft className="h-4 w-4" /> Platform Admin
@@ -246,6 +255,5 @@ function PlatformCommunesPage() {
         </ul>
       )}
     </div>
-    </PlatformShell>
-  );
+    );
 }

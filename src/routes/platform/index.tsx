@@ -34,19 +34,43 @@ function fmtDate(iso: string) {
   });
 }
 
+/** Wrapper minimal — PlatformShell gere l auth guard.
+ *  DashboardContent ne monte QUE quand auth.status === 'ready',
+ *  garantissant que les queries s executent toujours avec un token valide.
+ */
 function PlatformDashboard() {
-  const { data: stats, isLoading: statsLoading } = useQuery({
+  return (
+    <PlatformShell activePath="/platform">
+      <DashboardContent />
+    </PlatformShell>
+  );
+}
+
+/** Contenu reel du tableau de bord.
+ *  Monte uniquement apres confirmation auth — plus de race condition.
+ */
+function DashboardContent() {
+  const {
+    data: stats,
+    isLoading: statsLoading,
+    error: statsError,
+  } = useQuery({
     queryKey: ["platform-dashboard-stats"],
     queryFn: async () => {
-      await supabase.auth.getSession();
       const [usersRes, communesRes, licencesRes, pubsRes] = await Promise.all([
         supabase.from("profiles").select("id", { count: "exact", head: true }),
         supabase.from("collectivities").select("id", { count: "exact", head: true }),
         supabase.from("commune_licenses").select("id", { count: "exact", head: true }),
         supabase.from("publications").select("id", { count: "exact", head: true }),
       ]);
-      if (usersRes.error)    throw usersRes.error;
-      if (communesRes.error) throw communesRes.error;
+      if (usersRes.error) {
+        console.error("[platform] profiles count error:", usersRes.error);
+        throw usersRes.error;
+      }
+      if (communesRes.error) {
+        console.error("[platform] collectivities count error:", communesRes.error);
+        throw communesRes.error;
+      }
       return {
         users:    usersRes.count    ?? 0,
         communes: communesRes.count ?? 0,
@@ -55,46 +79,55 @@ function PlatformDashboard() {
       };
     },
     staleTime: 60_000,
-    placeholderData: (prev: any) => prev,
     retry: 2,
   });
 
-  const { data: licences, isLoading: licLoading } = useQuery({
+  const {
+    data: licences,
+    isLoading: licLoading,
+    error: licError,
+  } = useQuery({
     queryKey: ["platform-dashboard-licences"],
     queryFn: async () => {
-      await supabase.auth.getSession();
       const { data, error } = await supabase
         .from("commune_licenses")
         .select("id, plan, status, started_at, expires_at, collectivities(name)")
         .order("started_at", { ascending: false })
         .limit(20);
-      if (error) throw error;
+      if (error) {
+        console.error("[platform] licences error:", error);
+        throw error;
+      }
       return data ?? [];
     },
     staleTime: 5 * 60_000,
-    placeholderData: (prev: any) => prev,
     retry: 2,
   });
 
-  const { data: collectivities, isLoading: collLoading } = useQuery({
+  const {
+    data: collectivities,
+    isLoading: collLoading,
+    error: collError,
+  } = useQuery({
     queryKey: ["platform-dashboard-collectivities"],
     queryFn: async () => {
-      await supabase.auth.getSession();
       const { data, error } = await supabase
         .from("collectivities")
         .select("id, name, insee_code, status, created_at")
         .order("created_at", { ascending: false })
         .limit(30);
-      if (error) throw error;
+      if (error) {
+        console.error("[platform] collectivities error:", error);
+        throw error;
+      }
       return data ?? [];
     },
     staleTime: 5 * 60_000,
-    placeholderData: (prev: any) => prev,
     retry: 2,
   });
 
   return (
-    <PlatformShell activePath="/platform">
+    <div>
       <div className="mb-8">
         <h1 className="text-xl font-bold text-slate-900">Tableau de bord</h1>
         <p className="mt-0.5 text-sm text-slate-500">Vue d'ensemble de la plateforme VigieCity</p>
@@ -107,7 +140,11 @@ function PlatformDashboard() {
           <h2 className="mb-4 text-xs font-semibold uppercase tracking-wider text-slate-400">
             Statistiques globales
           </h2>
-          {statsLoading ? (
+          {statsError ? (
+            <div className="rounded-xl border border-red-200 bg-red-50 px-5 py-4 text-sm text-red-600">
+              Erreur de chargement : {(statsError as any)?.message ?? "inconnue"}
+            </div>
+          ) : statsLoading ? (
             <div className="grid grid-cols-4 gap-4">
               {[1, 2, 3, 4].map((i) => (
                 <div key={i} className="h-28 animate-pulse rounded-xl border border-slate-200 bg-white" />
@@ -132,7 +169,11 @@ function PlatformDashboard() {
             {licences && <span className="text-xs text-slate-400">{licences.length} affichees</span>}
           </div>
           <div className="overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm">
-            {licLoading ? (
+            {licError ? (
+              <div className="px-5 py-4 text-sm text-red-500">
+                Erreur licences : {(licError as any)?.message ?? "inconnue"}
+              </div>
+            ) : licLoading ? (
               <div className="flex items-center justify-center py-12">
                 <Loader2 className="h-5 w-5 animate-spin text-slate-300" />
               </div>
@@ -206,7 +247,11 @@ function PlatformDashboard() {
             {collectivities && <span className="text-xs text-slate-400">{collectivities.length} affichees</span>}
           </div>
           <div className="overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm">
-            {collLoading ? (
+            {collError ? (
+              <div className="px-5 py-4 text-sm text-red-500">
+                Erreur collectivites : {(collError as any)?.message ?? "inconnue"}
+              </div>
+            ) : collLoading ? (
               <div className="flex items-center justify-center py-12">
                 <Loader2 className="h-5 w-5 animate-spin text-slate-300" />
               </div>
@@ -245,7 +290,7 @@ function PlatformDashboard() {
         </section>
 
       </div>
-    </PlatformShell>
+    </div>
   );
 }
 
@@ -295,7 +340,7 @@ function TypeBadge({ type }: { type: string | null }) {
   const cls = map[type ?? ""] ?? "bg-slate-100 text-slate-600";
   return (
     <span className={`rounded-full px-2 py-0.5 text-xs font-semibold ${cls}`}>
-      {type ?? "—"}
+      {type ?? "---"}
     </span>
   );
 }

@@ -27,6 +27,14 @@ const FEATURE_LIST = [
 type FeatureKey = typeof FEATURE_LIST[number]["key"];
 
 function FeaturesPage() {
+  return (
+    <PlatformShell activePath="/platform/features">
+      <FeaturesPageContent />
+    </PlatformShell>
+  );
+}
+
+function FeaturesPageContent() {
   const qc = useQueryClient();
   const [localEdits, setLocalEdits] = useState<Record<string, Record<FeatureKey, boolean>>>({});
 
@@ -80,7 +88,6 @@ function FeaturesPage() {
   if (isLoading) return <div className="text-center py-12 text-muted-foreground">Chargement…</div>;
 
   return (
-    <PlatformShell activePath="/platform/features">
     <div className="space-y-5">
       <div className="flex items-center justify-between">
         <div>
@@ -180,6 +187,5 @@ function FeaturesPage() {
         Les modifications ne sont appliquées qu'après avoir cliqué « Sauvegarder ».
       </p>
     </div>
-    </PlatformShell>
-  );
+    );
 }

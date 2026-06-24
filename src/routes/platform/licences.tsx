@@ -63,11 +63,21 @@ function daysUntil(iso: string) {
 
 // ── Main component ────────────────────────────────────────────────────────────
 function PlatformLicencesPage() {
+  return (
+    <PlatformShell activePath="/platform/licences">
+      <PlatformLicencesPageContent />
+    </PlatformShell>
+  );
+}
+
+function PlatformLicencesPageContent() {
   const navigate = useNavigate();
   const qc = useQueryClient();
   const [editingId, setEditingId] = useState<string | null>(null);
   const [editPlan, setEditPlan] = useState<PlanKey>("trial");
   const [expandedId, setExpandedId] = useState<string | null>(null);
+
+  const [isAdmin, setIsAdmin] = useState(false);
 
   useEffect(() => {
     supabase.auth.getSession().then(async ({ data: { session } }) => {
@@ -176,7 +186,6 @@ function PlatformLicencesPage() {
   // ── Guards ─────────────────────────────────────────────────────────────────
 
   return (
-    <PlatformShell activePath="/platform/licences">
     <div className="space-y-5 px-4 pt-5 pb-10">
 
       <header>
@@ -373,6 +382,5 @@ function PlatformLicencesPage() {
         </ul>
       )}
     </div>
-    </PlatformShell>
-  );
+    );
 }

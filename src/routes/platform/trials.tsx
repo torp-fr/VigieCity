@@ -31,6 +31,14 @@ type License = {
 };
 
 function TrialsPage() {
+  return (
+    <PlatformShell activePath="/platform/trials">
+      <TrialsPageContent />
+    </PlatformShell>
+  );
+}
+
+function TrialsPageContent() {
   const qc = useQueryClient();
 
   const { data, isLoading } = useQuery({
@@ -89,7 +97,6 @@ function TrialsPage() {
   if (isLoading) return <div className="text-center py-12 text-muted-foreground">Chargement…</div>;
 
   return (
-    <PlatformShell activePath="/platform/trials">
     <div className="space-y-6">
       <div>
         <h1 className="text-2xl font-bold flex items-center gap-2">
@@ -156,8 +163,7 @@ function TrialsPage() {
         </div>
       )}
     </div>
-    </PlatformShell>
-  );
+    );
 }
 
 function TrialRow({ t, extendTrial, convertPlan }: { t: License; extendTrial: any; convertPlan: any }) {

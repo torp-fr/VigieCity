@@ -127,6 +127,14 @@ async function fetchRetention(): Promise<CommuneStats[]> {
 
 // ─── Composant ────────────────────────────────────────────────────────────────
 function RetentionPlatform() {
+  return (
+    <PlatformShell activePath="/platform/retention">
+      <RetentionPlatformContent />
+    </PlatformShell>
+  );
+}
+
+function RetentionPlatformContent() {
   const [search,  setSearch]  = useState("");
   const [sortKey, setSortKey] = useState<keyof CommuneStats>("engagementScore");
   const [sortAsc, setSortAsc] = useState(false);
@@ -186,7 +194,6 @@ function RetentionPlatform() {
 
   // ─── UI ──────────────────────────────────────────────────────────────────
   return (
-    <PlatformShell activePath="/platform/retention">
     <div className="space-y-5">
       {/* En-tête */}
       <div>
@@ -371,6 +378,5 @@ function RetentionPlatform() {
         </>
       )}
     </div>
-    </PlatformShell>
-  );
+    );
 }
