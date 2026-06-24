@@ -208,8 +208,11 @@ function RootComponent() {
         event !== "USER_UPDATED"
       ) return;
 
-      // SIGNED_OUT : invalider le router + reset analytics, puis sortir
+      // SIGNED_OUT : vider le cache platform-auth + invalider le router
+      // removeQueries assure que sur la reconnexion suivante, la query
+      // repart de zero (isPending:true) et non d'un etat isError stale
       if (event === "SIGNED_OUT") {
+        queryClient.removeQueries({ queryKey: ["platform-auth"] });
         router.invalidate();
         posthog.reset();
         return;
