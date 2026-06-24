@@ -5,7 +5,7 @@ import {
   Settings, LogOut, Shield, ChevronRight,
   CreditCard, Euro, BarChart3, UserPlus,
   TrendingUp, Newspaper, Package, BookOpen,
-  Menu, Bell,
+  Menu, Bell, Megaphone,
 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { usePlatformAuth } from "@/hooks/usePlatformAuth";
@@ -38,6 +38,7 @@ const NAV_SECTIONS = [
       { icon: Euro,            label: "Intercommunal",    path: "/platform/tarification"   },
       { icon: Package,         label: "Modules",          path: "/platform/modules"        },
       { icon: Shield,          label: "Abonnements",      path: "/platform/abonnements"    },
+      { icon: Megaphone,       label: "Publicités",       path: "/platform/publicites"     },
     ],
   },
   {
@@ -68,6 +69,7 @@ const PAGE_TITLES: Record<string, string> = {
   "/platform/tarification":     "Intercommunal",
   "/platform/modules":          "Modules",
   "/platform/abonnements":      "Abonnements",
+  "/platform/publicites":       "Publicités",
   "/platform/analytics":        "Analytics",
   "/platform/settings":         "Paramètres",
 };

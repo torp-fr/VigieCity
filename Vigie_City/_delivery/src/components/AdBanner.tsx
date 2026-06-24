@@ -1,1 +1,136 @@
-/**\n * AdBanner — J13a Advertising component\n * Displays ads in header or footer\n * Tracks impressions and clicks\n */\n\nimport { useEffect, useState, useRef } from 'react';\nimport { useAppAuth } from '../hooks/useAppAuth';\nimport { supabase } from '../lib/supabase';\n\ninterface AdCampaign {\n  id: string;\n  name: string;\n  creativeTitle: string;\n  creativeDescription: string;\n  creativeImageUrl: string;\n  creativeCtaText: string;\n  creativeCtaUrl: string;\n}\n\ninterface AdBannerProps {\n  collectivityId: string;\n  placementId: string; // 'banner_header' | 'card_sponsor' | 'push_notification'\n}\n\nexport function AdBanner({ collectivityId, placementId }: AdBannerProps) {\n  const { user } = useAppAuth();\n  const [campaign, setCampaign] = useState<AdCampaign | null>(null);\n  const [loading, setLoading] = useState(true);\n  const [impressionId] = useState(() => crypto.randomUUID());\n  const [hasConsent, setHasConsent] = useState(true);\n  const containerRef = useRef<HTMLDivElement>(null);\n  const intersectionObserver = useRef<IntersectionObserver | null>(null);\n  const [isVisible, setIsVisible] = useState(false);\n  const [impressionTracked, setImpressionTracked] = useState(false);\n\n  // Check user consent for push ads\n  useEffect(() => {\n    async function checkConsent() {\n      if (placementId === 'push_notification' && user) {\n        const { data } = await supabase\n          .from('ad_consent')\n          .select('consented')\n          .eq('user_id', user.id)\n          .eq('collectivity_id', collectivityId)\n          .eq('consent_type', 'push_ads')\n          .single();\n\n        setHasConsent(data?.consented ?? false);\n      }\n    }\n\n    checkConsent();\n  }, [user, collectivityId, placementId]);\n\n  // Load active campaign for this placement\n  useEffect(() => {\n    async function loadCampaign() {\n      try {\n        const now = new Date().toISOString();\n        const { data, error } = await supabase\n          .from('ad_campaigns')\n          .select('id, name, creative_title, creative_description, creative_image_url, creative_cta_text, creative_cta_url')\n          .eq('status', 'active')\n          .lt('start_date', now.split('T')[0])\n          .gt('end_date', now.split('T')[0])\n          .contains('placements', [placementId])\n          .limit(1)\n          .single();\n\n        if (!error && data) {\n          setCampaign({\n            id: data.id,\n            name: data.name,\n            creativeTitle: data.creative_title,\n            creativeDescription: data.creative_description,\n            creativeImageUrl: data.creative_image_url,\n            creativeCtaText: data.creative_cta_text,\n            creativeCtaUrl: data.creative_cta_url,\n          });\n        }\n      } catch (err) {\n        console.error('Error loading campaign:', err);\n      } finally {\n        setLoading(false);\n      }\n    }\n\n    loadCampaign();\n  }, [collectivityId, placementId]);\n\n  // Track impression when ad becomes visible\n  useEffect(() => {\n    if (!campaign || !containerRef.current || impressionTracked) return;\n\n    intersectionObserver.current = new IntersectionObserver(\n      entries => {\n        entries.forEach(entry => {\n          if (entry.isIntersecting && !impressionTracked) {\n            setIsVisible(true);\n            trackImpression();\n          }\n        });\n      },\n      { threshold: 0.5 }\n    );\n\n    intersectionObserver.current.observe(containerRef.current);\n\n    return () => {\n      intersectionObserver.current?.disconnect();\n    };\n  }, [campaign, impressionTracked]);\n\n  const trackImpression = async () => {\n    if (!campaign) return;\n\n    try {\n      await fetch(`${import.meta.env.VITE_SUPABASE_URL}/functions/v1/ad-tracker`, {\n        method: 'POST',\n        headers: { 'Content-Type': 'application/json' },\n        body: JSON.stringify({\n          campaign_id: campaign.id,\n          placement_id: placementId,\n          collectivity_id: collectivityId,\n          action: 'impression',\n          impression_id: impressionId,\n          device_type: /Mobile|Android|iPhone/.test(navigator.userAgent) ? 'mobile' : 'desktop',\n          browser: navigator.userAgent.split(' ').pop(),\n        }),\n      });\n      setImpressionTracked(true);\n    } catch (err) {\n      console.error('Error tracking impression:', err);\n    }\n  };\n\n  const trackClick = async () => {\n    if (!campaign) return;\n\n    try {\n      await fetch(`${import.meta.env.VITE_SUPABASE_URL}/functions/v1/ad-tracker`, {\n        method: 'POST',\n        headers: { 'Content-Type': 'application/json' },\n        body: JSON.stringify({\n          campaign_id: campaign.id,\n          placement_id: placementId,\n          collectivity_id: collectivityId,\n          action: 'click',\n          impression_id: impressionId,\n        }),\n      });\n    } catch (err) {\n      console.error('Error tracking click:', err);\n    }\n  };\n\n  if (loading) return null;\n  if (!campaign || !hasConsent) return null;\n\n  const handleClick = () => {\n    trackClick();\n    window.open(campaign.creativeCtaUrl, '_blank');\n  };\n\n  if (placementId === 'banner_header') {\n    return (\n      <div ref={containerRef} className=\"bg-gradient-to-r from-blue-600 to-blue-700 text-white p-4\">\n        <div className=\"max-w-6xl mx-auto flex items-center justify-between\">\n          <div className=\"flex-1\">\n            <p className=\"text-xs uppercase tracking-wide opacity-90\">Annonce sponsorisée</p>\n            <h3 className=\"text-lg font-bold mt-1\">{campaign.creativeTitle}</h3>\n            <p className=\"text-sm mt-2 opacity-90\">{campaign.creativeDescription}</p>\n          </div>\n          <button\n            onClick={handleClick}\n            className=\"ml-4 px-4 py-2 bg-white text-blue-600 font-bold rounded hover:bg-opacity-90 whitespace-nowrap\"\n          >\n            {campaign.creativeCtaText}\n          </button>\n        </div>\n      </div>\n    );\n  }\n\n  if (placementId === 'card_sponsor') {\n    return (\n      <div\n        ref={containerRef}\n        onClick={handleClick}\n        className=\"border-2 border-blue-200 rounded-lg p-4 bg-blue-50 cursor-pointer hover:bg-blue-100 transition\"\n      >\n        <p className=\"text-xs uppercase text-blue-600 font-bold tracking-wide\">Partenaire</p>\n        {campaign.creativeImageUrl && (\n          <img src={campaign.creativeImageUrl} alt={campaign.creativeTitle} className=\"w-full h-32 object-cover rounded mt-2\" />\n        )}\n        <h4 className=\"font-bold text-gray-900 mt-2\">{campaign.creativeTitle}</h4>\n        <p className=\"text-sm text-gray-700 mt-1\">{campaign.creativeDescription}</p>\n        <button className=\"mt-3 w-full bg-blue-600 text-white font-bold py-2 rounded hover:bg-blue-700 transition\">\n          {campaign.creativeCtaText}\n        </button>\n      </div>\n    );\n  }\n\n  return null;\n}\n
+// AdBanner.tsx
+// Composant publicitaire RGPD-ready : affiche une annonce si le citoyen a consenti
+// Charge via EF get-ad (publique), track via EF track-ad-event (publique)
+// Consent stocke dans localStorage["ads_consent"] = "true" | "false"
+
+import { useEffect, useRef, useState } from "react";
+import { X } from "lucide-react";
+import { supabase } from "@/integrations/supabase/client";
+
+interface Ad {
+  id: string;
+  title: string;
+  image_url: string;
+  link_url: string;
+  advertiser_name: string;
+}
+
+const EF_BASE = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1`;
+
+async function getAd(collectivityId?: string | null): Promise<Ad | null> {
+  const params = collectivityId ? `?collectivity_id=${collectivityId}` : "";
+  const res = await fetch(`${EF_BASE}/get-ad${params}`, {
+    headers: { apikey: import.meta.env.VITE_SUPABASE_ANON_KEY },
+  });
+  if (!res.ok) return null;
+  const json = await res.json();
+  return json.ad ?? null;
+}
+
+async function trackEvent(adId: string, event: "impression" | "click", collectivityId?: string | null) {
+  fetch(`${EF_BASE}/track-ad-event`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      apikey: import.meta.env.VITE_SUPABASE_ANON_KEY,
+    },
+    body: JSON.stringify({ ad_id: adId, event_type: event, collectivity_id: collectivityId ?? null }),
+  }).catch(() => {});
+}
+
+interface AdBannerProps {
+  collectivityId?: string | null;
+}
+
+export function AdBanner({ collectivityId }: AdBannerProps) {
+  const [ad, setAd] = useState<Ad | null>(null);
+  const [consent, setConsent] = useState<boolean | null>(null);
+  const [dismissed, setDismissed] = useState(false);
+  const tracked = useRef(false);
+
+  // Lire le consentement en memoire
+  useEffect(() => {
+    const stored = localStorage.getItem("ads_consent");
+    if (stored === "true") setConsent(true);
+    else if (stored === "false") setConsent(false);
+    else setConsent(null); // pas encore choisi
+  }, []);
+
+  // Charger l\'annonce si consent = true
+  useEffect(() => {
+    if (consent !== true) return;
+    getAd(collectivityId).then((a) => setAd(a));
+  }, [consent, collectivityId]);
+
+  // Tracker l\'impression une seule fois au mount
+  useEffect(() => {
+    if (ad && !tracked.current) {
+      tracked.current = true;
+      trackEvent(ad.id, "impression", collectivityId);
+    }
+  }, [ad, collectivityId]);
+
+  // Pas encore de choix -> demander le consentement
+  if (consent === null) {
+    return (
+      <div className="rounded-2xl border border-primary/30 bg-primary/5 p-4 text-sm">
+        <p className="font-semibold text-foreground">Annonces VigieCity</p>
+        <p className="mt-1 text-muted-foreground text-xs">
+          VigieCity affiche des annonces de partenaires locaux pour financer ses services gratuits.
+          Acceptez-vous de voir ces annonces ?
+        </p>
+        <div className="mt-3 flex gap-2">
+          <button
+            onClick={() => { localStorage.setItem("ads_consent", "true"); setConsent(true); }}
+            className="rounded-xl bg-primary px-4 py-2 text-xs font-semibold text-white hover:opacity-90"
+          >
+            Oui, je soutiens
+          </button>
+          <button
+            onClick={() => { localStorage.setItem("ads_consent", "false"); setConsent(false); }}
+            className="rounded-xl border border-border px-4 py-2 text-xs text-muted-foreground hover:bg-muted"
+          >
+            Non merci
+          </button>
+        </div>
+      </div>
+    );
+  }
+
+  // Consent false ou pas d\'annonce disponible -> rien
+  if (consent === false || !ad || dismissed) return null;
+
+  return (
+    <div className="relative rounded-2xl border border-border bg-card shadow-sm overflow-hidden">
+      {/* Label */}
+      <div className="absolute top-2 left-2 rounded-full bg-black/50 px-2 py-0.5 text-[9px] font-semibold text-white/80 uppercase tracking-wide">
+        Annonce
+      </div>
+      {/* Fermer */}
+      <button
+        onClick={() => setDismissed(true)}
+        className="absolute top-2 right-2 rounded-full bg-black/50 p-0.5 text-white/80 hover:bg-black/70"
+        aria-label="Fermer l\'annonce"
+      >
+        <X className="h-3.5 w-3.5" />
+      </button>
+      {/* Image + lien */}
+      <a
+        href={ad.link_url}
+        target="_blank"
+        rel="noopener noreferrer nofollow sponsored"
+        onClick={() => trackEvent(ad.id, "click", collectivityId)}
+      >
+        <img
+          src={ad.image_url}
+          alt={ad.title}
+          className="h-24 w-full object-cover"
+        />
+        <div className="px-3 py-2">
+          <p className="text-xs font-semibold truncate">{ad.title}</p>
+          <p className="text-[10px] text-muted-foreground">{ad.advertiser_name}</p>
+        </div>
+      </a>
+    </div>
+  );
+}

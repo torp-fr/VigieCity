@@ -18,6 +18,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { SosButton } from "@/components/SosButton";
 import { useRadio } from "@/hooks/useRadio";
 import { useAppAuth } from "@/hooks/useAppAuth";
+import { AdBanner } from "@/components/AdBanner";
 
 export const Route = createFileRoute("/accueil")({
   head: () => ({
@@ -266,6 +267,9 @@ function Home() {
           </ul>
         )}
       </section>
+
+      {/* Bandeau publicitaire RGPD-ready */}
+      <AdBanner collectivityId={collectivityId} />
 
       {/* Disclaimer */}
       <p className="rounded-xl border border-border bg-muted/40 p-3 text-center text-xs text-muted-foreground">
