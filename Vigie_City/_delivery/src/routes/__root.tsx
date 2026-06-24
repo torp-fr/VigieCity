@@ -215,10 +215,13 @@ function RootComponent() {
         return;
       }
 
-      // SIGNED_IN / USER_UPDATED : invalider le cache données (pas le router
-      // — router.invalidate() pendant une navigation en cours provoque un race
-      // condition qui interrompt le redirect vers /platform/ sur reconnexion)
+      // SIGNED_IN / USER_UPDATED : invalider le cache données
       queryClient.invalidateQueries();
+      // Effacer l'état d'erreur de platform-auth : après un signOut(),
+      // fetchPlatformAuth échoue (getUser → null) et laisse la query en isError=true.
+      // Sans ce reset, PlatformShell voit "unauthorized" et redirige vers
+      // /admin/login avant que le refetch post-connexion ait pu aboutir.
+      queryClient.resetQueries({ queryKey: ["platform-auth"] });
 
       if (event === "SIGNED_IN" && session?.user) {
         await new Promise((r) => setTimeout(r, 500));
