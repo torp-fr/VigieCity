@@ -5,6 +5,10 @@
     "VITE_SUPABASE_URL",
     "VITE_SUPABASE_PUBLISHABLE_KEY"
   ],
+  "redirects": [
+    { "source": "/admin", "destination": "/admin/", "permanent": false },
+    { "source": "/platform", "destination": "/platform/", "permanent": false }
+  ],
   "rewrites": [
     { "source": "/(.*)", "destination": "/index.html" }
   ]
