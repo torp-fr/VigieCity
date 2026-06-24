@@ -1354,4 +1354,165 @@ function LandingPage() {
         </div>
       </section>
 
-      {/* ── Pour qui ───────────────────────────────�
+      {/* ── Pour qui ─────────────────────────────────── */}
+      <section id="pour-qui" className="py-20 bg-white">
+        <div className="mx-auto max-w-7xl px-6">
+          <div className="mb-14 text-center">
+            <h2 className="text-3xl font-extrabold text-gray-900 md:text-4xl">
+              Pour qui ?
+            </h2>
+            <p className="mx-auto mt-4 max-w-2xl text-lg text-gray-500">
+              VigieCity s’adapte à chaque collectivité, quelle que soit sa taille.
+            </p>
+          </div>
+          <div className="grid gap-8 md:grid-cols-3">
+            {FOR_WHO.map(({ Icon, title, sub, desc }) => (
+              <div key={title} className="rounded-2xl border border-gray-100 bg-gray-50 p-8 shadow-sm">
+                <div className="mb-5 flex h-12 w-12 items-center justify-center rounded-xl bg-blue-100">
+                  <Icon className="h-6 w-6 text-blue-700" />
+                </div>
+                <h3 className="text-xl font-bold text-gray-900">{title}</h3>
+                <p className="mt-1 text-sm font-semibold text-blue-600">{sub}</p>
+                <p className="mt-4 text-gray-500">{desc}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* ── Fonctionnalités ──────────────────────────── */}
+      <section id="modules" style={{ backgroundColor: "#f8faff" }} className="py-20">
+        <div className="mx-auto max-w-7xl px-6">
+          <div className="mb-14 text-center">
+            <h2 className="text-3xl font-extrabold text-gray-900 md:text-4xl">
+              Tout ce dont votre commune a besoin
+            </h2>
+            <p className="mx-auto mt-4 max-w-2xl text-lg text-gray-500">
+              Une plateforme complète pour connecter habitants et services municipaux.
+            </p>
+          </div>
+          <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+            {MODULES.map(({ Icon, title, desc, color }) => (
+              <div key={title} className="rounded-2xl border border-gray-100 bg-white p-7 shadow-sm">
+                <div
+                  className="mb-5 flex h-11 w-11 items-center justify-center rounded-xl"
+                  style={{ backgroundColor: color + "1a" }}
+                >
+                  <Icon className="h-5 w-5" style={{ color }} />
+                </div>
+                <h3 className="text-base font-bold text-gray-900">{title}</h3>
+                <p className="mt-2 text-sm leading-relaxed text-gray-500">{desc}</p>
+              </div>
+            ))}
+          </div>
+          <div className="mt-16 rounded-2xl bg-[#1e3a8a] p-8 md:p-10">
+            <h3 className="mb-6 text-xl font-bold text-white">
+              Interface d’administration web incluse
+            </h3>
+            <div className="grid gap-4 sm:grid-cols-2 md:grid-cols-3">
+              {ADMIN_FEATURES.map(({ Icon, t }) => (
+                <div key={t} className="flex items-center gap-3">
+                  <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-blue-500/30">
+                    <Icon className="h-4 w-4 text-blue-200" />
+                  </div>
+                  <span className="text-sm font-medium text-blue-100">{t}</span>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* ── Comment ça marche ─────────────────────────── */}
+      <section id="comment-ca-marche" className="py-20 bg-white">
+        <div className="mx-auto max-w-5xl px-6">
+          <div className="mb-14 text-center">
+            <h2 className="text-3xl font-extrabold text-gray-900 md:text-4xl">
+              Déployé en 3 étapes
+            </h2>
+            <p className="mt-4 text-lg text-gray-500">
+              De la configuration au lancement, en moins de 48 heures.
+            </p>
+          </div>
+          <div className="space-y-8">
+            {STEPS.map(({ n, title, desc }) => (
+              <div key={n} className="flex items-start gap-6">
+                <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-blue-700 text-lg font-extrabold text-white">
+                  {n}
+                </div>
+                <div>
+                  <h3 className="text-lg font-bold text-gray-900">{title}</h3>
+                  <p className="mt-2 leading-relaxed text-gray-500">{desc}</p>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* ── Calculateur tarifaire ────────────────────── */}
+      <CommuneCalculatorSection />
+
+      {/* ── Grille tarifaire ─────────────────────────── */}
+      <PricingSection />
+
+      {/* ── Contact ──────────────────────────────────── */}
+      <section id="contact" className="py-20" style={{ backgroundColor: "#1e3a8a" }}>
+        <div className="mx-auto max-w-3xl px-6 text-center">
+          <h2 className="text-3xl font-extrabold text-white md:text-4xl">
+            Prêt à connecter votre commune ?
+          </h2>
+          <p className="mt-4 text-lg text-blue-200">
+            Notre équipe vous accompagne de la configuration au lancement.
+            Contactez-nous pour un devis personnalisé.
+          </p>
+          <div className="mt-10 flex flex-col items-center gap-4 sm:flex-row sm:justify-center">
+            <a
+              href="mailto:contact@vigiecity.fr"
+              className="inline-flex items-center gap-2 rounded-xl bg-white px-8 py-4 text-base font-bold text-blue-900 shadow-lg transition hover:bg-blue-50"
+            >
+              contact@vigiecity.fr
+              <ArrowRight className="h-4 w-4" />
+            </a>
+          </div>
+          <p className="mt-6 text-sm text-blue-300">
+            Réponse sous 24h · Sans engagement
+          </p>
+        </div>
+      </section>
+
+      {/* ── Footer ────────────────────────────────────── */}
+      <footer style={{ backgroundColor: "#0f172a" }} className="py-10">
+        <div className="mx-auto max-w-7xl px-6">
+          <div className="flex flex-col items-center gap-6 md:flex-row md:justify-between">
+            <div className="flex items-center gap-2.5">
+              <VCLogo size={28} />
+              <span className="text-base font-bold text-white">VigieCity</span>
+            </div>
+            <nav className="flex flex-wrap justify-center gap-6">
+              <Link to="/mentions-legales" className="text-sm text-slate-400 transition hover:text-white">
+                Mentions légales
+              </Link>
+              <Link to="/confidentialite" className="text-sm text-slate-400 transition hover:text-white">
+                Confidentialité
+              </Link>
+              <Link to="/cgu" className="text-sm text-slate-400 transition hover:text-white">
+                CGU
+              </Link>
+              <a href="mailto:contact@vigiecity.fr" className="text-sm text-slate-400 transition hover:text-white">
+                Contact
+              </a>
+            </nav>
+            <p className="text-sm text-slate-500">
+              &copy; {new Date().getFullYear()} VigieCity
+            </p>
+          </div>
+        </div>
+      </footer>
+
+      {/* ── Floating promo banner ───────────────────── */}
+      <PromoBanner />
+
+    </div>
+  );
+}

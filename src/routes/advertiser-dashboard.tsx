@@ -1,1 +1,70 @@
-/**\n * Advertiser Dashboard — J13a\n * Page for advertisers to manage campaigns\n * Route: /advertiser/dashboard\n */\n\nimport { useState, useEffect } from 'react';\nimport { supabase } from '../lib/supabase';\n\ninterface Campaign {\n  id: string;\n  name: string;\n  status: 'draft' | 'active' | 'paused' | 'completed';\n  impressions: number;\n  clicks: number;\n  spent: number;\n  budget: number;\n}\n\nexport default function AdvertiserDashboard() {\n  const [campaigns, setCampaigns] = useState<Campaign[]>([]);\n  const [loading, setLoading] = useState(true);\n  const [showCreateForm, setShowCreateForm] = useState(false);\n\n  useEffect(() => {\n    loadCampaigns();\n  }, []);\n\n  const loadCampaigns = async () => {\n    try {\n      const { data, error } = await supabase\n        .from('ad_campaigns')\n        .select('id, name, status')\n        .order('created_at', { ascending: false });\n\n      if (error) throw error;\n\n      // For now, return mock data structure\n      setCampaigns((data || []).map(c => ({\n        id: c.id,\n        name: c.name,\n        status: c.status as Campaign['status'],\n        impressions: Math.floor(Math.random() * 10000),\n        clicks: Math.floor(Math.random() * 500),\n        spent: Math.floor(Math.random() * 5000),\n        budget: 10000,\n      })));\n    } catch (err) {\n      console.error('Error loading campaigns:', err);\n    } finally {\n      setLoading(false);\n    }\n  };\n\n  return (\n    <div className=\"min-h-screen bg-gray-50\">\n      {/* Header */}\n      <div className=\"bg-white border-b border-gray-200 p-6\">\n        <div className=\"max-w-6xl mx-auto flex items-center justify-between\">\n          <div>\n            <h1 className=\"text-3xl font-bold text-gray-900\">Campagnes publicitaires</h1>\n            <p className=\"text-gray-600 mt-1\">Gérez vos annonces et suivez leurs performances</p>\n          </div>\n          <button\n            onClick={() => setShowCreateForm(!showCreateForm)}\n            className=\"bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-6 rounded-lg transition\"\n          >\n            + Nouvelle campagne\n          </button>\n        </div>\n      </div>\n\n      {/* Content */}\n      <div className=\"max-w-6xl mx-auto p-6\">\n        {/* Create form (placeholder) */}\n        {showCreateForm && (\n          <div className=\"bg-white border border-gray-200 rounded-lg p-6 mb-6\">\n            <h2 className=\"text-xl font-bold text-gray-900 mb-4\">Créer une campagne</h2>\n            <p className=\"text-gray-600\">Formulaire de création de campagne (à implémenter)</p>\n          </div>\n        )}\n\n        {/* Campaigns grid */}\n        {loading ? (\n          <div className=\"flex items-center justify-center p-8\">\n            <div className=\"text-center\">\n              <div className=\"h-8 w-8 animate-spin rounded-full border-4 border-blue-400 border-t-blue-600 mx-auto\"></div>\n              <p className=\"mt-2 text-gray-600\">Chargement des campagnes...</p>\n            </div>\n          </div>\n        ) : campaigns.length === 0 ? (\n          <div className=\"bg-white border border-gray-200 rounded-lg p-12 text-center\">\n            <p className=\"text-gray-600 mb-4\">Aucune campagne publiée</p>\n            <button\n              onClick={() => setShowCreateForm(!showCreateForm)}\n              className=\"inline-block bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-6 rounded-lg transition\"\n            >\n              + Créer votre première campagne\n            </button>\n          </div>\n        ) : (\n          <div className=\"grid gap-6 md:grid-cols-2\">\n            {campaigns.map(campaign => (\n              <div key={campaign.id} className=\"bg-white border border-gray-200 rounded-lg p-6\">\n                <div className=\"flex items-start justify-between mb-4\">\n                  <div>\n                    <h3 className=\"font-bold text-gray-900\">{campaign.name}</h3>\n                    <span\n                      className={`inline-block mt-2 px-3 py-1 text-xs font-bold rounded ${\n                        campaign.status === 'active'\n                          ? 'bg-green-100 text-green-800'\n                          : campaign.status === 'paused'\n                          ? 'bg-yellow-100 text-yellow-800'\n                          : campaign.status === 'draft'\n                          ? 'bg-gray-100 text-gray-800'\n                          : 'bg-blue-100 text-blue-800'\n                      }`}\n                    >\n                      {campaign.status.toUpperCase()}\n                    </span>\n                  </div>\n                  <div className=\"text-right\">\n                    <p className=\"text-sm text-gray-600\">Dépensé</p>\n                    <p className=\"text-lg font-bold text-gray-900\">\n                      {campaign.spent}€ / {campaign.budget}€\n                    </p>\n                  </div>\n                </div>\n\n                <div className=\"grid grid-cols-2 gap-4 mb-4\">\n                  <div>\n                    <p className=\"text-sm text-gray-600\">Impressions</p>\n                    <p className=\"text-2xl font-bold text-gray-900\">{campaign.impressions.toLocaleString()}</p>\n                  </div>\n                  <div>\n                    <p className=\"text-sm text-gray-600\">Clics</p>\n                    <p className=\"text-2xl font-bold text-gray-900\">\n                      {campaign.clicks.toLocaleString()} ({((campaign.clicks / campaign.impressions) * 100).toFixed(2)}%)\n                    </p>\n                  </div>\n                </div>\n\n                <div className=\"flex gap-2\">\n                  <button className=\"flex-1 px-4 py-2 border border-gray-300 rounded font-medium text-gray-700 hover:bg-gray-50 transition\">\n                    Modifier\n                  </button>\n                  <button className=\"flex-1 px-4 py-2 bg-blue-50 rounded font-medium text-blue-600 hover:bg-blue-100 transition\">\n                    Voir détails\n                  </button>\n                </div>\n              </div>\n            ))}\n          </div>\n        )}\n      </div>\n    </div>\n  );\n}\n
+import { createFileRoute } from "@tanstack/react-router";
+import { useState, useEffect } from "react";
+import { supabase } from "@/integrations/supabase/client";
+
+export const Route = createFileRoute("/advertiser-dashboard")({
+  component: AdvertiserDashboard,
+});
+
+interface Campaign {
+  id: string;
+  name: string;
+  status: "draft" | "active" | "paused" | "completed";
+  impressions: number;
+  clicks: number;
+  spent: number;
+  budget: number;
+}
+
+function AdvertiserDashboard() {
+  const [campaigns, setCampaigns] = useState<Campaign[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    loadCampaigns();
+  }, []);
+
+  const loadCampaigns = async () => {
+    try {
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
+      if (!user) {
+        setCampaigns([]);
+        return;
+      }
+      // Phase 1 — advertising not yet implemented
+      setCampaigns([]);
+    } catch (err) {
+      console.error("loadCampaigns:", err);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  if (loading) {
+    return (
+      <div className="flex min-h-screen items-center justify-center">
+        <div className="text-gray-500">Chargement...</div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="min-h-screen bg-gray-50 px-6 py-12">
+      <div className="mx-auto max-w-4xl">
+        <h1 className="text-2xl font-bold text-gray-900">
+          Tableau de bord annonceur
+        </h1>
+        <p className="mt-2 text-gray-500">
+          La plateforme publicitaire sera disponible prochainement.
+        </p>
+        {campaigns.length === 0 && !loading && (
+          <div className="mt-8 rounded-xl border border-dashed border-gray-200 bg-white p-10 text-center">
+            <p className="text-gray-400">Aucune campagne active pour le moment.</p>
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}
