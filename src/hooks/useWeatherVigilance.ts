@@ -1,9 +1,9 @@
 /**
- * useWeatherVigilance — Realtime weather vigilance alerts for user's commune
+ * useWeatherVigilance -- Realtime weather vigilance alerts for user's commune
  * Listens to weather_vigilance_logs changes via Realtime
  */
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, createElement } from "react";
 import { useAppAuth } from "./useAppAuth";
 
 export interface WeatherAlert {
@@ -26,20 +26,20 @@ const LEVEL_COLORS = {
 
 const LEVEL_LABELS = {
   GREEN:  "Vigilant",
-  YELLOW: "Modéré",
-  ORANGE: "Élevé",
-  RED:    "Extrême",
+  YELLOW: "Modere",
+  ORANGE: "Eleve",
+  RED:    "Extreme",
 };
 
 const LEVEL_EMOJIS = {
-  GREEN:  "✓",
-  YELLOW: "⚠️",
-  ORANGE: "🔴",
-  RED:    "🆘",
+  GREEN:  "ok",
+  YELLOW: "!",
+  ORANGE: "!!",
+  RED:    "SOS",
 };
 
 export function useWeatherVigilance() {
-  const { supabase, user, collectivity_id } = useAppAuth();
+  const { supabase, collectivity_id } = useAppAuth();
   const [alert, setAlert] = useState<WeatherAlert | null>(null);
   const [loading, setLoading] = useState(true);
 
@@ -49,7 +49,6 @@ export function useWeatherVigilance() {
       return;
     }
 
-    // Fetch current alert
     const fetchAlert = async () => {
       const { data, error } = await supabase
         .from("weather_vigilance_logs")
@@ -58,7 +57,6 @@ export function useWeatherVigilance() {
         .single();
 
       if (error && error.code !== "PGRST116") {
-        // PGRST116 = no rows found
         console.error("Error fetching weather alert:", error);
       }
 
@@ -68,7 +66,6 @@ export function useWeatherVigilance() {
 
     fetchAlert();
 
-    // Subscribe to realtime changes
     const subscription = supabase
       .channel(`weather:collectivity_id=eq.${collectivity_id}`)
       .on(
@@ -104,16 +101,15 @@ export function useWeatherVigilance() {
 }
 
 /**
- * Helper : render level badge
+ * Helper: render level badge (no JSX -- uses createElement so this file stays .ts)
  */
 export function WeatherLevelBadge({ level }: { level: string }) {
   const colors = LEVEL_COLORS[level as keyof typeof LEVEL_COLORS] || LEVEL_COLORS.GREEN;
   const label = LEVEL_LABELS[level as keyof typeof LEVEL_LABELS] || "Vigilant";
-  const emoji = LEVEL_EMOJIS[level as keyof typeof LEVEL_EMOJIS] || "✓";
-
-  return (
-    <span className={`inline-flex items-center gap-1 px-2 py-1 rounded border ${colors} font-semibold text-sm`}>
-      {emoji} {label}
-    </span>
+  const emoji = LEVEL_EMOJIS[level as keyof typeof LEVEL_EMOJIS] || "ok";
+  return createElement(
+    "span",
+    { className: `inline-flex items-center gap-1 px-2 py-1 rounded border ${colors} font-semibold text-sm` },
+    emoji + " " + label
   );
 }
