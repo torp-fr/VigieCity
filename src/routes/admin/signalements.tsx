@@ -237,16 +237,17 @@ function SignalementsAdmin() {
 
   return (
     <AdminShell activePath="/admin/signalements">
-      <div className="mx-auto max-w-7xl px-8 py-8 space-y-4">
-        <div className="mb-1">
+    <>
+      <div className="space-y-4 pb-4">
+        <header className="px-4 pt-5">
           <h1 className="text-2xl font-bold">Signalements</h1>
           <p className="mt-1 text-sm text-muted-foreground">
             Modérez les signalements de votre commune.
           </p>
-        </div>
+        </header>
 
         {/* Onglets statut */}
-        <div className="flex gap-1.5 overflow-x-auto pb-1">
+        <div className="flex gap-1.5 overflow-x-auto px-4 pb-1">
           {TABS.map((tab) => (
             <button
               key={tab.filter}
@@ -264,7 +265,7 @@ function SignalementsAdmin() {
         </div>
 
         {/* Barre de recherche + export */}
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-2 px-4">
           <div className="relative flex-1">
             <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
             <input
@@ -290,13 +291,13 @@ function SignalementsAdmin() {
 
         {/* Résultats count si recherche active */}
         {term && (
-          <p className="text-xs text-muted-foreground">
+          <p className="px-4 text-xs text-muted-foreground">
             {visible.length} résultat{visible.length !== 1 ? "s" : ""} pour «{search}»
           </p>
         )}
 
         {/* Liste */}
-        <div>
+        <div className="px-4">
           {isLoading ? (
             <ul className="space-y-3">
               {[1, 2, 3].map((n) => (
@@ -336,6 +337,7 @@ function SignalementsAdmin() {
           isPending={updateStatus.isPending}
         />
       )}
+    </>
     </AdminShell>
   );
 }

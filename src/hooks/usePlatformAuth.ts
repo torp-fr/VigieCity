@@ -1,94 +1,64 @@
 /**
- * usePlatformAuth -- auth guard pour /platform/*
+ * usePlatformAuth — auth guard partagé pour toutes les pages /platform/*
  *
- * useState (pas React Query) -- immunise contre queryClient.invalidateQueries()
- * global de __root.tsx.
- *
- * Fast-path: sessionStorage lu dans le premier useEffect (apres hydration),
- * pas dans le lazy initializer -- evite le mismatch SSR/client #418.
- *
- * Apres la verification async, invalide toutes les queries platform pour
- * qu'elles se relancent avec la session auth confirmee.
+ * Utilise React Query pour mettre en cache la session + le rôle.
+ * Écoute onAuthStateChange pour invalider immédiatement si la session expire
+ * ou si l'utilisateur se déconnecte depuis un autre onglet.
  */
-import { useEffect, useRef, useState } from "react";
-import { useQueryClient } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
-
-export const PLATFORM_SESSION_KEY = "__vc_platform_email";
 
 export type PlatformAuthResult =
   | { status: "loading" }
   | { status: "unauthorized" }
   | { status: "ready"; email: string };
 
+async function fetchPlatformAuth(): Promise<{ email: string }> {
+  const {
+    data: { user },
+    error: userError,
+  } = await supabase.auth.getUser();
+
+  if (userError || !user) throw new Error("no_session");
+
+  // BUG-002: utilise user_roles (même table que les RLS Supabase) plutôt que profiles.role
+  const { data: roleRow, error } = await supabase
+    .from("user_roles")
+    .select("role")
+    .eq("user_id", user.id)
+    .eq("role", "super_admin")
+    .maybeSingle();
+
+  if (error || !roleRow) throw new Error("unauthorized");
+
+  return { email: user.email ?? "" };
+}
+
 export function usePlatformAuth(): PlatformAuthResult {
-  // Toujours "loading" au premier render (server ET client) pour eviter l hydration mismatch.
-  const [result, setResult] = useState<PlatformAuthResult>({ status: "loading" });
-  const cancelled = useRef(false);
-  // eslint-disable-next-line react-hooks/exhaustive-deps
   const queryClient = useQueryClient();
 
+  // Écouter les changements de session Supabase (expiry, logout, refresh)
   useEffect(() => {
-    cancelled.current = false;
-
-    // Fast-path synchrone : si le cache est la on passe "ready" immediatement apres hydration.
-    // Les queries vont se lancer mais peuvent retourner vide sans auth — la verification
-    // async ci-dessous les invalide une fois la session confirmee.
-    const cached = sessionStorage.getItem(PLATFORM_SESSION_KEY);
-    if (cached) {
-      setResult({ status: "ready", email: cached });
-    }
-
-    // Verification reseau en arriere-plan, timeout 10 s.
-    (async () => {
-      try {
-        const verified = await Promise.race<{ email: string } | null>([
-          (async () => {
-            // getSession() garantit que le client Supabase a restaure la session
-            // depuis localStorage avant toute requete PostgREST.
-            const { data: { session } } = await supabase.auth.getSession();
-            if (!session?.user) return null;
-            const { data: profile, error } = await supabase
-              .from("profiles")
-              .select("role")
-              .eq("id", session.user.id)
-              .single();
-            if (error || profile?.role !== "super_admin") return null;
-            return { email: session.user.email ?? "" };
-          })(),
-          new Promise<null>((resolve) =>
-            setTimeout(() => resolve(null), 10_000),
-          ),
-        ]);
-
-        if (cancelled.current) return;
-
-        if (!verified) {
-          // Timeout ou session invalide -- si cache present on garde "ready"
-          const still = sessionStorage.getItem(PLATFORM_SESSION_KEY);
-          if (!still) setResult({ status: "unauthorized" });
-          return;
-        }
-
-        sessionStorage.setItem(PLATFORM_SESSION_KEY, verified.email);
-        if (!cancelled.current) {
-          setResult({ status: "ready", email: verified.email });
-          // Session confirmee -- invalide toutes les queries actives pour
-          // qu elles se relancent maintenant que le token auth est disponible.
-          queryClient.invalidateQueries();
-        }
-      } catch {
-        if (cancelled.current) return;
-        const s2 = sessionStorage.getItem(PLATFORM_SESSION_KEY);
-        if (!s2) {
-          sessionStorage.removeItem(PLATFORM_SESSION_KEY);
-          setResult({ status: "unauthorized" });
-        }
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((event) => {
+      if (event === "SIGNED_OUT" || event === "TOKEN_REFRESHED" || event === "USER_UPDATED") {
+        // Invalider le cache pour forcer une re-vérification
+        queryClient.invalidateQueries({ queryKey: ["platform-auth"] });
       }
-    })();
+    });
+    return () => subscription.unsubscribe();
+  }, [queryClient]);
 
-    return () => { cancelled.current = true; };
-  }, []); // eslint-disable-line react-hooks/exhaustive-deps
+  const { data, isPending, isError } = useQuery({
+    queryKey: ["platform-auth"],
+    queryFn: fetchPlatformAuth,
+    staleTime: 4 * 60_000,   // 4 min — re-fetch avant expiry JWT (1h Supabase)
+    gcTime:    10 * 60_000,
+    retry: 1,                 // 1 retry pour absorber les erreurs réseau transitoires
+    retryDelay: 1000,
+  });
 
-  return result;
+  if (isPending) return { status: "loading" };
+  if (isError || !data) return { status: "unauthorized" };
+  return { status: "ready", email: data.email };
 }

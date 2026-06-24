@@ -262,18 +262,24 @@ function AdminEvenementsPage() {
   // ── Rendu ──────────────────────────────────────────────────────────────────
   return (
     <AdminShell activePath="/admin/evenements">
-      <div className="mx-auto max-w-7xl px-8 py-8 flex flex-col gap-6">
+    <>
+      <div className="flex flex-col gap-4 px-4 pt-4 pb-6">
         {/* En-tête */}
-        <div className="flex items-center justify-between">
-          <div>
-            <h1 className="text-2xl font-bold text-slate-900">Agenda</h1>
-            <p className="mt-1 text-sm text-slate-500">Événements communaux</p>
+        <header className="flex items-center justify-between">
+          <div className="flex items-center gap-2">
+            <a href="/admin/" className="flex h-8 w-8 items-center justify-center rounded-full bg-muted text-muted-foreground">
+              <ChevronLeft className="h-4 w-4" />
+            </a>
+            <div>
+              <h1 className="text-lg font-bold leading-tight">Agenda</h1>
+              <p className="text-xs text-muted-foreground">Événements communaux</p>
+            </div>
           </div>
           <Button size="sm" onClick={openCreate} className="gap-1.5">
             <Plus className="h-4 w-4" />
             Créer
           </Button>
-        </div>
+        </header>
 
         {/* Chargement */}
         {isLoading && (
@@ -514,6 +520,7 @@ function AdminEvenementsPage() {
           </div>
         </div>
       )}
+    </>
     </AdminShell>
   );
 }

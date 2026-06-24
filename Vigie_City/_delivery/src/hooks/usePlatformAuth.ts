@@ -22,13 +22,15 @@ async function fetchPlatformAuth(): Promise<{ email: string }> {
 
   if (userError || !user) throw new Error("no_session");
 
-  const { data: profile, error } = await supabase
-    .from("profiles")
+  // BUG-002: utilise user_roles (même table que les RLS Supabase) plutôt que profiles.role
+  const { data: roleRow, error } = await supabase
+    .from("user_roles")
     .select("role")
-    .eq("id", user.id)
-    .single();
+    .eq("user_id", user.id)
+    .eq("role", "super_admin")
+    .maybeSingle();
 
-  if (error || profile?.role !== "super_admin") throw new Error("unauthorized");
+  if (error || !roleRow) throw new Error("unauthorized");
 
   return { email: user.email ?? "" };
 }

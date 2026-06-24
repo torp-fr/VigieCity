@@ -83,13 +83,9 @@ async function fetchRetention(): Promise<CommuneStats[]> {
   const pubs           = pubRes.data ?? [];
 
   // Requête séparée pour la dernière activité toutes périodes confondues
-  const [lastRepRes, lastPubRes] = await Promise.all([
-    supabase.from("reports").select("collectivity_id, created_at").order("created_at", { ascending: false }),
-    supabase.from("publications").select("collectivity_id, created_at").order("created_at", { ascending: false }),
-  ]);
-
-  const allReports = lastRepRes.data ?? [];
-  const allPubs    = lastPubRes.data ?? [];
+  // BUG-008: suppression des requêtes sans pagination sur toute la table
+  // La dernière activité est dérivée des données déjà chargées (30j),
+  // ce qui est cohérent avec le critère de churn (>30j sans activité).
 
   // Construction des stats par commune
   return collectivities.map((col) => {
@@ -97,9 +93,13 @@ async function fetchRetention(): Promise<CommuneStats[]> {
     const reports30 = reports.filter((r) => r.collectivity_id === col.id).length;
     const pubs30    = pubs.filter((p) => p.collectivity_id === col.id).length;
 
-    // Dernière activité
-    const lastRep = allReports.find((r) => r.collectivity_id === col.id)?.created_at ?? null;
-    const lastPub = allPubs.find((p) => p.collectivity_id === col.id)?.created_at ?? null;
+    // Dernière activité dans la fenêtre 30j (cohérent avec le critère churn)
+    const lastRep = reports
+      .filter((r) => r.collectivity_id === col.id)
+      .sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime())[0]?.created_at ?? null;
+    const lastPub = pubs
+      .filter((p) => p.collectivity_id === col.id)
+      .sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime())[0]?.created_at ?? null;
     const lastActivityAt = [lastRep, lastPub]
       .filter(Boolean)
       .sort((a, b) => (b! > a! ? 1 : -1))[0] ?? null;

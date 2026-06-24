@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>VigieCity — Mode hors ligne</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      background: linear-gradient(135deg, #1e3a8a 0%, #1d4ed8 100%);
+      color: #1f2937;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+      padding: 1rem;
+    }
+
+    .container {
+      background: white;
+      border-radius: 1.5rem;
+      padding: 2rem;
+      max-width: 480px;
+      text-align: center;
+      box-shadow: 0 20px 25px rgba(0, 0, 0, 0.1);
+    }
+
+    .icon {
+      font-size: 4rem;
+      margin-bottom: 1rem;
+      display: block;
+    }
+
+    h1 {
+      font-size: 1.5rem;
+      margin-bottom: 0.5rem;
+      color: #111827;
+    }
+
+    p {
+      color: #6b7280;
+      margin-bottom: 1.5rem;
+      line-height: 1.6;
+    }
+
+    .offline-pages {
+      background: #f3f4f6;
+      border-radius: 1rem;
+      padding: 1.5rem;
+      margin-bottom: 1.5rem;
+      text-align: left;
+    }
+
+    .offline-pages h2 {
+      font-size: 0.875rem;
+      font-weight: 600;
+      color: #374151;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      margin-bottom: 1rem;
+    }
+
+    .offline-pages ul {
+      list-style: none;
+    }
+
+    .offline-pages li {
+      padding: 0.75rem 0;
+      border-bottom: 1px solid #d1d5db;
+      font-size: 0.875rem;
+    }
+
+    .offline-pages li:last-child {
+      border-bottom: none;
+    }
+
+    .offline-pages a {
+      color: #1e3a8a;
+      text-decoration: none;
+      font-weight: 500;
+    }
+
+    .offline-pages a:hover {
+      text-decoration: underline;
+    }
+
+    .emoji {
+      display: inline-block;
+      margin-right: 0.5rem;
+    }
+
+    .button-group {
+      display: flex;
+      gap: 1rem;
+      margin-top: 1.5rem;
+    }
+
+    button {
+      flex: 1;
+      padding: 0.75rem 1.5rem;
+      border: none;
+      border-radius: 0.75rem;
+      font-size: 0.875rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .btn-primary {
+      background: #1e3a8a;
+      color: white;
+    }
+
+    .btn-primary:hover {
+      background: #1d3ba6;
+    }
+
+    .btn-secondary {
+      background: #e5e7eb;
+      color: #111827;
+    }
+
+    .btn-secondary:hover {
+      background: #d1d5db;
+    }
+
+    .status {
+      font-size: 0.75rem;
+      color: #9ca3af;
+      margin-top: 1rem;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <span class="icon">📡</span>
+    <h1>Pas de connexion Internet</h1>
+    <p>VigieCity fonctionne mieux en ligne, mais vous pouvez consulter les pages mises en cache.</p>
+
+    <div class="offline-pages">
+      <h2>Pages disponibles hors ligne</h2>
+      <ul>
+        <li><a href="/accueil"><span class="emoji">🏠</span>Accueil</a></li>
+        <li><a href="/urgences"><span class="emoji">🚨</span>Urgences</a></li>
+        <li><a href="/carte"><span class="emoji">🗺️</span>Carte</a></li>
+        <li><a href="/services"><span class="emoji">🏥</span>Services</a></li>
+        <li><a href="/actualites"><span class="emoji">📰</span>Actualités</a></li>
+      </ul>
+    </div>
+
+    <div class="button-group">
+      <button class="btn-primary" onclick="location.reload()">Réessayer</button>
+      <button class="btn-secondary" onclick="history.back()">Retour</button>
+    </div>
+
+    <p class="status">
+      En attente de connexion Internet...
+      <br />
+      VigieCity se reconnectera automatiquement.
+    </p>
+  </div>
+
+  <script>
+    // Detect when back online
+    window.addEventListener('online', () => {
+      document.querySelector('.status').innerHTML =
+        '✅ Vous êtes à nouveau connecté. <a href="/">Retour à l\'accueil</a>';
+    });
+  </script>
+</body>
+</html>

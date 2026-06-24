@@ -66,6 +66,7 @@ function KnowledgePlatform() {
   );
 }
 
+
 function KnowledgePlatformContent() {
   const qc = useQueryClient();
 
@@ -209,6 +210,7 @@ function KnowledgePlatformContent() {
 
   // ─── UI ──────────────────────────────────────────────────────────────────
   return (
+    <>
     <div className="space-y-5">
       {/* En-tête */}
       <div className="flex items-center justify-between">
@@ -549,5 +551,6 @@ function KnowledgePlatformContent() {
         </div>
       )}
     </div>
-    );
+    </>
+  );
 }

@@ -3,7 +3,7 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useState } from "react";
 import {
   Megaphone, Send, Loader2, Clock, ChevronDown,
-  AlertTriangle, Info, Zap, Bell, MapPin, Users,
+  AlertTriangle, Info, Zap, Bell,
 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
@@ -29,15 +29,9 @@ type FormData = {
   title: string;
   body: string;
   severity: "info" | "warning" | "critical";
-  district: string;
-  area_label: string;
-  expires_at: string;
 };
 
-const BLANK: FormData = {
-  title: "", body: "", severity: "info",
-  district: "", area_label: "", expires_at: "",
-};
+const BLANK: FormData = { title: "", body: "", severity: "info" };
 
 // ── Severity config ────────────────────────────────────────────────────────────
 
@@ -64,9 +58,8 @@ function AdminAlertesPage() {
   const qc = useQueryClient();
   const [form, setForm] = useState<FormData>(BLANK);
   const [showHistory, setShowHistory] = useState(false);
-  const [lastResult, setLastResult] = useState<{ count: number; total: number } | null>(null);
 
-  // ── Fetch collectivity + districts disponibles ─────────────────────────────
+  // ── Fetch collectivity ─────────────────────────────────────────────────────
 
   const { data: meta } = useQuery({
     queryKey: ["admin-alertes-meta"],
@@ -78,24 +71,9 @@ function AdminAlertesPage() {
         .select("collectivity_id, collectivities(name)")
         .eq("id", user.id)
         .single();
-      const cid = profile?.collectivity_id as string;
-      if (!cid) throw new Error("Collectivité non configurée");
-
-      // Quartiers distincts (citizens de cette commune)
-      const { data: districtRows } = await supabase
-        .from("profiles")
-        .select("district")
-        .eq("collectivity_id", cid)
-        .not("district", "is", null);
-
-      const districts = [...new Set(
-        (districtRows ?? []).map((r) => r.district as string).filter(Boolean)
-      )].sort();
-
       return {
-        collectivityId: cid,
+        collectivityId: profile?.collectivity_id as string,
         communeName: (profile as any)?.collectivities?.name as string ?? "",
-        districts,
       };
     },
   });
@@ -119,33 +97,36 @@ function AdminAlertesPage() {
     },
   });
 
-  // ── Send alert via EF send-alert (gere le ciblage geo + batch push) ─────────
+  // ── Send alert ─────────────────────────────────────────────────────────────
 
   const sendAlert = useMutation({
     mutationFn: async (f: FormData) => {
       if (!collectivityId) throw new Error("Commune non résolue");
 
-      const res = await supabase.functions.invoke("send-alert", {
+      // 1. Log in DB
+      const { error: logErr } = await supabase
+        .from("push_notifications_log")
+        .insert({
+          collectivity_id: collectivityId,
+          title:    f.title.trim(),
+          body:     f.body.trim(),
+          severity: f.severity,
+          sent_at:  new Date().toISOString(),
+        });
+      if (logErr) throw logErr;
+
+      // 2. Broadcast push to all subscribers of this collectivity
+      await supabase.functions.invoke("send-push-notification", {
         body: {
           collectivity_id: collectivityId,
-          title:      f.title.trim(),
-          message:    f.body.trim(),
-          severity:   f.severity,
-          district:   f.district || undefined,
-          area_label: f.area_label.trim() || undefined,
-          expires_at: f.expires_at || undefined,
-          url:        "/urgences",
+          title:   f.title.trim(),
+          message: f.body.trim(),
+          url:     "/alertes",
         },
       });
-
-      if (res.error) throw new Error(res.error.message ?? "Erreur serveur");
-      const data = res.data as { success?: boolean; error?: string; recipient_count?: number; total_subscribers?: number };
-      if (!data?.success) throw new Error(data?.error ?? "Erreur inconnue");
-      return { count: data.recipient_count ?? 0, total: data.total_subscribers ?? 0 };
     },
-    onSuccess: (result) => {
-      setLastResult(result);
-      toast.success(`Alerte diffusée — ${result.count} / ${result.total} abonnés notifiés`);
+    onSuccess: () => {
+      toast.success("Alerte diffusée aux abonnés de la commune");
       setForm(BLANK);
       qc.invalidateQueries({ queryKey: ["admin-alerts-history", collectivityId] });
     },
@@ -160,7 +141,7 @@ function AdminAlertesPage() {
 
   return (
     <AdminShell activePath="/admin/alertes">
-      <div className="mx-auto max-w-7xl px-8 py-8">
+    <div className="p-8">
 
       {/* Header */}
       <div className="mb-8">
@@ -234,58 +215,6 @@ function AdminAlertesPage() {
               <p className="mt-1 text-right text-xs text-slate-400">{form.body.length}/400</p>
             </div>
 
-            {/* Geographic targeting */}
-            <div className="rounded-xl border border-slate-200 bg-slate-50 p-4 space-y-3">
-              <div className="flex items-center gap-2 text-sm font-medium text-slate-700">
-                <MapPin className="h-4 w-4 text-slate-400" />
-                Ciblage géographique
-              </div>
-
-              <div>
-                <label className="mb-1 block text-xs font-medium text-slate-600">Quartier (optionnel)</label>
-                <select
-                  value={form.district}
-                  onChange={e => setForm(f => ({ ...f, district: e.target.value }))}
-                  className="w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm outline-none focus:border-emerald-400"
-                >
-                  <option value="">Commune entière</option>
-                  {(meta?.districts ?? []).map((d) => (
-                    <option key={d} value={d}>{d}</option>
-                  ))}
-                </select>
-              </div>
-
-              <div>
-                <label className="mb-1 block text-xs font-medium text-slate-600">Libellé zone affiché</label>
-                <input
-                  type="text"
-                  maxLength={60}
-                  value={form.area_label}
-                  onChange={e => setForm(f => ({ ...f, area_label: e.target.value }))}
-                  placeholder={form.district ? `Quartier ${form.district}` : "Commune entière"}
-                  className="w-full rounded-lg border border-slate-200 px-3 py-2 text-sm outline-none focus:border-emerald-400"
-                />
-              </div>
-
-              <div>
-                <label className="mb-1 block text-xs font-medium text-slate-600">Expiration (optionnel)</label>
-                <input
-                  type="datetime-local"
-                  value={form.expires_at}
-                  onChange={e => setForm(f => ({ ...f, expires_at: e.target.value }))}
-                  className="w-full rounded-lg border border-slate-200 px-3 py-2 text-sm outline-none focus:border-emerald-400"
-                />
-              </div>
-            </div>
-
-            {/* Last result */}
-            {lastResult && (
-              <div className="flex items-center gap-2 rounded-xl bg-emerald-50 border border-emerald-200 px-4 py-3 text-sm text-emerald-700">
-                <Users className="h-4 w-4 shrink-0" />
-                Dernière diffusion : <strong>{lastResult.count}</strong> / {lastResult.total} abonnés notifiés
-              </div>
-            )}
-
             {/* Send btn */}
             <button
               onClick={() => sendAlert.mutate(form)}
@@ -298,7 +227,6 @@ function AdminAlertesPage() {
           </div>
         </div>
 
-        {/* Preview */}
         {/* Preview */}
         <div>
           <h2 className="mb-3 font-semibold text-slate-900">Aperçu notification</h2>

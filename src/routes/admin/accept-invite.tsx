@@ -167,7 +167,7 @@ function AcceptInvitePage() {
       setState({ kind: "success", communeName: invite.collectivities?.name ?? "votre commune" });
 
       // Redirect to admin dashboard after 3 s
-      setTimeout(() => navigate({ to: "/admin" }), 3000);
+      setTimeout(() => navigate({ to: "/admin/dashboard" }), 3000);
 
     } catch (err: any) {
       toast.error(err.message ?? "Une erreur est survenue.");

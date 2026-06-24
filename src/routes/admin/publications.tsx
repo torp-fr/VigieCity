@@ -65,16 +65,13 @@ function PublicationsPage() {
     queryKey: ["admin-publications"],
     queryFn: async () => {
       const { data: { user } } = await supabase.auth.getUser();
-      if (!user) throw new Error("Non authentifié");
       const { data: profile } = await supabase
-        .from("profiles").select("collectivity_id").eq("id", user.id).single();
-      const cid = profile?.collectivity_id;
-      if (!cid) throw new Error("Collectivité non configurée");
+        .from("profiles").select("collectivity_id").eq("id", user!.id).single();
       const { data } = await supabase
         .from("publications").select("*")
-        .eq("collectivity_id", cid)
+        .eq("collectivity_id", profile!.collectivity_id!)
         .order("created_at", { ascending: false });
-      return { pubs: (data ?? []) as Pub[], collectivityId: cid };
+      return { pubs: (data ?? []) as Pub[], collectivityId: profile!.collectivity_id! };
     },
   });
 
@@ -127,8 +124,7 @@ function PublicationsPage() {
         const { error } = await supabase.from("publications").update(payload).eq("id", editId);
         if (error) throw error;
       } else {
-        const uid = (await supabase.auth.getUser()).data.user?.id;
-        if (!uid) throw new Error("Non authentifié");
+        const uid = (await supabase.auth.getUser()).data.user!.id;
         const { error } = await supabase.from("publications").insert({
           ...payload, collectivity_id: data!.collectivityId, created_by: uid,
         });
@@ -193,7 +189,7 @@ function PublicationsPage() {
   // ── Render ────────────────────────────────────────────────────────────────
   return (
     <AdminShell activePath="/admin/publications">
-      <div className="mx-auto max-w-7xl px-8 py-8 space-y-6">
+    <div className="space-y-6">
 
       {/* En-tête */}
       <div className="flex items-center justify-between">

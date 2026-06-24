@@ -9,7 +9,7 @@ import {
   HeadContent,
   Scripts,
 } from "@tanstack/react-router";
-import { useEffect, type ReactNode } from "react";
+import { useEffect, useRef, type ReactNode } from "react";
 import posthog from "posthog-js";
 
 import appCss from "../styles.css?url";
@@ -47,7 +47,8 @@ const ADMIN_ROLES = ["commune_admin", "interco_admin", "super_admin"] as const;
 
 // Routes rendered without the app shell (header / bottom nav)
 const SHELL_FREE_ROUTES = [
-  "/", "/landing", "/admin/login", "/admin/reset-password", "/admin/accept-invite",
+  "/", "/landing", "/auth",
+  "/admin/login", "/admin/reset-password", "/admin/accept-invite",
   "/mentions-legales", "/confidentialite", "/cgu",
 ];
 
@@ -178,6 +179,10 @@ function RootComponent() {
   const navigate = useNavigate();
   const pathname = useRouterState({ select: (s) => s.location.pathname });
 
+  // BUG-010: éviter le closure stale de pathname dans onAuthStateChange (deps=[])
+  const pathnameRef = useRef(pathname);
+  useEffect(() => { pathnameRef.current = pathname; }, [pathname]);
+
   const isShellFree  = SHELL_FREE_ROUTES.some((r) => pathname === r || pathname.startsWith(r + "/"));
   const isAdminRoute = pathname.startsWith("/admin") || pathname.startsWith("/platform");
 
@@ -212,7 +217,7 @@ function RootComponent() {
       }
 
       if (event === "SIGNED_IN" && session?.user) {
-        if (SKIP_ONBOARDING_ROUTES.includes(pathname)) return;
+        if (SKIP_ONBOARDING_ROUTES.includes(pathnameRef.current)) return;
 
         await new Promise((r) => setTimeout(r, 500));
 
@@ -244,11 +249,11 @@ function RootComponent() {
           });
         }
 
-        // Admin roles → redirect to /admin/dashboard
+        // Admin roles → redirect to /admin/ (dashboard)
         const role = profile?.role as string;
         if (ADMIN_ROLES.includes(role as typeof ADMIN_ROLES[number])) {
-          if (!pathname.startsWith("/admin") && !pathname.startsWith("/platform")) {
-            navigate({ to: "/admin/dashboard" });
+          if (!pathnameRef.current.startsWith("/admin") && !pathnameRef.current.startsWith("/platform")) {
+            navigate({ to: "/admin/" });
           }
           return;
         }

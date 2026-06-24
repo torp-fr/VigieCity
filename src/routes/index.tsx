@@ -5,7 +5,7 @@ import {
   BellRing, MapPin, CalendarDays, Newspaper, MessageSquare,
   Home, Network, Building2,
   LayoutDashboard, CheckSquare, BarChart3, Map as MapIcon, Users,
-  ToggleLeft, ToggleRight,
+  X, Sparkles, ToggleLeft, ToggleRight,
 } from "lucide-react";
 
 export const Route = createFileRoute("/")({
@@ -741,349 +741,255 @@ const ADMIN_FEATURES = [
 // ── Calculateur tarifaire INSEE ───────────────────────────────────────────────
 
 type CommuneResult = { nom: string; code: string; population: number };
-type Region        = { nom: string; code: string };
-type Departement   = { nom: string; code: string };
-type EPCIStub      = { code: string; nom: string };
-type EPCIDetail    = { nom: string; code: string; population: number; type?: string };
-type CalcMode      = "commune" | "groupement";
-
-const EPCI_LABELS: Record<string, string> = {
-  CC:    "Communauté de communes",
-  CA:    "Communauté d'agglomération",
-  CU:    "Communauté urbaine",
-  ME:    "Métropole",
-  MET69: "Métropole de Lyon",
-};
 
 function getPopulationTierIndex(population: number): number {
-  if (population < 1000)  return 0;
-  if (population < 3501)  return 1;
-  if (population < 10001) return 2;
-  if (population < 50001) return 3;
-  return 4;
-}
-
-const TIER_DATA = [
-  { name: "Nano",      range: "< 1 000 hab.",         monthly: 49,  annual: 490  },
-  { name: "Micro",     range: "1 001 – 3 500 hab.",   monthly: 99,  annual: 990  },
-  { name: "Local",     range: "3 501 – 10 000 hab.",  monthly: 189, annual: 1890 },
-  { name: "Urbain",    range: "10 001 – 50 000 hab.", monthly: 490, annual: 4900 },
-  { name: "Métropole", range: "> 50 000 hab.",         monthly: null, annual: null },
-] as const;
-
-function TierResultCard({
-  name, subtitle, tierName, monthly, annual, mailSubject, mailBody,
-}: {
-  name: string; subtitle: string; tierName: string;
-  monthly: number | null; annual: number | null;
-  mailSubject: string; mailBody: string;
-}) {
-  return (
-    <div style={{ marginTop: 20, background: "rgba(255,255,255,0.97)", borderRadius: 16, padding: "24px 28px", boxShadow: "0 4px 24px rgba(0,0,0,0.14)" }}>
-      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", gap: 12, flexWrap: "wrap" }}>
-        <div>
-          <p style={{ fontSize: 18, fontWeight: 800, color: "#111827", margin: "0 0 4px" }}>{name}</p>
-          <p style={{ fontSize: 13, color: "#6b7280", margin: 0 }}>{subtitle}</p>
-        </div>
-        <span style={{ background: "#dbeafe", color: "#1d4ed8", fontWeight: 700, fontSize: 13, padding: "4px 14px", borderRadius: 20, whiteSpace: "nowrap", flexShrink: 0 }}>{tierName}</span>
-      </div>
-      <div style={{ borderTop: "1px solid #e5e7eb", paddingTop: 16 }}>
-        {monthly ? (
-          <>
-            <p style={{ fontSize: 28, fontWeight: 900, color: "#1d4ed8", margin: 0 }}>
-              {monthly.toLocaleString("fr-FR")} €
-              <span style={{ fontSize: 14, fontWeight: 500, color: "#6b7280" }}> /mois HT</span>
-            </p>
-            <p style={{ fontSize: 13, color: "#6b7280", margin: "4px 0 12px" }}>
-              ou {annual?.toLocaleString("fr-FR")} €/an HT{" "}
-              <span style={{ color: "#059669", fontWeight: 600 }}>(2 mois offerts)</span>
-            </p>
-          </>
-        ) : (
-          <p style={{ fontSize: 18, fontWeight: 700, color: "#1d4ed8", margin: "0 0 12px" }}>Tarif sur devis</p>
-        )}
-        <a
-          href={`mailto:contact@vigiecity.fr?subject=${encodeURIComponent(mailSubject)}&body=${encodeURIComponent(mailBody)}`}
-          style={{ display: "inline-block", background: "#1d4ed8", color: "white", padding: "10px 22px", borderRadius: 8, textDecoration: "none", fontWeight: 700, fontSize: 14 }}
-        >
-          Demander une proposition →
-        </a>
-      </div>
-    </div>
-  );
+  if (population < 1000)  return 0; // Nano
+  if (population < 3501)  return 1; // Micro
+  if (population < 10001) return 2; // Local
+  if (population < 50001) return 3; // Urbain
+  return 4;                          // Métropole
 }
 
 function CommuneCalculatorSection() {
-  const [mode, setMode] = useState<CalcMode>("commune");
-
-  // ── Commune ───────────────────────────────────────────────────
-  const [query, setQuery]               = useState("");
-  const [results, setResults]           = useState<CommuneResult[]>([]);
-  const [commLoading, setCommLoading]   = useState(false);
-  const [selected, setSelected]         = useState<CommuneResult | null>(null);
+  const [query, setQuery]             = useState("");
+  const [results, setResults]         = useState<CommuneResult[]>([]);
+  const [loading, setLoading]         = useState(false);
+  const [selected, setSelected]       = useState<CommuneResult | null>(null);
   const [showDropdown, setShowDropdown] = useState(false);
-  const debounceRef                     = useRef<ReturnType<typeof setTimeout> | null>(null);
-  const containerRef                    = useRef<HTMLDivElement>(null);
+  const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const containerRef = useRef<HTMLDivElement>(null);
 
-  // ── EPCI ──────────────────────────────────────────────────────
-  const [regions, setRegions]         = useState<Region[]>([]);
-  const [depts, setDepts]             = useState<Departement[]>([]);
-  const [epciStubs, setEpciStubs]     = useState<EPCIStub[]>([]);
-  const [selRegion, setSelRegion]     = useState("");
-  const [selDept, setSelDept]         = useState("");
-  const [selEPCICode, setSelEPCICode] = useState("");
-  const [epciDetail, setEpciDetail]   = useState<EPCIDetail | null>(null);
-  const [epciLoading, setEpciLoading] = useState(false);
-
-  // Fermer dropdown au clic extérieur
+  // Ferme le dropdown si clic extérieur
   useEffect(() => {
-    const handle = (e: MouseEvent) => {
-      if (containerRef.current && !containerRef.current.contains(e.target as Node))
+    const handler = (e: MouseEvent) => {
+      if (containerRef.current && !containerRef.current.contains(e.target as Node)) {
         setShowDropdown(false);
+      }
     };
-    document.addEventListener("mousedown", handle);
-    return () => document.removeEventListener("mousedown", handle);
+    document.addEventListener("mousedown", handler);
+    return () => document.removeEventListener("mousedown", handler);
   }, []);
 
-  // Charger régions au montage
-  useEffect(() => {
-    fetch("https://geo.api.gouv.fr/regions?fields=nom,code&format=json")
-      .then(r => r.json())
-      .then((d: Region[]) => setRegions(d.sort((a, b) => a.nom.localeCompare(b.nom, "fr"))))
-      .catch(() => {});
-  }, []);
-
-  // Charger départements à la sélection région
-  useEffect(() => {
-    if (!selRegion) {
-      setDepts([]); setEpciStubs([]); setSelDept(""); setSelEPCICode(""); setEpciDetail(null);
-      return;
+  const search = async (q: string) => {
+    if (q.trim().length < 2) { setResults([]); setLoading(false); return; }
+    setLoading(true);
+    try {
+      const url = `https://geo.api.gouv.fr/communes?nom=${encodeURIComponent(q)}&fields=nom,code,population&limit=7&boost=population`;
+      const res  = await fetch(url);
+      const data = await res.json() as CommuneResult[];
+      setResults(data.filter((c) => c.population != null && c.population > 0));
+    } catch {
+      setResults([]);
+    } finally {
+      setLoading(false);
     }
-    setSelDept(""); setEpciStubs([]); setSelEPCICode(""); setEpciDetail(null);
-    setEpciLoading(true);
-    fetch(`https://geo.api.gouv.fr/regions/${selRegion}/departements?fields=nom,code`)
-      .then(r => r.json())
-      .then((d: Departement[]) => { setDepts(d.sort((a, b) => a.nom.localeCompare(b.nom, "fr"))); setEpciLoading(false); })
-      .catch(() => setEpciLoading(false));
-  }, [selRegion]);
-
-  // Charger EPCIs (pivot communes → EPCI uniques) à la sélection département
-  useEffect(() => {
-    if (!selDept) { setEpciStubs([]); setSelEPCICode(""); setEpciDetail(null); return; }
-    setSelEPCICode(""); setEpciDetail(null);
-    setEpciLoading(true);
-    fetch(`https://geo.api.gouv.fr/departements/${selDept}/communes?fields=code,epci&limit=2000`)
-      .then(r => r.json())
-      .then((data: { code: string; epci?: EPCIStub }[]) => {
-        const seen = new Map<string, string>();
-        data.forEach(c => { if (c.epci) seen.set(c.epci.code, c.epci.nom); });
-        const stubs = Array.from(seen.entries())
-          .map(([code, nom]) => ({ code, nom }))
-          .sort((a, b) => a.nom.localeCompare(b.nom, "fr"));
-        setEpciStubs(stubs);
-        setEpciLoading(false);
-      })
-      .catch(() => setEpciLoading(false));
-  }, [selDept]);
-
-  // Charger détails EPCI à la sélection
-  useEffect(() => {
-    if (!selEPCICode) { setEpciDetail(null); return; }
-    setEpciLoading(true);
-    fetch(`https://geo.api.gouv.fr/epcis/${selEPCICode}?fields=nom,code,population,type`)
-      .then(r => r.json())
-      .then((d: EPCIDetail) => { setEpciDetail(d); setEpciLoading(false); })
-      .catch(() => setEpciLoading(false));
-  }, [selEPCICode]);
-
-  // Recherche commune avec debounce
-  const search = (q: string) => {
-    if (q.length < 2) { setResults([]); setShowDropdown(false); return; }
-    setCommLoading(true);
-    fetch(`https://geo.api.gouv.fr/communes?nom=${encodeURIComponent(q)}&fields=nom,code,population&boost=population&limit=6`)
-      .then(r => r.json())
-      .then((d: CommuneResult[]) => { setResults(d); setShowDropdown(d.length > 0); setCommLoading(false); })
-      .catch(() => setCommLoading(false));
   };
 
   const handleInput = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const v = e.target.value;
-    setQuery(v); setSelected(null);
+    const val = e.target.value;
+    setQuery(val);
+    setSelected(null);
+    setShowDropdown(true);
     if (debounceRef.current) clearTimeout(debounceRef.current);
-    debounceRef.current = setTimeout(() => search(v), 280);
+    debounceRef.current = setTimeout(() => search(val), 280);
   };
 
   const handleSelect = (c: CommuneResult) => {
-    setSelected(c); setQuery(c.nom); setShowDropdown(false); setResults([]);
+    setSelected(c);
+    setQuery(c.nom);
+    setResults([]);
+    setShowDropdown(false);
   };
 
-  const tier     = selected   ? TIER_DATA[getPopulationTierIndex(selected.population)]        : null;
-  const epciTier = epciDetail ? TIER_DATA[getPopulationTierIndex(epciDetail.population ?? 0)] : null;
+  const tierIndex = selected ? getPopulationTierIndex(selected.population) : null;
+  // PRICING_TIERS n'est pas encore déclaré ici, on le référence après
+  // → on passe par les mêmes constantes définies plus bas dans le fichier
 
-  const baseInput: React.CSSProperties = {
-    width: "100%", padding: "13px 18px", fontSize: 15, borderRadius: 10,
-    border: "2px solid rgba(255,255,255,0.22)", background: "rgba(255,255,255,0.1)",
-    color: "white", outline: "none", boxSizing: "border-box", fontFamily: "inherit",
-  };
-  const selectSt: React.CSSProperties = {
-    ...baseInput, cursor: "pointer", appearance: "none",
-    backgroundImage: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='rgba(255,255,255,0.55)' stroke-width='2' fill='none'/%3E%3C/svg%3E")`,
-    backgroundRepeat: "no-repeat", backgroundPosition: "right 14px center", paddingRight: 40,
-  };
+  const TIER_DATA = [
+    { name: "Nano",      range: "< 1 000 hab.",          monthly: 49,  annual: 490  },
+    { name: "Micro",     range: "1 001 – 3 500 hab.",    monthly: 99,  annual: 990  },
+    { name: "Local",     range: "3 501 – 10 000 hab.",   monthly: 189, annual: 1890 },
+    { name: "Urbain",    range: "10 001 – 50 000 hab.",  monthly: 490, annual: 4900 },
+    { name: "Métropole", range: "> 50 000 hab.",          monthly: null, annual: null },
+  ] as const;
+
+  const tier = tierIndex !== null ? TIER_DATA[tierIndex] : null;
 
   return (
-    <section style={{ background: "linear-gradient(135deg, #1e3a8a 0%, #1d4ed8 60%, #2563eb 100%)", padding: "72px 24px" }}>
-      <div style={{ maxWidth: 680, margin: "0 auto" }}>
-
-        {/* En-tête */}
-        <div style={{ textAlign: "center", marginBottom: 36 }}>
-          <span style={{ background: "rgba(255,255,255,0.12)", color: "#bfdbfe", fontSize: 11, fontWeight: 700, padding: "4px 14px", borderRadius: 20, letterSpacing: 1.2, textTransform: "uppercase" }}>
-            Simulateur tarifaire
-          </span>
-          <h2 style={{ color: "white", fontSize: "clamp(22px,4vw,30px)", fontWeight: 800, margin: "14px 0 8px" }}>
-            Quel est le tarif pour votre territoire ?
+    <section style={{ background: "linear-gradient(150deg, #1e3a8a 0%, #1d4ed8 100%)" }} className="py-20">
+      <div className="mx-auto max-w-2xl px-6">
+        {/* Header */}
+        <div className="text-center">
+          <p className="text-sm font-semibold uppercase tracking-widest text-blue-300">
+            Calculateur de tarif
+          </p>
+          <h2 className="mt-2 text-3xl font-extrabold text-white md:text-4xl">
+            Quel est le tarif pour votre commune ?
           </h2>
-          <p style={{ color: "#bfdbfe", fontSize: 15, margin: 0 }}>
-            Commune ou groupement — votre offre en quelques secondes.
+          <p className="mx-auto mt-4 max-w-lg text-blue-200">
+            Entrez le nom de votre commune — la population est récupérée directement
+            depuis l'INSEE et votre plan s'affiche instantanément.
           </p>
         </div>
 
-        {/* Toggle */}
-        <div style={{ display: "flex", justifyContent: "center", marginBottom: 28 }}>
-          <div style={{ display: "flex", borderRadius: 10, overflow: "hidden", border: "1.5px solid rgba(255,255,255,0.22)", width: "100%", maxWidth: 440 }}>
-            {(["commune", "groupement"] as CalcMode[]).map(m => (
-              <button
-                key={m}
-                onClick={() => setMode(m)}
-                style={{
-                  flex: 1, padding: "10px 12px", fontSize: 13, fontWeight: 700,
-                  border: "none", cursor: "pointer",
-                  background: mode === m ? "white" : "transparent",
-                  color: mode === m ? "#1d4ed8" : "rgba(255,255,255,0.72)",
-                  transition: "all 0.15s",
-                }}
-              >
-                {m === "commune" ? "Commune" : "Groupement de communes"}
-              </button>
-            ))}
+        {/* Champ de recherche */}
+        <div ref={containerRef} className="relative mt-10">
+          <div
+            className="flex items-center gap-3 rounded-2xl bg-white px-5 py-4 shadow-xl"
+            style={{ border: "2px solid transparent" }}
+          >
+            <MapPin className="h-5 w-5 flex-shrink-0 text-blue-400" />
+            <input
+              type="text"
+              value={query}
+              onChange={handleInput}
+              onFocus={() => query.length >= 2 && results.length > 0 && setShowDropdown(true)}
+              placeholder="Nom de votre commune ou code postal..."
+              className="flex-1 bg-transparent text-base font-medium text-gray-900 placeholder-gray-400 outline-none"
+            />
+            {loading && (
+              <span className="text-xs text-gray-400">Recherche…</span>
+            )}
           </div>
+
+          {/* Dropdown résultats */}
+          {showDropdown && results.length > 0 && (
+            <div
+              className="absolute left-0 right-0 top-full z-50 mt-2 overflow-hidden rounded-2xl bg-white"
+              style={{ boxShadow: "0 20px 60px rgba(0,0,0,0.18), 0 4px 16px rgba(0,0,0,0.08)" }}
+            >
+              {results.map((c, i) => (
+                <button
+                  key={c.code}
+                  onClick={() => handleSelect(c)}
+                  className="flex w-full items-center justify-between px-5 py-3 text-left transition hover:bg-blue-50"
+                  style={{
+                    borderTop: i > 0 ? "1px solid #f1f5f9" : "none",
+                  }}
+                >
+                  <div>
+                    <span className="font-semibold text-gray-900">{c.nom}</span>
+                    <span className="ml-2 text-xs text-gray-400">{c.code}</span>
+                  </div>
+                  <span
+                    className="rounded-full px-2.5 py-0.5 text-xs font-bold"
+                    style={{ background: "#eff6ff", color: "#1e3a8a" }}
+                  >
+                    {c.population.toLocaleString("fr-FR")} hab.
+                  </span>
+                </button>
+              ))}
+            </div>
+          )}
         </div>
 
-        {/* ── Mode Commune ── */}
-        {mode === "commune" && (
-          <div ref={containerRef} style={{ position: "relative" }}>
-            <div style={{ position: "relative" }}>
-              <input
-                type="text"
-                placeholder="Nom de votre commune…"
-                value={query}
-                onChange={handleInput}
-                onFocus={() => results.length > 0 && setShowDropdown(true)}
-                style={{ ...baseInput, padding: "14px 48px 14px 18px" }}
-              />
-              {commLoading && (
-                <span style={{ position: "absolute", right: 16, top: "50%", transform: "translateY(-50%)", color: "rgba(255,255,255,0.45)", fontSize: 18 }}>⟳</span>
+        {/* Résultat : plan adapté */}
+        {selected && tier && (
+          <div
+            className="mt-8 overflow-hidden rounded-2xl bg-white"
+            style={{ boxShadow: "0 24px 64px rgba(0,0,0,0.22)" }}
+          >
+            {/* Bandeau commune */}
+            <div
+              className="flex items-center gap-3 px-7 py-4"
+              style={{ background: "#f8faff", borderBottom: "1px solid #e0e7ff" }}
+            >
+              <div
+                className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-xl text-lg"
+                style={{ background: "#eff6ff" }}
+              >
+                🏛️
+              </div>
+              <div>
+                <p className="font-bold text-gray-900">{selected.nom}</p>
+                <p className="text-xs text-gray-500">
+                  {selected.population.toLocaleString("fr-FR")} habitants · Code INSEE {selected.code}
+                </p>
+              </div>
+              <button
+                onClick={() => { setSelected(null); setQuery(""); }}
+                className="ml-auto rounded-lg p-1.5 text-gray-400 transition hover:bg-gray-100 hover:text-gray-700"
+              >
+                <X className="h-4 w-4" />
+              </button>
+            </div>
+
+            {/* Tarif */}
+            <div className="px-7 py-7 text-center">
+              <p
+                className="text-xs font-bold uppercase tracking-widest"
+                style={{ color: "#1e3a8a" }}
+              >
+                Plan recommandé
+              </p>
+              <p className="mt-1 text-2xl font-extrabold text-gray-900">
+                {tier.name}
+              </p>
+              <p className="text-sm text-gray-400">{tier.range}</p>
+
+              {tier.monthly === null ? (
+                <>
+                  <p className="mt-5 text-4xl font-extrabold text-gray-900">
+                    Sur devis
+                  </p>
+                  <p className="mt-2 text-sm text-gray-500">
+                    Tarif personnalisé · SLA et accompagnement adaptés
+                  </p>
+                </>
+              ) : (
+                <>
+                  <div className="mt-5 flex items-end justify-center gap-2">
+                    <span className="text-5xl font-extrabold text-gray-900">
+                      {tier.monthly} €
+                    </span>
+                    <span className="mb-2 text-gray-400">/mois HT</span>
+                  </div>
+                  <p className="mt-1.5 text-sm font-semibold" style={{ color: "#1e3a8a" }}>
+                    ou {tier.annual?.toLocaleString("fr-FR")} €/an HT{" "}
+                    <span className="font-normal text-gray-400">(2 mois offerts)</span>
+                  </p>
+                </>
               )}
-            </div>
-            {showDropdown && (
-              <ul style={{ position: "absolute", top: "calc(100% + 6px)", left: 0, right: 0, background: "white", borderRadius: 12, boxShadow: "0 8px 32px rgba(0,0,0,0.18)", listStyle: "none", margin: 0, padding: "6px 0", zIndex: 50 }}>
-                {results.map(c => (
-                  <li key={c.code} onMouseDown={() => handleSelect(c)}
-                    style={{ padding: "10px 18px", cursor: "pointer", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-                    <span style={{ fontWeight: 600, color: "#111827" }}>{c.nom}</span>
-                    <span style={{ fontSize: 12, color: "#9ca3af" }}>{c.population.toLocaleString("fr-FR")} hab.</span>
-                  </li>
+
+              {/* Features condensées */}
+              <div className="mt-5 flex flex-wrap justify-center gap-2">
+                {["Tous modules inclus", "App iOS & Android", "Espace admin web", "Support inclus"].map((f) => (
+                  <span
+                    key={f}
+                    className="flex items-center gap-1 rounded-full px-3 py-1 text-xs font-medium"
+                    style={{ background: "#f0fdf4", color: "#15803d" }}
+                  >
+                    <CheckCircle2 className="h-3 w-3" />
+                    {f}
+                  </span>
                 ))}
-              </ul>
-            )}
-            {selected && tier && (
-              <TierResultCard
-                name={selected.nom}
-                tierName={tier.name}
-                subtitle={`${selected.population.toLocaleString("fr-FR")} habitants · Code INSEE ${selected.code}`}
-                monthly={tier.monthly ?? null}
-                annual={tier.annual ?? null}
-                mailSubject={`Proposition VigieCity — ${selected.nom}`}
-                mailBody={`Bonjour,\n\nJe souhaite obtenir une proposition pour ${selected.nom} (${selected.population.toLocaleString("fr-FR")} habitants).\n\nMerci.`}
-              />
-            )}
-          </div>
-        )}
+              </div>
 
-        {/* ── Mode Groupement ── */}
-        {mode === "groupement" && (
-          <div style={{ display: "flex", flexDirection: "column", gap: 14 }}>
-
-            {/* Région */}
-            <div>
-              <label style={{ display: "block", color: "rgba(255,255,255,0.55)", fontSize: 11, fontWeight: 700, textTransform: "uppercase", letterSpacing: 1.1, marginBottom: 7 }}>
-                Région
-              </label>
-              <select value={selRegion} onChange={e => setSelRegion(e.target.value)} style={selectSt}>
-                <option value="" style={{ color: "#1f2937", background: "white" }}>Sélectionnez une région…</option>
-                {regions.map(r => <option key={r.code} value={r.code} style={{ color: "#1f2937", background: "white" }}>{r.nom}</option>)}
-              </select>
+              <a
+                href={`mailto:contact@vigiecity.fr?subject=Demande de proposition VigieCity — ${encodeURIComponent(selected.nom)}&body=Bonjour,%0A%0AJe souhaite obtenir une proposition pour la commune de ${encodeURIComponent(selected.nom)} (${selected.population.toLocaleString("fr-FR")} habitants).%0A%0AMerci.`}
+                className="mt-6 inline-flex items-center gap-2 rounded-xl px-8 py-4 text-sm font-bold text-white shadow-lg transition hover:opacity-90"
+                style={{ backgroundColor: "#1e3a8a" }}
+              >
+                Demander une proposition pour {selected.nom}
+                <ArrowRight className="h-4 w-4" />
+              </a>
             </div>
-
-            {/* Département */}
-            {selRegion && (
-              <div>
-                <label style={{ display: "block", color: "rgba(255,255,255,0.55)", fontSize: 11, fontWeight: 700, textTransform: "uppercase", letterSpacing: 1.1, marginBottom: 7 }}>
-                  Département
-                </label>
-                <select value={selDept} onChange={e => setSelDept(e.target.value)} disabled={epciLoading} style={{ ...selectSt, opacity: epciLoading ? 0.55 : 1 }}>
-                  <option value="" style={{ color: "#1f2937", background: "white" }}>{epciLoading ? "Chargement…" : "Sélectionnez un département…"}</option>
-                  {depts.map(d => <option key={d.code} value={d.code} style={{ color: "#1f2937", background: "white" }}>{d.code} – {d.nom}</option>)}
-                </select>
-              </div>
-            )}
-
-            {/* EPCI */}
-            {selDept && (
-              <div>
-                <label style={{ display: "block", color: "rgba(255,255,255,0.55)", fontSize: 11, fontWeight: 700, textTransform: "uppercase", letterSpacing: 1.1, marginBottom: 7 }}>
-                  Groupement de communes{epciStubs.length > 0 && !epciLoading ? ` (${epciStubs.length})` : ""}
-                </label>
-                <select
-                  value={selEPCICode}
-                  onChange={e => setSelEPCICode(e.target.value)}
-                  disabled={epciLoading || epciStubs.length === 0}
-                  style={{ ...selectSt, opacity: epciLoading ? 0.55 : 1 }}
-                >
-                  <option value="" style={{ color: "#1f2937", background: "white" }}>
-                    {epciLoading ? "Chargement…" : epciStubs.length === 0 ? "Aucun groupement trouvé" : "Sélectionnez un groupement…"}
-                  </option>
-                  {epciStubs.map(ep => (
-                    <option key={ep.code} value={ep.code} style={{ color: "#1f2937", background: "white" }}>{ep.nom}</option>
-                  ))}
-                </select>
-              </div>
-            )}
-
-            {/* Résultat EPCI */}
-            {epciDetail && epciTier && (
-              <TierResultCard
-                name={epciDetail.nom}
-                tierName={epciTier.name}
-                subtitle={`${EPCI_LABELS[epciDetail.type ?? ""] ?? "Groupement de communes"} · ${(epciDetail.population ?? 0).toLocaleString("fr-FR")} habitants · SIREN ${epciDetail.code}`}
-                monthly={epciTier.monthly ?? null}
-                annual={epciTier.annual ?? null}
-                mailSubject={`Proposition VigieCity — ${epciDetail.nom}`}
-                mailBody={`Bonjour,\n\nJe souhaite obtenir une proposition pour ${epciDetail.nom} (${(epciDetail.population ?? 0).toLocaleString("fr-FR")} habitants).\n\nMerci.`}
-              />
-            )}
           </div>
         )}
 
-        <p style={{ textAlign: "center", color: "rgba(255,255,255,0.35)", fontSize: 11, marginTop: 28, marginBottom: 0 }}>
-          Données population · <a href="https://geo.api.gouv.fr" target="_blank" rel="noreferrer" style={{ color: "rgba(255,255,255,0.5)", textDecoration: "underline" }}>geo.api.gouv.fr</a>
+        {/* Note de bas de section */}
+        <p className="mt-8 text-center text-xs text-blue-300">
+          Données population source :{" "}
+          <span className="font-medium text-blue-200">INSEE via geo.api.gouv.fr</span>{" "}
+          ·{" "}
+          <a href="#tarifs" className="underline transition hover:text-white">
+            Voir la grille tarifaire complète ↓
+          </a>
         </p>
       </div>
     </section>
   );
 }
-
-
 
 // ── Grille tarifaire ──────────────────────────────────────────────────────────
 
@@ -1278,6 +1184,59 @@ function PricingSection() {
   );
 }
 
+// ── Banner promo flottante ────────────────────────────────────────────────────
+
+function PromoBanner() {
+  const [dismissed, setDismissed] = useState(false);
+  if (dismissed) return null;
+  return (
+    <>
+      <style>{`
+        @keyframes vcSlideUp {
+          from { transform: translateY(24px); opacity: 0; }
+          to   { transform: translateY(0);    opacity: 1; }
+        }
+        .vc-promo { animation: vcSlideUp 0.45s cubic-bezier(0.22,1,0.36,1) both; }
+      `}</style>
+      <div
+        className="vc-promo fixed bottom-6 right-6 z-50 w-72 rounded-2xl bg-white p-5"
+        style={{ boxShadow: "0 20px 60px rgba(0,0,0,0.18), 0 4px 16px rgba(0,0,0,0.10)", border: "1px solid #e0e7ff" }}
+      >
+        {/* Close */}
+        <button
+          onClick={() => setDismissed(true)}
+          className="absolute right-3 top-3 rounded-lg p-1 text-gray-400 transition hover:bg-gray-100 hover:text-gray-700"
+          aria-label="Fermer"
+        >
+          <X className="h-4 w-4" />
+        </button>
+
+        {/* Content */}
+        <div className="flex items-center gap-2">
+          <Sparkles className="h-5 w-5 flex-shrink-0" style={{ color: "#f59e0b" }} />
+          <p className="text-sm font-extrabold text-gray-900">Offre à ne pas manquer</p>
+        </div>
+        <p className="mt-2.5 text-sm leading-relaxed text-gray-600">
+          Les <strong>premières collectivités partenaires</strong> bénéficient de{" "}
+          <strong className="text-blue-700">2 mois offerts</strong> avant le début de l'abonnement.
+        </p>
+        <p className="mt-1.5 text-xs text-gray-400">
+          Places limitées · Accès prioritaire aux nouvelles fonctionnalités
+        </p>
+        <a
+          href="#contact"
+          onClick={() => setDismissed(true)}
+          className="mt-4 flex items-center justify-center gap-1.5 rounded-xl py-2.5 text-sm font-bold text-white transition hover:opacity-90"
+          style={{ backgroundColor: "#1e3a8a" }}
+        >
+          En savoir plus
+          <ArrowRight className="h-3.5 w-3.5" />
+        </a>
+      </div>
+    </>
+  );
+}
+
 // ── Page ──────────────────────────────────────────────────────────────────────
 
 function LandingPage() {
@@ -1395,255 +1354,4 @@ function LandingPage() {
         </div>
       </section>
 
-      {/* ── Pour qui ───────────────────────────────────────────────────── */}
-      <section id="pour-qui" className="bg-white py-20">
-        <div className="mx-auto max-w-7xl px-6">
-          <div className="text-center">
-            <p className="text-sm font-semibold uppercase tracking-widest text-blue-600">
-              Pour qui
-            </p>
-            <h2 className="mt-2 text-3xl font-extrabold text-gray-900 md:text-4xl">
-              Toutes les collectivités, sans distinction
-            </h2>
-            <p className="mx-auto mt-4 max-w-xl text-lg text-gray-500">
-              Que vous gériez 200 ou 200 000 habitants, VigieCity s'adapte à
-              votre territoire et à votre organisation.
-            </p>
-          </div>
-
-          <div className="mt-14 grid gap-8 md:grid-cols-3">
-            {FOR_WHO.map((c) => (
-              <div
-                key={c.title}
-                className="rounded-2xl border border-gray-100 bg-gray-50 p-8"
-              >
-                <c.Icon className="h-10 w-10" style={{ color: "#1e3a8a" }} />
-                <h3 className="mt-4 text-lg font-bold text-gray-900">
-                  {c.title}
-                </h3>
-                <p
-                  className="mt-1 text-xs font-semibold uppercase tracking-wider"
-                  style={{ color: "#1e3a8a" }}
-                >
-                  {c.sub}
-                </p>
-                <p className="mt-3 text-sm leading-relaxed text-gray-500">
-                  {c.desc}
-                </p>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* ── Modules ────────────────────────────────────────────────────── */}
-      <section id="modules" style={{ backgroundColor: "#f8fafc" }} className="py-20">
-        <div className="mx-auto max-w-7xl px-6">
-          <div className="text-center">
-            <p className="text-sm font-semibold uppercase tracking-widest text-blue-600">
-              Fonctionnalités
-            </p>
-            <h2 className="mt-2 text-3xl font-extrabold text-gray-900 md:text-4xl">
-              Bien plus qu'un simple outil de signalement
-            </h2>
-            <p className="mx-auto mt-4 max-w-xl text-lg text-gray-500">
-              VigieCity couvre l'ensemble des besoins de communication entre
-              votre collectivité et ses habitants.
-            </p>
-          </div>
-
-          <div className="mt-14 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-            {MODULES.map((m) => (
-              <div
-                key={m.title}
-                className="rounded-2xl border border-gray-100 bg-white p-7 transition hover:shadow-md"
-              >
-                <div
-                  className="mb-4 flex h-12 w-12 items-center justify-center rounded-xl"
-                  style={{ backgroundColor: m.color + "18" }}
-                >
-                  <m.Icon className="h-6 w-6" style={{ color: m.color }} />
-                </div>
-                <h3 className="mb-2 font-bold text-gray-900">{m.title}</h3>
-                <p className="text-sm leading-relaxed text-gray-500">{m.desc}</p>
-              </div>
-            ))}
-
-            {/* Admin card */}
-            <div
-              className="rounded-2xl p-7"
-              style={{
-                background: "linear-gradient(135deg, #1e3a8a, #1d4ed8)",
-              }}
-            >
-              <div className="mb-4 flex h-12 w-12 items-center justify-center rounded-xl bg-white/20">
-                <LayoutDashboard className="h-6 w-6 text-white" />
-              </div>
-              <h3 className="mb-2 font-bold text-white">
-                Espace d'administration
-              </h3>
-              <p className="mb-4 text-sm leading-relaxed text-blue-200">
-                Interface web dédiée à vos agents pour gérer l'ensemble des
-                contenus et interactions.
-              </p>
-              <div className="grid grid-cols-2 gap-1.5">
-                {ADMIN_FEATURES.map((f) => (
-                  <div key={f.t} className="flex items-center gap-1.5">
-                    <f.Icon className="h-3.5 w-3.5 flex-shrink-0 text-blue-300" />
-                    <span className="text-xs text-blue-100">{f.t}</span>
-                  </div>
-                ))}
-              </div>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* ── How it works ───────────────────────────────────────────────── */}
-      <section id="comment-ca-marche" className="bg-white py-20">
-        <div className="mx-auto max-w-7xl px-6">
-          <div className="text-center">
-            <p className="text-sm font-semibold uppercase tracking-widest text-blue-600">
-              Mise en place
-            </p>
-            <h2 className="mt-2 text-3xl font-extrabold text-gray-900 md:text-4xl">
-              Opérationnel en 48 heures
-            </h2>
-            <p className="mx-auto mt-4 max-w-lg text-lg text-gray-500">
-              Pas d'équipe technique requise. De la configuration à votre
-              premier habitant connecté, tout se fait simplement.
-            </p>
-          </div>
-
-          <div className="mt-14 grid gap-8 md:grid-cols-3">
-            {STEPS.map((step) => (
-              <div
-                key={step.n}
-                className="rounded-2xl border border-gray-100 bg-gray-50 p-8"
-              >
-                <div
-                  className="mb-5 inline-flex h-12 w-12 items-center justify-center rounded-xl text-lg font-extrabold text-white"
-                  style={{ backgroundColor: "#1e3a8a" }}
-                >
-                  {step.n}
-                </div>
-                <h3 className="mb-2 text-base font-bold text-gray-900">
-                  {step.title}
-                </h3>
-                <p className="text-sm leading-relaxed text-gray-500">
-                  {step.desc}
-                </p>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      <CommuneCalculatorSection />
-      <PricingSection />
-
-      {/* ── Contact ────────────────────────────────────────────────────── */}
-      <section
-        id="contact"
-        className="py-20"
-        style={{
-          background: "linear-gradient(135deg, #f0f4ff 0%, #e0e7ff 100%)",
-        }}
-      >
-        <div className="mx-auto max-w-3xl px-6 text-center">
-          <p className="text-sm font-semibold uppercase tracking-widest text-blue-600">
-            Contact
-          </p>
-          <h2 className="mt-2 text-3xl font-extrabold text-gray-900 md:text-4xl">
-            Votre commune mérite un lien{" "}
-            <span style={{ color: "#1e3a8a" }}>direct avec ses habitants</span>
-          </h2>
-          <p className="mx-auto mt-5 max-w-lg text-lg text-gray-500">
-            Nous accompagnons les premières collectivités qui souhaitent adopter
-            VigieCity. Prenez contact pour en savoir plus sur le projet et les
-            conditions de lancement.
-          </p>
-
-          <div className="mt-10 flex flex-col items-center justify-center gap-4 sm:flex-row">
-            <a
-              href="mailto:contact@vigiecity.fr?subject=Je souhaite en savoir plus sur VigieCity"
-              className="inline-flex items-center gap-2 rounded-xl px-8 py-4 text-base font-bold text-white shadow-lg transition hover:opacity-90"
-              style={{ backgroundColor: "#1e3a8a" }}
-            >
-              Écrire à contact@vigiecity.fr
-              <ArrowRight className="h-4 w-4" />
-            </a>
-          </div>
-
-          <div className="mt-8 flex flex-wrap items-center justify-center gap-6 text-sm text-gray-500">
-            {[
-              "Application iOS & Android",
-              "Espace admin web",
-              "Support inclus",
-              "Données hébergées en Europe",
-              "Conforme RGPD",
-            ].map((item) => (
-              <span key={item} className="flex items-center gap-1.5">
-                <CheckCircle2 className="h-4 w-4 text-green-500" />
-                {item}
-              </span>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* ── Footer ─────────────────────────────────────────────────────── */}
-      <footer className="py-10" style={{ backgroundColor: "#0f172a" }}>
-        <div className="mx-auto max-w-7xl px-6">
-          <div className="flex flex-col items-center justify-between gap-6 md:flex-row">
-            <div className="flex items-center gap-2.5">
-              <VCLogo size={26} />
-              <span className="text-lg font-bold text-white">VigieCity</span>
-              <span className="text-sm text-slate-500">
-                — L'app citoyenne pour votre commune
-              </span>
-            </div>
-            <div className="flex flex-wrap items-center gap-6">
-              <a
-                href="mailto:contact@vigiecity.fr"
-                className="text-sm text-slate-400 transition hover:text-white"
-              >
-                contact@vigiecity.fr
-              </a>
-              <Link
-                to="/auth"
-                className="text-sm text-slate-400 transition hover:text-white"
-              >
-                Connexion habitants
-              </Link>
-              <Link
-                to="/mentions-legales"
-                className="text-sm text-slate-400 transition hover:text-white"
-              >
-                Mentions légales
-              </Link>
-              <Link
-                to="/confidentialite"
-                className="text-sm text-slate-400 transition hover:text-white"
-              >
-                Confidentialité
-              </Link>
-              <Link
-                to="/cgu"
-                className="text-sm text-slate-400 transition hover:text-white"
-              >
-                CGU
-              </Link>
-            </div>
-          </div>
-          <div className="mt-6 border-t border-slate-800 pt-6 text-center text-xs text-slate-600">
-            © {new Date().getFullYear()} VigieCity · Application déployée sur{" "}
-            <span className="text-slate-500">Vercel</span> · Base de données{" "}
-            <span className="text-slate-500">Supabase (EU)</span> · Données
-            hébergées en Europe · Conforme RGPD
-          </div>
-        </div>
-      </footer>
-    </div>
-  );
-}
+      {/* ── Pour qui ───────────────────────────────�

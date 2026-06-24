@@ -5,7 +5,7 @@ import {
   Settings, LogOut, Shield, ChevronRight,
   CreditCard, Euro, BarChart3, UserPlus,
   TrendingUp, Newspaper, Package, BookOpen,
-  Target, Menu, Bell,
+  Menu, Bell,
 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { usePlatformAuth } from "@/hooks/usePlatformAuth";
@@ -18,7 +18,6 @@ const NAV_SECTIONS = [
     items: [
       { icon: LayoutDashboard, label: "Tableau de bord",  path: "/platform"                },
       { icon: Building2,       label: "Collectivités",    path: "/platform/collectivites"  },
-      { icon: Target,          label: "Prospection",      path: "/platform/prospection"    },
       { icon: UserPlus,        label: "Onboarding",       path: "/platform/onboarding"     },
       { icon: TrendingUp,      label: "Rétention",        path: "/platform/retention"      },
       { icon: Users,           label: "Utilisateurs",     path: "/platform/users"          },
@@ -58,7 +57,6 @@ const NAV_SECTIONS = [
 const PAGE_TITLES: Record<string, string> = {
   "/platform":                  "Tableau de bord",
   "/platform/collectivites":    "Collectivités",
-  "/platform/prospection":      "Prospection",
   "/platform/onboarding":       "Onboarding",
   "/platform/retention":        "Rétention",
   "/platform/users":            "Utilisateurs",

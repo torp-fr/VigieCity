@@ -117,7 +117,7 @@ function AdminVoisinsPage() {
 
   return (
     <AdminShell activePath="/admin/voisins">
-      <div className="mx-auto max-w-3xl px-8 py-8 space-y-6">
+      <div className="p-6 max-w-3xl mx-auto space-y-6">
         {/* Header */}
         <header>
           <h1 className="text-2xl font-bold text-slate-800">Voisins vigilants</h1>

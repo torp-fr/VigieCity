@@ -14,12 +14,10 @@ export const Route = createFileRoute("/platform/onboarding")({
 });
 
 const PLANS = [
-  { value: "trial",     label: "Trial 30 jours", desc: "Acces complet, sans engagement",   color: "bg-amber-50 border-amber-200"   },
-  { value: "nano",      label: "Nano",           desc: "< 1 000 hab. - 49 EUR/mois",       color: "bg-slate-50 border-slate-300"   },
-  { value: "micro",     label: "Micro",          desc: "1 001-3 500 hab. - 99 EUR/mois",   color: "bg-blue-50 border-blue-200"     },
-  { value: "local",     label: "Local",          desc: "3 501-10 000 hab. - 189 EUR/mois", color: "bg-emerald-50 border-emerald-200"},
-  { value: "urbain",    label: "Urbain",         desc: "10 001-50 000 hab. - 490 EUR/mois",color: "bg-violet-50 border-violet-200" },
-  { value: "metropole", label: "Metropole",      desc: "> 50 000 hab. - Sur devis",        color: "bg-amber-50 border-amber-200"   },
+  { value: "trial",      label: "Trial 30 jours", desc: "Accès complet, sans engagement", color: "bg-amber-50 border-amber-200" },
+  { value: "starter",    label: "Starter",         desc: "Jusqu'à 5 000 habitants",        color: "bg-blue-50 border-blue-200"   },
+  { value: "pro",        label: "Pro",             desc: "Communes jusqu'à 50 000 hab.",   color: "bg-violet-50 border-violet-200" },
+  { value: "enterprise", label: "Enterprise",      desc: "Communes >50 000 hab. + SLA",    color: "bg-gray-50 border-gray-200"   },
 ];
 
 type Step = 1 | 2 | 3 | 4;

@@ -164,8 +164,8 @@ function AdminConsultationsPage() {
   }
 
   return (
-    <AdminShell activePath="/admin/consultations">
-      <div className="mx-auto max-w-7xl px-8 py-8 space-y-4">
+    <AdminShell>
+      <div className="space-y-4 p-4 pb-24">
         {/* Header */}
         <div className="flex items-center justify-between">
           <div>

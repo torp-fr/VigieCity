@@ -1,7 +1,8 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
 import { useEffect, useState } from "react";
-import { MapPin, Phone, Globe, Clock, Navigation } from "lucide-react";
+import { MapPin, Phone, Globe, Clock, Navigation, Map as MapIcon } from "lucide-react";
+import { ServicesMapWidget } from "@/components/ServicesMapWidget";
 import { supabase } from "@/integrations/supabase/client";
 
 export const Route = createFileRoute("/services")({
@@ -180,6 +181,17 @@ function ServicesPage() {
           >
             Choisir ma commune
           </Link>
+        </div>
+      )}
+
+      {/* ── Carte interactive (J8.2) ── */}
+      {collectivityId && (
+        <div className="px-4 pt-4 pb-2">
+          <div className="flex items-center gap-2 mb-3">
+            <MapIcon className="h-5 w-5 text-primary" />
+            <h2 className="font-semibold">Carte interactive</h2>
+          </div>
+          <ServicesMapWidget />
         </div>
       )}
 

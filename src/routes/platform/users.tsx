@@ -51,6 +51,15 @@ const ROLE_BADGE: Record<string, string> = {
 // ── Page ──────────────────────────────────────────────────────────────────────
 
 function PlatformUsersPage() {
+  return (
+    <PlatformShell activePath="/platform/users">
+      <PlatformUsersContent />
+    </PlatformShell>
+  );
+}
+
+
+function PlatformUsersContent() {
   const qc = useQueryClient();
   const [search,     setSearch]     = useState("");
   const [filterRole, setFilterRole] = useState("all");
@@ -58,16 +67,13 @@ function PlatformUsersPage() {
   const { data: profiles = [], isLoading } = useQuery<Profile[]>({
     queryKey: ["platform/users"],
     queryFn: async () => {
-      await supabase.auth.getSession();
       const { data, error } = await supabase
         .from("profiles")
         .select("id, display_name, role, collectivity_id, created_at, collectivities(name)")
         .order("created_at", { ascending: false });
       if (error) throw error;
-      return (data ?? []) as Profile[];
+      return data as Profile[];
     },
-    staleTime: 60_000,
-    retry: 2,
   });
 
   const changeRoleMut = useMutation({
@@ -101,8 +107,7 @@ function PlatformUsersPage() {
   // ── Render ────────────────────────────────────────────────────────────────
 
   return (
-    <PlatformShell activePath="/platform/users">
-
+    <>
       {/* Header */}
       <div className="mb-8">
         <h1 className="text-2xl font-bold text-slate-900">Utilisateurs</h1>
@@ -206,6 +211,6 @@ function PlatformUsersPage() {
           </table>
         </div>
       )}
-    </PlatformShell>
+    </>
   );
 }
