@@ -20,6 +20,8 @@ import {
   BarChart2,
   ShieldAlert,
   Settings,
+  CreditCard,
+  AlertTriangle,
 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 
@@ -44,6 +46,7 @@ const BASE_NAV = [
   { icon: Tablet,          label: "Mode terrain",     path: "/admin/terrain"        },
   { icon: BarChart3,       label: "Analytics",         path: "/admin/analytics"    },
   { icon: Settings,        label: "Paramètres",        path: "/admin/settings"     },
+  { icon: CreditCard,      label: "Abonnement",        path: "/admin/abonnement"   },
 ] as const;
 
 const EPCI_ITEM = { icon: Building2, label: "Intercommunal", path: "/admin/epci" } as const;
@@ -69,6 +72,7 @@ export function AdminShell({ activePath, children }: AdminShellProps) {
   const [secondaryColor, setSecondaryColor] = useState(DEFAULT_SECONDARY);
   const [collectivityId, setCollectivityId] = useState<string | null>(null);
   const [msgUnread,      setMsgUnread]      = useState(0);
+  const [licenseWarning, setLicenseWarning] = useState<"expiring_soon" | "expired" | null>(null);
 
   useEffect(() => {
     const timeout = setTimeout(() => setAuthError(true), 10_000);
@@ -117,6 +121,25 @@ export function AdminShell({ activePath, children }: AdminShellProps) {
         setPrimaryColor(pc);
         setSecondaryColor(sc);
         setCollectivityId(profile?.collectivity_id ?? null);
+
+        // Verif expiration licence
+        if (profile?.collectivity_id) {
+          supabase
+            .from("commune_licenses")
+            .select("status, expires_at")
+            .eq("collectivity_id", profile.collectivity_id)
+            .single()
+            .then(({ data: lic }) => {
+              if (!lic) return;
+              if (lic.status === "expired" || lic.status === "suspended") {
+                setLicenseWarning("expired");
+              } else if (lic.expires_at) {
+                const daysLeft = Math.ceil((new Date(lic.expires_at).getTime() - Date.now()) / 86400000);
+                if (daysLeft <= 30) setLicenseWarning("expiring_soon");
+              }
+            });
+        }
+
         clearTimeout(timeout);
         setAuthReady(true);
 
@@ -261,8 +284,27 @@ export function AdminShell({ activePath, children }: AdminShellProps) {
         </div>
       </aside>
 
-      {/* ── Main ── */}
-      <main className="ml-60 flex-1 overflow-auto">{children}</main>
+      {/* -- Main -- */}
+      <main className="ml-60 flex-1 overflow-auto">
+        {/* Banner expiration licence */}
+        {licenseWarning === "expired" && (
+          <div className="flex items-center gap-3 bg-red-600 px-5 py-2.5 text-sm text-white">
+            <AlertTriangle className="h-4 w-4 shrink-0" />
+            <span className="font-medium">Votre licence VigieCity a expire.</span>
+            <span className="opacity-80">Certaines fonctionnalites peuvent etre limitees.</span>
+            <a href="/admin/abonnement" className="ml-auto underline font-semibold hover:opacity-90 whitespace-nowrap">Voir mon abonnement</a>
+          </div>
+        )}
+        {licenseWarning === "expiring_soon" && (
+          <div className="flex items-center gap-3 bg-amber-500 px-5 py-2.5 text-sm text-white">
+            <AlertTriangle className="h-4 w-4 shrink-0" />
+            <span className="font-medium">Votre licence expire bientot.</span>
+            <span className="opacity-80">Contactez-nous pour renouveler votre abonnement.</span>
+            <a href="/admin/abonnement" className="ml-auto underline font-semibold hover:opacity-90 whitespace-nowrap">Voir mon abonnement</a>
+          </div>
+        )}
+        {children}
+      </main>
     </div>
   );
 }

@@ -37,6 +37,7 @@ const NAV_SECTIONS = [
       { icon: CreditCard,      label: "Plans tarifaires", path: "/platform/plans"          },
       { icon: Euro,            label: "Intercommunal",    path: "/platform/tarification"   },
       { icon: Package,         label: "Modules",          path: "/platform/modules"        },
+      { icon: Shield,          label: "Abonnements",      path: "/platform/abonnements"    },
     ],
   },
   {
@@ -66,6 +67,7 @@ const PAGE_TITLES: Record<string, string> = {
   "/platform/plans":            "Plans tarifaires",
   "/platform/tarification":     "Intercommunal",
   "/platform/modules":          "Modules",
+  "/platform/abonnements":      "Abonnements",
   "/platform/analytics":        "Analytics",
   "/platform/settings":         "Paramètres",
 };

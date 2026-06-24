@@ -67,6 +67,8 @@ import { Route as PlatformRetentionRouteImport } from './routes/platform/retenti
 import { Route as PlatformAnalyticsRouteImport } from './routes/platform/analytics'
 import { Route as PlatformPlansRouteImport } from './routes/platform/plans'
 import { Route as PlatformTarificationRouteImport } from './routes/platform/tarification'
+import { Route as PlatformAbonnementsRouteImport } from './routes/platform/abonnements'
+import { Route as AdminAbonnementRouteImport } from './routes/admin/abonnement'
 
 // ── Déclarations de routes ────────────────────────────────────────────────────
 const IndexRoute = IndexRouteImport.update({
@@ -326,6 +328,16 @@ const PlatformTarificationRoute = PlatformTarificationRouteImport.update({
   path: '/platform/tarification',
   getParentRoute: () => rootRouteImport,
 } as any)
+const PlatformAbonnementsRoute = PlatformAbonnementsRouteImport.update({
+  id: '/platform/abonnements',
+  path: '/platform/abonnements',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AdminAbonnementRoute = AdminAbonnementRouteImport.update({
+  id: '/admin/abonnement',
+  path: '/admin/abonnement',
+  getParentRoute: () => rootRouteImport,
+} as any)
 
 // ── Interfaces de types ───────────────────────────────────────────────────────
 export interface FileRoutesByFullPath {
@@ -380,6 +392,8 @@ export interface FileRoutesByFullPath {
   '/platform/analytics': typeof PlatformAnalyticsRoute
   '/platform/plans': typeof PlatformPlansRoute
   '/platform/tarification': typeof PlatformTarificationRoute
+  '/platform/abonnements': typeof PlatformAbonnementsRoute
+  '/admin/abonnement': typeof AdminAbonnementRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -432,6 +446,8 @@ export interface FileRoutesByTo {
   '/platform/analytics': typeof PlatformAnalyticsRoute
   '/platform/plans': typeof PlatformPlansRoute
   '/platform/tarification': typeof PlatformTarificationRoute
+  '/platform/abonnements': typeof PlatformAbonnementsRoute
+  '/admin/abonnement': typeof AdminAbonnementRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -485,6 +501,8 @@ export interface FileRoutesById {
   '/platform/analytics': typeof PlatformAnalyticsRoute
   '/platform/plans': typeof PlatformPlansRoute
   '/platform/tarification': typeof PlatformTarificationRoute
+  '/platform/abonnements': typeof PlatformAbonnementsRoute
+  '/admin/abonnement': typeof AdminAbonnementRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -540,6 +558,8 @@ export interface FileRouteTypes {
     | '/platform/analytics'
     | '/platform/plans'
     | '/platform/tarification'
+    | '/platform/abonnements'
+    | '/admin/abonnement'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -593,6 +613,8 @@ export interface FileRouteTypes {
     | '/platform/analytics'
     | '/platform/plans'
     | '/platform/tarification'
+    | '/platform/abonnements'
+    | '/admin/abonnement'
   id:
     | '__root__'
     | '/'
@@ -646,6 +668,8 @@ export interface FileRouteTypes {
     | '/platform/analytics'
     | '/platform/plans'
     | '/platform/tarification'
+    | '/platform/abonnements'
+    | '/admin/abonnement'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -700,6 +724,8 @@ export interface RootRouteChildren {
   PlatformAnalyticsRoute: typeof PlatformAnalyticsRoute
   PlatformPlansRoute: typeof PlatformPlansRoute
   PlatformTarificationRoute: typeof PlatformTarificationRoute
+  PlatformAbonnementsRoute: typeof PlatformAbonnementsRoute
+  AdminAbonnementRoute: typeof AdminAbonnementRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -1054,6 +1080,20 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof PlatformTarificationRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/platform/abonnements': {
+      id: '/platform/abonnements'
+      path: '/platform/abonnements'
+      fullPath: '/platform/abonnements'
+      preLoaderRoute: typeof PlatformAbonnementsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/admin/abonnement': {
+      id: '/admin/abonnement'
+      path: '/admin/abonnement'
+      fullPath: '/admin/abonnement'
+      preLoaderRoute: typeof AdminAbonnementRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
@@ -1110,6 +1150,8 @@ const rootRouteChildren: RootRouteChildren = {
   PlatformAnalyticsRoute,
   PlatformPlansRoute,
   PlatformTarificationRoute,
+  PlatformAbonnementsRoute,
+  AdminAbonnementRoute,
 }
 
 export const routeTree = rootRouteImport
