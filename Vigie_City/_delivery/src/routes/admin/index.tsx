@@ -10,6 +10,13 @@ import {
   AlertTriangle,
   ArrowRight,
   Loader2,
+  CheckCircle2,
+  Circle,
+  X,
+  Palette,
+  Bell,
+  Users,
+  MapPin,
 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { AdminShell } from "@/components/AdminShell";
@@ -47,6 +54,108 @@ function SeverityBadge({ severity }: { severity: string }) {
 }
 
 // ── Page ──────────────────────────────────────────────────────────────────────
+
+
+// ── Widget "Premiers pas" ─────────────────────────────────────────────────────
+
+const ONBOARDING_STEPS = [
+  { id: "logo",       label: "Personnalisez le logo et les couleurs",  icon: <Palette      className="h-4 w-4" />, path: "/admin/settings",    color: "text-violet-600" },
+  { id: "alerte",     label: "Publiez votre premiere alerte",           icon: <Bell         className="h-4 w-4" />, path: "/admin/alertes",     color: "text-red-600"    },
+  { id: "publication",label: "Redigez une actualite",                   icon: <BookOpen     className="h-4 w-4" />, path: "/admin/publications",color: "text-emerald-600"},
+  { id: "evenement",  label: "Creez un evenement agenda",               icon: <Calendar     className="h-4 w-4" />, path: "/admin/evenements",  color: "text-blue-600"   },
+  { id: "agent",      label: "Invitez un agent de la mairie",           icon: <Users        className="h-4 w-4" />, path: "/admin/settings",    color: "text-amber-600"  },
+] as const;
+
+const STORAGE_KEY = "vigie_onboarding_v1";
+
+type OnboardingState = { dismissed: boolean; checked: Record<string, boolean> };
+
+function loadOnboarding(): OnboardingState {
+  try {
+    const raw = localStorage.getItem(STORAGE_KEY);
+    if (raw) return JSON.parse(raw);
+  } catch {}
+  return { dismissed: false, checked: {} };
+}
+
+function GettingStartedWidget() {
+  const navigate = useNavigate();
+  const [state, setState] = useState<OnboardingState>(() => loadOnboarding());
+
+  function save(next: OnboardingState) {
+    setState(next);
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(next));
+  }
+
+  function toggle(id: string) {
+    save({ ...state, checked: { ...state.checked, [id]: !state.checked[id] } });
+  }
+
+  const done = ONBOARDING_STEPS.filter(s => state.checked[s.id]).length;
+  const total = ONBOARDING_STEPS.length;
+  const pct = Math.round((done / total) * 100);
+
+  if (state.dismissed || done === total) return null;
+
+  return (
+    <div className="mb-8 overflow-hidden rounded-2xl border border-blue-200 bg-gradient-to-br from-blue-50 to-indigo-50 shadow-sm">
+      <div className="flex items-center justify-between px-6 py-4 border-b border-blue-100">
+        <div className="flex items-center gap-3">
+          <div className="flex h-8 w-8 items-center justify-center rounded-xl bg-blue-600 text-white text-xs font-bold">
+            {done}/{total}
+          </div>
+          <div>
+            <h2 className="font-bold text-slate-900 text-sm">Premiers pas avec VigieCity</h2>
+            <p className="text-xs text-slate-500">{pct}% complete &mdash; configurez votre commune en quelques minutes</p>
+          </div>
+        </div>
+        <button
+          onClick={() => save({ ...state, dismissed: true })}
+          className="rounded-lg p-1.5 text-slate-400 hover:bg-blue-100 hover:text-slate-600 transition"
+          aria-label="Fermer"
+        >
+          <X className="h-4 w-4" />
+        </button>
+      </div>
+      {/* Progress bar */}
+      <div className="h-1 bg-blue-100">
+        <div
+          className="h-1 bg-blue-500 transition-all duration-500"
+          style={{ width: pct + "%" }}
+        />
+      </div>
+      {/* Steps */}
+      <div className="divide-y divide-blue-100">
+        {ONBOARDING_STEPS.map(step => {
+          const checked = !!state.checked[step.id];
+          return (
+            <div key={step.id} className="flex items-center gap-3 px-6 py-3 hover:bg-blue-50/70 transition">
+              <button
+                onClick={() => toggle(step.id)}
+                className={`shrink-0 transition ${checked ? "text-emerald-500" : "text-slate-300 hover:text-slate-400"}`}
+                aria-label={checked ? "Marquer comme non fait" : "Marquer comme fait"}
+              >
+                {checked ? <CheckCircle2 className="h-5 w-5" /> : <Circle className="h-5 w-5" />}
+              </button>
+              <span className={`flex-1 text-sm ${checked ? "line-through text-slate-400" : "text-slate-700 font-medium"}`}>
+                {step.label}
+              </span>
+              {!checked && (
+                <button
+                  onClick={() => navigate({ to: step.path as any })}
+                  className={`flex items-center gap-1 text-xs font-semibold ${step.color} hover:underline`}
+                >
+                  <span className={step.color}>{step.icon}</span>
+                  Faire
+                </button>
+              )}
+            </div>
+          );
+        })}
+      </div>
+    </div>
+  );
+}
 
 function AdminDashboard() {
   const navigate = useNavigate();
@@ -191,6 +300,9 @@ function AdminDashboard() {
             {communeName ? `Commune de ${communeName}` : "Administration VigieCity"}
           </p>
         </div>
+
+        {/* Onboarding checklist */}
+        <GettingStartedWidget />
 
         {/* Stat cards */}
         <div className="mb-8 grid grid-cols-2 gap-4 lg:grid-cols-4">

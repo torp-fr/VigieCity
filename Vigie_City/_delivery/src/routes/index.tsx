@@ -14,6 +14,31 @@ export const Route = createFileRoute("/")({
     links: [
       { rel: "icon", type: "image/svg+xml", href: "/icons/icon.svg" },
     ],
+    scripts: [
+      {
+        type: "application/ld+json",
+        children: JSON.stringify({
+          "@context": "https://schema.org",
+          "@type": "SoftwareApplication",
+          name: "VigieCity",
+          applicationCategory: "GovernmentApplication",
+          operatingSystem: "Web, iOS, Android",
+          description: "Application citoyenne SaaS pour communes : alertes, signalements, agenda, actualites locales.",
+          url: "https://vigiecity.fr",
+          offers: {
+            "@type": "AggregateOffer",
+            priceCurrency: "EUR",
+            lowPrice: "49",
+            highPrice: "490",
+          },
+          provider: {
+            "@type": "Organization",
+            name: "CRBR Group",
+            url: "https://vigiecity.fr",
+          },
+        }),
+      },
+    ],
     meta: [
       { title: "VigieCity — L'application citoyenne pour la vie de votre commune" },
       {
@@ -1256,6 +1281,77 @@ const POPULATIONS = [
   "Plus de 50 000 hab.",
 ];
 
+
+// ── FAQ Section ───────────────────────────────────────────────────────────────
+
+const FAQ_ITEMS = [
+  {
+    q: "Combien de temps faut-il pour déployer VigieCity ?",
+    a: "Moins de 48h. Nous configurons votre espace, importons les données de votre commune et vous envoyons les accès. Vos citoyens peuvent s'inscrire immédiatement.",
+  },
+  {
+    q: "Faut-il une compétence technique pour administrer l'application ?",
+    a: "Non. L'interface d'administration est aussi simple qu'un outil de messagerie. Pas de code, pas de serveur à gérer. Nous assurons la maintenance et les mises à jour.",
+  },
+  {
+    q: "Les données des citoyens sont-elles sécurisées ?",
+    a: "Oui. Toutes les données sont hébergées en Europe (Supabase EU + Vercel EU) conformément au RGPD. Les données de votre commune ne sont jamais partagées avec d'autres collectivités.",
+  },
+  {
+    q: "Comment fonctionne la facturation pour les collectivités publiques ?",
+    a: "Via Chorus Pro, le portail de facturation officiel des collectivités publiques françaises. Nous émettons une facture au format attendu (SIRET, mentions légales) — aucune carte bancaire requise.",
+  },
+  {
+    q: "Y a-t-il une application mobile pour les citoyens ?",
+    a: "VigieCity est une Progressive Web App (PWA) installable sur iOS et Android depuis le navigateur. Une version native App Store / Play Store est en cours de validation.",
+  },
+  {
+    q: "Peut-on tester avant de s'engager ?",
+    a: "Oui — démo gratuite et personnalisée avec les vraies données de votre commune, sans engagement. Utilisez le formulaire de contact ci-dessous.",
+  },
+];
+
+function FaqSection() {
+  const [open, setOpen] = useState<number | null>(null);
+  return (
+    <section className="py-20" style={{ backgroundColor: "#f8faff" }}>
+      <div className="mx-auto max-w-3xl px-6">
+        <div className="mb-12 text-center">
+          <p className="text-sm font-semibold uppercase tracking-widest text-blue-600">FAQ</p>
+          <h2 className="mt-2 text-3xl font-extrabold text-slate-900 md:text-4xl">
+            Questions fréquentes
+          </h2>
+        </div>
+        <div className="space-y-3">
+          {FAQ_ITEMS.map((item, i) => (
+            <div
+              key={i}
+              className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm"
+            >
+              <button
+                className="flex w-full items-center justify-between px-6 py-5 text-left transition hover:bg-slate-50"
+                onClick={() => setOpen(open === i ? null : i)}
+              >
+                <span className="pr-4 font-semibold text-slate-900 text-sm md:text-base">
+                  {item.q}
+                </span>
+                <ChevronDown
+                  className={"h-5 w-5 shrink-0 text-slate-400 transition-transform duration-200 " + (open === i ? "rotate-180" : "")}
+                />
+              </button>
+              {open === i && (
+                <div className="border-t border-slate-100 px-6 py-4">
+                  <p className="text-sm leading-relaxed text-slate-600">{item.a}</p>
+                </div>
+              )}
+            </div>
+          ))}
+        </div>
+      </div>
+    </section>
+  );
+}
+
 function ContactSection() {
   const navigate = useNavigate();
   const [form, setForm] = useState({
@@ -1667,6 +1763,35 @@ function LandingPage() {
 
       {/* ── Grille tarifaire ─────────────────────────── */}
       <PricingSection />
+
+      {/* ── Social proof / chiffres ──────────── */}
+      <section className="py-16 bg-white border-t border-slate-100">
+        <div className="mx-auto max-w-5xl px-6">
+          <div className="mb-10 text-center">
+            <p className="text-sm font-semibold uppercase tracking-widest text-blue-600">VigieCity en chiffres</p>
+            <h2 className="mt-2 text-2xl font-extrabold text-slate-900 md:text-3xl">
+              Une plateforme pensée pour les communes françaises
+            </h2>
+          </div>
+          <div className="grid grid-cols-2 gap-6 md:grid-cols-4">
+            {[
+              { stat: "34 969", label: "communes référencées", sub: "Base INSEE complète" },
+              { stat: "< 48h", label: "déploiement", sub: "De zéro à actif" },
+              { stat: "9 modules", label: "citoyens inclus", sub: "Alertes, agenda, carte..." },
+              { stat: "100 %", label: "données en France", sub: "Hébergement EU (RGPD)" },
+            ].map(({ stat, label, sub }) => (
+              <div key={label} className="rounded-2xl border border-slate-100 bg-slate-50 p-6 text-center">
+                <p className="text-3xl font-extrabold text-blue-700">{stat}</p>
+                <p className="mt-1 text-sm font-semibold text-slate-800">{label}</p>
+                <p className="mt-0.5 text-xs text-slate-500">{sub}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* ── FAQ ────────────────────────────────────── */}
+      <FaqSection />
 
       {/* ── Contact ──────────────────────────────────── */}
       <ContactSection />
