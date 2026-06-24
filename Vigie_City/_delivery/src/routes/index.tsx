@@ -1,4 +1,4 @@
-import { createFileRoute, Link } from "@tanstack/react-router";
+import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useState, useRef, useEffect } from "react";
 import {
   CheckCircle2, ArrowRight, ChevronDown,
@@ -1257,6 +1257,7 @@ const POPULATIONS = [
 ];
 
 function ContactSection() {
+  const navigate = useNavigate();
   const [form, setForm] = useState({
     nom: "", commune: "", email: "", telephone: "", population: "", message: "",
   });
@@ -1280,14 +1281,20 @@ function ContactSection() {
         body: JSON.stringify(form),
       });
       const json = await res.json();
-      setStatus(json.success ? "success" : "error");
+      if (json.success) {
+        if (typeof window !== "undefined" && (window as any).posthog) {
+          (window as any).posthog.capture("demo_requested", { commune: form.commune, population: form.population });
+        }
+        navigate({ to: "/merci" });
+        return;
+      }
+      setStatus("error");
     } catch {
       setStatus("error");
     }
   }
 
-  if (status === "success") {
-    return (
+  return (
       <section id="contact" className="py-20" style={{ backgroundColor: "#1e3a8a" }}>
         <div className="mx-auto max-w-xl px-6 text-center">
           <div className="mx-auto mb-6 flex h-16 w-16 items-center justify-center rounded-full bg-green-400/20">

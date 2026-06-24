@@ -47,7 +47,7 @@ const ADMIN_ROLES = ["commune_admin", "interco_admin", "super_admin"] as const;
 
 // Routes rendered without the app shell (header / bottom nav)
 const SHELL_FREE_ROUTES = [
-  "/", "/landing", "/auth", "/demo",
+  "/", "/landing", "/auth", "/demo", "/merci",
   "/admin/login", "/admin/reset-password", "/admin/accept-invite",
   "/mentions-legales", "/confidentialite", "/cgu",
 ];
