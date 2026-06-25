@@ -42,15 +42,26 @@ function AuthPage() {
     e.preventDefault();
     setLoading(true);
     const { error } = await supabase.auth.signInWithPassword({ email, password });
-    setLoading(false);
     if (error) {
+      setLoading(false);
       toast.error(
         error.message.includes("Invalid login")
           ? "Email ou mot de passe incorrect."
           : error.message
       );
+      return;
     }
-    // __root.tsx onAuthStateChange gère la redirection vers /onboarding ou /accueil
+    // Redirection directe — /auth est dans SKIP_ONBOARDING_ROUTES donc __root.tsx ne redirige pas
+    const { data: { user } } = await supabase.auth.getUser();
+    if (user) {
+      const { data: profile } = await supabase
+        .from("profiles")
+        .select("collectivity_id")
+        .eq("id", user.id)
+        .single();
+      navigate({ to: profile?.collectivity_id ? "/accueil" : "/onboarding" });
+    }
+    setLoading(false);
   }
 
   async function handleRegister(e: React.FormEvent) {
