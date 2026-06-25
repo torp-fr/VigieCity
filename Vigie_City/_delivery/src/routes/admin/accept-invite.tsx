@@ -164,10 +164,23 @@ function AcceptInvitePage() {
         .update({ accepted_at: new Date().toISOString() })
         .eq("id", invite.id);
 
+      // 4. Send welcome email (fire-and-forget — ne bloque pas l'UX)
+      const supabaseUrl = (supabase as any).supabaseUrl as string;
+      const supabaseKey = (supabase as any).supabaseKey as string;
+      fetch(supabaseUrl + "/functions/v1/send-welcome", {
+        method: "POST",
+        headers: { "Content-Type": "application/json", apikey: supabaseKey },
+        body: JSON.stringify({
+          email:        invite.email,
+          first_name:   firstName.trim() || undefined,
+          commune_name: invite.collectivities?.name ?? "",
+        }),
+      }).catch(() => { /* welcome email non bloquant */ });
+
       setState({ kind: "success", communeName: invite.collectivities?.name ?? "votre commune" });
 
       // Redirect to admin dashboard after 3 s
-      setTimeout(() => navigate({ to: "/admin/dashboard" }), 3000);
+      setTimeout(() => navigate({ to: "/admin" as any }), 3000);
 
     } catch (err: any) {
       toast.error(err.message ?? "Une erreur est survenue.");
