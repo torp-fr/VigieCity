@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?> 
+<resources> 
+    <string name="app_name">VigieCity</string> 
+    <string name="title_activity_main">VigieCity</string> 
+    <string name="package_name">fr.vigiecity.app</string> 
+    <string name="custom_url_scheme">fr.vigiecity.app</string> 
+</resources> 
