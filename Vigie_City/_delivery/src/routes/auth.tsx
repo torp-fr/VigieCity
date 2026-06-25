@@ -4,6 +4,29 @@ import { Eye, EyeOff, Loader2, ShieldCheck, ArrowRight } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 
+// ── Routing par profil ────────────────────────────────────────────────────────
+// Appelé après login ET au chargement si déjà connecté.
+// terrain     → gestion signalements mobile
+// super_admin → vue KPIs mobile (platform/mobile)
+// commune_admin / interco_admin → sur mobile, usage citoyen (/accueil)
+//   (le panel admin est desktop-only, ils y accèdent via navigateur)
+// citizen     → /accueil si commune choisie, sinon /onboarding
+function navigateByRole(
+  profile: { collectivity_id: string | null; role: string | null } | null,
+  navigate: ReturnType<typeof useNavigate>
+) {
+  const role = profile?.role ?? "citizen";
+  if (role === "terrain") {
+    navigate({ to: "/admin/terrain" });
+  } else if (role === "super_admin") {
+    navigate({ to: "/platform/mobile" });
+  } else {
+    // commune_admin, interco_admin → usage citoyen mobile
+    // citizen → onboarding si pas de commune
+    navigate({ to: profile?.collectivity_id ? "/accueil" : "/onboarding" });
+  }
+}
+
 export const Route = createFileRoute("/auth")({
   head: () => ({
     meta: [{ title: "VigieCity — Connexion" }],
@@ -22,10 +45,16 @@ function AuthPage() {
   const [showPwd, setShowPwd] = useState(false);
   const [loading, setLoading] = useState(false);
 
-  // Si déjà connecté → accueil directement
+  // Si déjà connecté → routing par profil directement
   useEffect(() => {
-    supabase.auth.getUser().then(({ data }) => {
-      if (data.user) navigate({ to: "/accueil" });
+    supabase.auth.getUser().then(async ({ data }) => {
+      if (!data.user) return;
+      const { data: profile } = await supabase
+        .from("profiles")
+        .select("collectivity_id, role")
+        .eq("id", data.user.id)
+        .single();
+      navigateByRole(profile, navigate);
     });
   }, [navigate]);
 
@@ -52,15 +81,15 @@ function AuthPage() {
       return;
     }
     // /auth est dans SKIP_ONBOARDING_ROUTES → __root.tsx ne redirige pas
-    // Navigate explicite ici — une seule navigation, pas de race condition
+    // Navigate explicite par profil — une seule navigation, pas de race condition
     const { data: { user } } = await supabase.auth.getUser();
     if (user) {
       const { data: profile } = await supabase
         .from("profiles")
-        .select("collectivity_id")
+        .select("collectivity_id, role")
         .eq("id", user.id)
         .single();
-      navigate({ to: profile?.collectivity_id ? "/accueil" : "/onboarding" });
+      navigateByRole(profile, navigate);
     }
     setLoading(false);
   }

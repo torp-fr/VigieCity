@@ -4,7 +4,7 @@
   "webDir": "dist",
   "bundledWebRuntime": false,
   "server": {
-    "url": "https://vigiecity.fr/auth",
+    "url": "https://app.vigiecity.fr/auth",
     "androidScheme": "https",
     "iosScheme": "https",
     "allowNavigation": ["*.vigiecity.fr", "*.supabase.co", "*.vercel.app"]

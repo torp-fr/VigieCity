@@ -38,6 +38,17 @@ import { CookieBanner } from "../components/CookieBanner";
 import { Toaster } from "../components/ui/sonner";
 import { supabase } from "@/integrations/supabase/client";
 
+// Détecte si on tourne dans l'app mobile (app.vigiecity.fr ou Capacitor natif).
+// Sur ce domaine : routes commerciales interdites, / → /auth.
+const IS_APP_DOMAIN =
+  typeof window !== "undefined" &&
+  (window.location.hostname === "app.vigiecity.fr" ||
+   !!(window as { Capacitor?: { isNativePlatform?: () => boolean } })
+     .Capacitor?.isNativePlatform?.());
+
+// Routes commerciales — inaccessibles dans l'app mobile
+const COMMERCIAL_ROUTES = ["/", "/landing", "/demo", "/merci", "/advertiser-dashboard"];
+
 // Routes that don't require onboarding check
 // /auth est dans cette liste : handleLogin gère lui-même sa redirection post-login.
 // __root.tsx ne doit PAS naviguer depuis /auth pour éviter la race condition.
@@ -67,7 +78,7 @@ function NotFoundComponent() {
         </p>
         <div className="mt-6">
           <Link
-            to="/"
+            to={IS_APP_DOMAIN ? "/auth" : "/"}
             className="inline-flex items-center justify-center rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground hover:bg-primary/90"
           >
             Retour à l'accueil
@@ -102,7 +113,7 @@ function ErrorComponent({ error, reset }: { error: Error; reset: () => void }) {
             Réessayer
           </button>
           <a
-            href="/"
+            href={IS_APP_DOMAIN ? "/auth" : "/"}
             className="inline-flex items-center justify-center rounded-md border border-input bg-background px-4 py-2 text-sm font-medium text-foreground hover:bg-accent"
           >
             Accueil
@@ -192,6 +203,16 @@ function RootComponent() {
 
   const isShellFree  = SHELL_FREE_ROUTES.some((r) => pathname === r || pathname.startsWith(r + "/"));
   const isAdminRoute = pathname.startsWith("/admin") || pathname.startsWith("/platform");
+
+  // ── Guard : routes commerciales interdites dans l'app mobile ─────────────
+  // Sur app.vigiecity.fr ou Capacitor, / /landing /demo /merci → redirect /auth
+  useEffect(() => {
+    if (!IS_APP_DOMAIN) return;
+    const isCommercial = COMMERCIAL_ROUTES.some(
+      (r) => pathname === r || pathname.startsWith(r + "/")
+    );
+    if (isCommercial) navigate({ to: "/auth" });
+  }, [pathname, navigate]);
 
   // ── Register Service Worker (J3.1) ────────────────────────────────────────
   useEffect(() => {
