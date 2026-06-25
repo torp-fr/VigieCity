@@ -269,4 +269,40 @@ function RootComponent() {
 
       // Admin : le formulaire /admin/login a deja redirige, rien a faire ici
       const role = profile?.role as string;
-      if (ADMIN_ROLES.in
+      if (ADMIN_ROLES.includes(role as typeof ADMIN_ROLES[number])) return;
+
+      // Citizen : redirect onboarding si pas de commune, sinon accueil
+      const currentPath = pathnameRef.current;
+      const skipOnboarding = SKIP_ONBOARDING_ROUTES.some(
+        (r) => currentPath === r || currentPath.startsWith(r + "/")
+      );
+      if (skipOnboarding) return;
+
+      if (!profile?.collectivity_id) {
+        navigate({ to: "/onboarding" });
+      } else {
+        navigate({ to: "/accueil" });
+      }
+    });
+
+    return () => { data.subscription.unsubscribe(); };
+  }, [navigate, queryClient]);
+
+  return (
+    <QueryClientProvider client={queryClient}>
+      {isShellFree || isAdminRoute ? (
+        <Outlet />
+      ) : (
+        <>
+          <AppHeader />
+          <main className="pb-safe flex-1">
+            <Outlet />
+          </main>
+          <BottomNav />
+        </>
+      )}
+      <CookieBanner />
+      <Toaster richColors closeButton />
+    </QueryClientProvider>
+  );
+}
