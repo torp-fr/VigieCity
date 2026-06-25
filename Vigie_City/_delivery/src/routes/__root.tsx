@@ -39,6 +39,8 @@ import { Toaster } from "../components/ui/sonner";
 import { supabase } from "@/integrations/supabase/client";
 
 // Routes that don't require onboarding check
+// /auth est dans cette liste : handleLogin gère lui-même sa redirection post-login.
+// __root.tsx ne doit PAS naviguer depuis /auth pour éviter la race condition.
 const SKIP_ONBOARDING_ROUTES = [
   "/auth", "/onboarding", "/profil", "/mentions-legales",
   "/confidentialite", "/cgu", "/admin/login",
