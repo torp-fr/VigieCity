@@ -13,7 +13,7 @@
     "backgroundColor": "#091844",
     "allowMixedContent": false,
     "captureInput": true,
-    "webContentsDebuggingEnabled": false
+    "webContentsDebuggingEnabled": true
   },
   "ios": {
     "backgroundColor": "#091844",

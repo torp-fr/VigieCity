@@ -285,12 +285,20 @@ function QuickLink({
   href: string;
   sub: string;
 }) {
+  // Dans Capacitor WebView, allowNavigation inclut *.vigiecity.fr.
+  // Un <a href> ordinaire naviguerait dans le WebView lui-même.
+  // On utilise window.open(url, '_system') pour forcer l'ouverture
+  // dans le navigateur Android externe.
+  function handleOpen(e: React.MouseEvent) {
+    e.preventDefault();
+    window.open(href, "_system");
+  }
+
   return (
-    <a
-      href={href}
-      target="_blank"
-      rel="noopener noreferrer"
-      className="flex items-center gap-3 rounded-2xl bg-white/8 border border-white/10 px-4 py-3.5"
+    <button
+      type="button"
+      onClick={handleOpen}
+      className="flex w-full items-center gap-3 rounded-2xl bg-white/8 border border-white/10 px-4 py-3.5 text-left"
     >
       <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-white/10">
         <Icon className="h-4.5 w-4.5 text-white/80" />
@@ -300,6 +308,6 @@ function QuickLink({
         <p className="text-xs text-white/50">{sub}</p>
       </div>
       <ExternalLink className="h-4 w-4 text-white/30 shrink-0" />
-    </a>
+    </button>
   );
 }

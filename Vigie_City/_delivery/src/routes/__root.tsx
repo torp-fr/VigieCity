@@ -51,10 +51,13 @@ const COMMERCIAL_ROUTES = ["/", "/landing", "/demo", "/merci", "/advertiser-dash
 
 // Routes that don't require onboarding check
 // /auth est dans cette liste : handleLogin gère lui-même sa redirection post-login.
-// __root.tsx ne doit PAS naviguer depuis /auth pour éviter la race condition.
+// /platform/mobile et /admin/terrain ont leurs propres guards, ne pas interférer.
+// __root.tsx ne doit PAS naviguer depuis ces routes pour éviter les race conditions.
 const SKIP_ONBOARDING_ROUTES = [
   "/auth", "/onboarding", "/profil", "/mentions-legales",
   "/confidentialite", "/cgu", "/admin/login",
+  "/platform/mobile",  // dashboard super-admin : guard interne
+  "/admin/terrain",    // terrain agent : guard interne
 ];
 const ADMIN_ROLES = ["commune_admin", "interco_admin", "super_admin"] as const;
 
@@ -290,8 +293,11 @@ function RootComponent() {
         });
       }
 
+      // Si profil introuvable (RLS, réseau, utilisateur tout neuf), ne pas naviguer en aveugle
+      if (!profile) return;
+
       // Admin : le formulaire /admin/login a deja redirige, rien a faire ici
-      const role = profile?.role as string;
+      const role = profile.role as string;
       if (ADMIN_ROLES.includes(role as typeof ADMIN_ROLES[number])) return;
 
       // Citizen : redirect onboarding si pas de commune, sinon accueil
