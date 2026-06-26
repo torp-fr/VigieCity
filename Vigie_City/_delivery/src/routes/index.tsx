@@ -781,11 +781,12 @@ const ADMIN_FEATURES = [
 type CommuneResult = { nom: string; code: string; population: number };
 
 function getPopulationTierIndex(population: number): number {
-  if (population < 1000)  return 0; // Nano
-  if (population < 3501)  return 1; // Micro
-  if (population < 10001) return 2; // Local
-  if (population < 50001) return 3; // Urbain
-  return 4;                          // Métropole
+  if (population < 500)   return 0; // Hameau
+  if (population < 3501)  return 1; // Village
+  if (population < 10001) return 2; // Bourg
+  if (population < 25001) return 3; // Bastide
+  if (population < 50001) return 4; // Cité
+  return 5;                          // Métropole
 }
 
 function CommuneCalculatorSection() {
@@ -844,11 +845,12 @@ function CommuneCalculatorSection() {
   // → on passe par les mêmes constantes définies plus bas dans le fichier
 
   const TIER_DATA = [
-    { name: "Nano",      range: "< 1 000 hab.",          monthly: 49,  annual: 490  },
-    { name: "Micro",     range: "1 001 – 3 500 hab.",    monthly: 99,  annual: 990  },
-    { name: "Local",     range: "3 501 – 10 000 hab.",   monthly: 189, annual: 1890 },
-    { name: "Urbain",    range: "10 001 – 50 000 hab.",  monthly: 490, annual: 4900 },
-    { name: "Métropole", range: "> 50 000 hab.",          monthly: null, annual: null },
+    { name: "Hameau",    range: "< 500 hab.",            monthly: 19,  annual: 190  },
+    { name: "Village",   range: "501 – 3 500 hab.",      monthly: 49,  annual: 490  },
+    { name: "Bourg",     range: "3 501 – 10 000 hab.",   monthly: 99,  annual: 990  },
+    { name: "Bastide",   range: "10 001 – 25 000 hab.",  monthly: 189, annual: 1890 },
+    { name: "Cité",      range: "25 001 – 50 000 hab.",  monthly: 390, annual: 3900 },
+    { name: "Métropole", range: "> 50 000 hab.",         monthly: 590, annual: 5900 },
   ] as const;
 
   const tier = tierIndex !== null ? TIER_DATA[tierIndex] : null;
@@ -1032,11 +1034,12 @@ function CommuneCalculatorSection() {
 // ── Grille tarifaire ──────────────────────────────────────────────────────────
 
 const PRICING_TIERS = [
-  { name: "Nano", range: "< 1 000 hab.", monthly: 49, annual: 490 },
-  { name: "Micro", range: "1 001 – 3 500 hab.", monthly: 99, annual: 990 },
-  { name: "Local",   range: "3 501 – 10 000 hab.", monthly: 189, annual: 1890 },
-  { name: "Urbain", range: "10 001 – 50 000 hab.", monthly: 490, annual: 4900 },
-  { name: "Métropole", range: "> 50 000 hab.", monthly: null, annual: null },
+  { name: "Hameau", range: "< 500 hab.", monthly: 19, annual: 190 },
+  { name: "Village", range: "501 – 3 500 hab.", monthly: 49, annual: 490 },
+  { name: "Bourg",   range: "3 501 – 10 000 hab.", monthly: 99, annual: 990 },
+  { name: "Bastide", range: "10 001 – 25 000 hab.", monthly: 189, annual: 1890 },
+  { name: "Cité", range: "25 001 – 50 000 hab.", monthly: 390, annual: 3900 },
+  { name: "Métropole", range: "> 50 000 hab.", monthly: 590, annual: 5900 },
 ] as const;
 
 const FEATURES_LIST = [
@@ -1837,8 +1840,6 @@ function LandingPage() {
         </div>
       </footer>
 
-      {/* ── Floating promo banner ───────────────────── */}
-      <PromoBanner />
 
     </div>
   );
