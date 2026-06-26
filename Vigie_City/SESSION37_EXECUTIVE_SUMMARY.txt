@@ -1,0 +1,220 @@
+═══════════════════════════════════════════════════════════════════════════════
+  VigieCity — Session 37 Executive Summary
+  Bilan & Roadmap complets (26/06/2026)
+═══════════════════════════════════════════════════════════════════════════════
+
+📊 BILAN SESSIONS 31 → 36
+─────────────────────────────────────────────────────────────────────────────────
+
+6 sessions = 24 jours de déploiement commercial + mobile finition
+
+  Session 31 (J19)  → Email bienvenue commune (send-welcome v2)
+  Session 32 (J20)  → SEO og:image 1200×630
+  Session 33 (J22)  → Email nurturing J+3/J+7 + pg_cron
+  Session 34 (J9)   → Route /auth mobile + icônes Android
+  Session 35 (J9b)  → Fix routeTree /accueil → 404 error
+  Session 36 (J9c)  → Séparation vigiecity.fr / app.vigiecity.fr + routing profil
+
+✅ Résultat : Plateforme commerciale MVP stable, mobile entrée app prête
+
+
+🎯 ÉTAT ACTUEL
+─────────────────────────────────────────────────────────────────────────────────
+
+Frontend
+  ✅ Dual-domain architecture : vigiecity.fr + app.vigiecity.fr
+  ✅ IS_APP_DOMAIN guard dans __root.tsx
+  ✅ navigateByRole() routing (terrain/super_admin/commune_admin/citizen)
+  ✅ Routes : /auth (splash), /accueil, /admin/*, /platform/*
+  ✅ 9 templates email (1 câblé send-welcome, 8 en attente)
+
+Backend (Supabase xfhkngecpbvmlstjymfy)
+  ✅ 11 Edge Functions en prod (send-email/welcome/nurturing/contact, ads, health-check, rss, etc.)
+  ✅ 61 tables PostgreSQL (types.ts à jour)
+  ✅ RLS complètes + pg_cron actifs (emails nurturing)
+  ✅ Migration nurturing_sent + pg_cron 9h UTC
+
+Mobile (Capacitor Android)
+  ✅ Routes /auth configurées, splash login 1.8s
+  ✅ Icônes générées (5 densités Android)
+  ✅ server.url pointant vers /auth
+  ⏳ DNS app.vigiecity.fr : Pending T1.1
+  ⏳ AAB rebuild + Play Console : Pending T1.2
+
+PWA & Monitoring
+  ✅ Service Worker v5 (multi-cache, offline, manifest Lighthouse)
+  ✅ Health-check EF + pg_cron 8h UTC
+  ✅ RSS monitoring + alerts
+
+Analytics
+  ✅ PostHog intégré + posthog-query EF
+  ✅ /platform/analytics page (carte Leaflet, signalements)
+  ✅ /platform/monetization dashboard (MRR consolidé, sparklines)
+
+SEO & Conversion
+  ✅ Landing : FAQ + chiffres clés + JSON-LD SoftwareApplication
+  ✅ OG:image : og-image.png 1200×630 + meta tags
+  ✅ Contact page + /merci (formulaires)
+  ✅ Widget "Premiers pas" admin (5 étapes localStorage)
+
+
+⚡ TÂCHES IMMÉDIATES (SESSION 37 = 1-2 jours)
+─────────────────────────────────────────────────────────────────────────────────
+
+Priority 🔴 BLOCKER
+
+  T1.1 : Configurer DNS app.vigiecity.fr
+    → Vercel Dashboard → Settings → Domains
+    → Ajouter CNAME : cname.vercel-dns.com
+    ⏱️ 15-30 min | Impact : Nécessaire avant AAB rebuild
+
+  T1.2 : Rebuild AAB + upload Play Console
+    → Terminal : .\build_aab.bat
+    → Vérifier app-release.aab généré
+    → Upload Play Console → Internal testing track
+    ⏱️ 30-45 min | Impact : Finaliser mobile launch
+
+  T1.3 : QA dual-domain routing end-to-end
+    → Tester vigiecity.fr (landing) vs app.vigiecity.fr (app)
+    → Vérifier guards : route commerciale sur app domain = redirect /auth
+    → Login flows : citoyen/admin/super_admin → dashboards corrects
+    ⏱️ 20 min | Impact : Validation S36 complète
+
+
+🗺️ ROADMAP 2026 Q3 (4-6 semaines)
+─────────────────────────────────────────────────────────────────────────────────
+
+COURT TERME (S38-S39)
+
+  J21 — Témoignages landing (1-2j)
+    → Ajouter section social proof sur landing
+    → 3-4 quotes élus/agents + étoiles + commune
+    → Améliore CTR démo
+
+  J23 — Template 02 Bienvenue Citoyen (1j)
+    → Email envoyé après signup citoyen
+    → Récupérer HTML du standalone file
+    → Déclencher fire-and-forget en /auth signup handler
+
+  J24 — Template 06 Résumé Hebdomadaire (2j)
+    → Email lundi 8h UTC (cron pg_cron)
+    → Agrège signalements + articles + events 7j précédents
+    → Pour tous admins communes actives
+
+
+MOYEN TERME (S40+)
+
+  T3.1 — Paiements décision (réunion 30 min)
+    → Chorus Pro reste seul paiement ? ou Stripe + freemium ?
+    → Conditionne roadmap long terme
+
+  T3.2 — Mobile QA avancée (1-2j)
+    → Full flow test app.vigiecity.fr
+    → Lighthouse 85+ score
+    → Bug triage pour sessions futures
+
+  T3.3 — iOS build (3-5j)
+    → Capacitor iOS + Xcode
+    → Apple Developer signing certs
+    → App Store internal testing
+
+
+LONG TERME (Q3-Q4)
+
+  J27 — Dashboard collectivités super-admin (2-3j)
+    → Table collectivités avec filtres/recherche/export
+    → Page détail commune avec analytics
+
+  J28 — Régie pub avancée (2-3j)
+    → Targeting par région/taille commune
+    → Reporting détaillé (CTR, impressions, clicks)
+    → Dashboard buyer
+
+  J29 — Chorus Pro sync (1-2j)
+    → Table commune_licenses amélorée
+    → Cron daily pour sync API Chorus Pro
+    → Admin dashboard : état licence + renouvellement
+
+
+GANTT ESTIMÉ
+
+  S37 (cette semaine)  : T1.1 + T1.2 + T1.3         = 1-2j
+  S38                  : J21 (témoignages)          = 1-2j
+  S39                  : J23 (citoyen) + J24 (digest) = 2-3j
+  S40                  : T3.1 décision + T3.2 QA     = 2-3j
+  S41+                 : T3.3 iOS + J27/J28/J29      = 3-5j chacun
+
+Parallèle : TORP roadmap autonome
+
+
+⚙️ CONTRAINTES À CONNAÎTRE
+─────────────────────────────────────────────────────────────────────────────────
+
+  ❌ NO STRIPE — Chorus Pro uniquement (jamais intégrer Stripe)
+  ⚠️  types.ts obsolète → Régénérer CLI Supabase si colonnes manquent
+  ⚠️  Unicode longs fichiers → Utiliser Python, pas Edit tool
+  ⚠️  routeTree.gen.ts autogénéré QUE en dev watch → vérifier manuellement avant push
+  ⚠️  EF déployées via MCP → NON trackées git (ne pas git add supabase/functions/)
+  ⚠️  Git in PowerShell → single-line uniquement (backslash fail)
+  ⚠️  SW bypass /admin* + /platform* → network-only (jamais CacheFirst)
+  🔐 Supabase project : xfhkngecpbvmlstjymfy (VigieCity, CORRECT)
+      ⚠️  Ne pas confondre avec iixxzfgexmiofvmfrnuy (TORP)
+
+
+📚 FICHIERS GÉNÉRÉS S37
+─────────────────────────────────────────────────────────────────────────────────
+
+  ✅ SESSION37_BRIEF_ETAT_PROJET.md
+     → État détaillé + contraintes + jalons restants + checklist
+
+  ✅ SESSION37_PLAN_TACHES.md
+     → Plan complet T1.1 → T4.3 avec durées / dépendances / étapes
+
+  ✅ SESSION37_DASHBOARD.html
+     → Dashboard visuel interactif (ouvrir dans navigateur)
+
+  ✅ SESSION37_EXECUTIVE_SUMMARY.txt (ce fichier)
+     → Résumé concis pour décisions rapides
+
+  ✅ Memory updated
+     → project_vigie_session37_state.md enregistrée pour S38+
+
+
+🚀 PROCHAIN APPEL À L'ACTION
+─────────────────────────────────────────────────────────────────────────────────
+
+Avant SESSION 37 démarrage :
+
+  1. ✅ Ouvrir SESSION37_DASHBOARD.html dans navigateur
+  2. ✅ Lire SESSION37_BRIEF_ETAT_PROJET.md (contexte complet)
+  3. ✅ Consulter SESSION37_PLAN_TACHES.md (T1.1, T1.2, T1.3 détaillés)
+  4. ✅ Décider priorité : T1 (mobile finition) vs J21 (conversion) vs autres
+
+  Commandes vérification :
+    git -C "C:\Users\Baptiste-\VigieCity" log --oneline -5
+    → Attendu : 48cffd7 (séparation domaine) en premier
+
+
+✉️ QUESTIONS FRÉQUENTES
+─────────────────────────────────────────────────────────────────────────────────
+
+  Q: Stripe peut-il être intégré ?
+  A: ❌ Non. Chorus Pro reste le seul paiement. À rediscuter en réunion business.
+
+  Q: Quand iOS ?
+  A: ⏳ Après Android stable (S40+). Capacitor iOS déjà en package.json.
+
+  Q: Combien de temps le roadmap complet J21-J29 ?
+  A: 4-6 semaines (~ 6 sessions). Dépend de T3.1 (décision Stripe) pour Q4.
+
+  Q: La plateforme est prête pour production ?
+  A: ✅ Oui. Phase 0 + 1 complétées. Mobile en test interne. Launch possible.
+
+  Q: Que faire si types.ts est obsolète ?
+  A: ⚠️ Régénérer : `npx supabase gen types typescript --project-id xfhkngecpbvmlstjymfy > src/integrations/supabase/types.ts`
+
+
+═══════════════════════════════════════════════════════════════════════════════
+Généré par Claude — 26/06/2026
+Consultez les fichiers MD détaillés pour plus d'information.
+═══════════════════════════════════════════════════════════════════════════════

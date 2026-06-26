@@ -1,0 +1,143 @@
+╔═══════════════════════════════════════════════════════════════════════════════╗
+║                 VigieCity Session 37 — BILAN & ROADMAP                         ║
+║                                                                                 ║
+║  4 fichiers créés pour vous en 5 min, détail complet ou planning 4-6 semaines  ║
+╚═══════════════════════════════════════════════════════════════════════════════╝
+
+
+🚀 COMMENCEZ ICI (choisissez votre chemin) :
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  1️⃣  Je veux un RÉSUMÉ RAPIDE (5 min)
+     → Ouvrir : SESSION37_EXECUTIVE_SUMMARY.txt
+     📄 Contient : bilan, tâches immédiates, FAQ, checklist
+
+  2️⃣  Je veux une VUE VISUELLE (2 min)
+     → Ouvrir : SESSION37_DASHBOARD.html (dans navigateur)
+     📊 Contient : dashboard interactif, cartes, timeline, tâches
+
+  3️⃣  Je veux LE CONTEXTE COMPLET (15 min)
+     → Lire : SESSION37_BRIEF_ETAT_PROJET.md
+     📋 Contient : état technique, architecture, 10 contraintes clés, jalons
+
+  4️⃣  Je veux LE PLAN DÉTAILLÉ (20 min)
+     → Lire : SESSION37_PLAN_TACHES.md
+     📅 Contient : phases, tâches T1.1→T4.3, durées, dépendances, gantt 4-6 sem
+
+  5️⃣  Je veux L'INDEX & NAVIGATION
+     → Lire : SESSION37_INDEX.md
+     🗂️  Contient : fichiers, flux de lecture, métainfo, commandes utiles
+
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+⚡ EN 60 SECONDES
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+✅ FAIT (6 sessions = 24 jours) :
+   • Plateforme commerciale MVP stable
+   • Mobile Capacitor routes + icônes Android
+   • Emails nurturing + templates
+   • Dual-domain architecture (vigiecity.fr vs app.vigiecity.fr)
+
+🔴 À FAIRE MAINTENANT (S37, 1-2 jours) :
+   • T1.1 : DNS app.vigiecity.fr                  (15 min)
+   • T1.2 : Rebuild AAB + Play Console            (45 min)
+   • T1.3 : QA dual-domain routing                (20 min)
+
+📅 ROADMAP (S38-S41+, 4-6 semaines) :
+   • S38 : J21 témoignages + J23 citoyen email
+   • S39 : J24 digest hebdomadaire + mobile QA
+   • S40+ : Paiements décision + iOS + features long terme
+
+🎯 = Plateforme prête pour production, mobile en final tests
+
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+📚 FICHIERS CRÉÉS
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  📄 SESSION37_EXECUTIVE_SUMMARY.txt
+     Résumé 5 min : bilan, tâches immédiates, roadmap, FAQ
+     👉 LIRE EN PREMIER
+
+  📊 SESSION37_DASHBOARD.html
+     Dashboard visuel interactif (ouvrir dans navigateur)
+     👉 VUE D'ENSEMBLE RAPIDE
+
+  📋 SESSION37_BRIEF_ETAT_PROJET.md
+     État technique complet, architecture, contraintes, jalons
+     👉 CONTEXTE DÉVELOPPEUR
+
+  📅 SESSION37_PLAN_TACHES.md
+     Plan exécution phases/tâches, durées, dépendances, gantt
+     👉 PLANNING 4-6 SEMAINES
+
+  🗂️  SESSION37_INDEX.md
+     Index + flux de lecture + commandes utiles + FAQ
+     👉 NAVIGATION COMPLÈTE
+
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+🎯 PROCHAINES ÉTAPES
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+AVANT CETTE SESSION :
+  [ ] Lire SESSION37_EXECUTIVE_SUMMARY.txt (5 min)
+  [ ] Ouvrir SESSION37_DASHBOARD.html (2 min)
+  [ ] Consulter SESSION37_PLAN_TACHES.md (T1.1-T1.3, 5 min)
+
+PENDANT CETTE SESSION :
+  [ ] T1.1 : Configurer DNS app.vigiecity.fr             (15 min)
+  [ ] T1.2 : Rebuild AAB + upload Play Console           (45 min)
+  [ ] T1.3 : QA dual-domain routing                      (20 min)
+
+APRÈS CETTE SESSION :
+  [ ] Vercel rebuild ✅
+  [ ] Play Console internal testing track updated
+  [ ] Bug triage si besoin
+  [ ] Planifier S38 (J21 témoignages)
+
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+❓ QUESTIONS RAPIDES
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  Q: Combien de temps ces documents à lire ?
+  A: 5 min (résumé) à 1h (complet) selon votre besoin
+
+  Q: D'où vient le bilan S31→S36 ?
+  A: Chaque session (S31-S36) a une mémoire. Le memory.md les indexe.
+
+  Q: Peut-on lancer T1.1 maintenant ?
+  A: Oui ! T1.1 DNS = 15 min, puis attendre propagation (~5-30 min)
+
+  Q: Quand le prochain jalon (J21) ?
+  A: S38 (semaine prochaine). Témoignages landing = 1-2 jours.
+
+  Q: La plateforme est stable ?
+  A: Oui. Phase 0 + 1 complétées, mobile en final tests, launch-ready.
+
+  👉 Plus de FAQ en SESSION37_EXECUTIVE_SUMMARY.txt ou SESSION37_INDEX.md
+
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+🔐 SECURITY REMINDERS
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ⚠️  Supabase project = xfhkngecpbvmlstjymfy (VigieCity, CORRECT)
+      Ne pas confondre avec iixxzfgexmiofvmfrnuy (TORP)
+
+  ⚠️  .env gitignored → Variables en Vercel dashboard, jamais locale
+
+  ⚠️  EFs déployées via MCP → NON trackées git
+
+  ⚠️  NO STRIPE → Chorus Pro uniquement (jamais ajouter Stripe)
+
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Généré par Claude — 26/06/2026
+
+👉 DÉMARRAGE RAPIDE : Ouvrir SESSION37_DASHBOARD.html ou SESSION37_EXECUTIVE_SUMMARY.txt
+
+═══════════════════════════════════════════════════════════════════════════════════

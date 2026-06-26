@@ -1,0 +1,596 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>VigieCity Session 37 — Dashboard</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell', sans-serif;
+      background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+      color: #e2e8f0;
+      line-height: 1.6;
+    }
+
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 2rem;
+    }
+
+    header {
+      text-align: center;
+      margin-bottom: 3rem;
+      padding: 2rem;
+      background: rgba(30, 41, 59, 0.8);
+      border-radius: 12px;
+      border-left: 4px solid #1d4ed8;
+    }
+
+    h1 {
+      font-size: 2.5rem;
+      margin-bottom: 0.5rem;
+      color: #60a5fa;
+    }
+
+    .subtitle {
+      color: #94a3b8;
+      font-size: 1.1rem;
+    }
+
+    .date {
+      color: #64748b;
+      font-size: 0.9rem;
+      margin-top: 0.5rem;
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 1.5rem;
+      margin-bottom: 3rem;
+    }
+
+    .card {
+      background: rgba(30, 41, 59, 0.6);
+      border: 1px solid #334155;
+      border-radius: 8px;
+      padding: 1.5rem;
+      transition: all 0.3s ease;
+    }
+
+    .card:hover {
+      border-color: #1d4ed8;
+      background: rgba(30, 41, 59, 0.9);
+    }
+
+    .card-title {
+      font-size: 1.2rem;
+      font-weight: 600;
+      color: #60a5fa;
+      margin-bottom: 1rem;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .badge {
+      display: inline-block;
+      padding: 0.25rem 0.75rem;
+      border-radius: 999px;
+      font-size: 0.75rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      margin: 0.25rem 0;
+    }
+
+    .badge.success {
+      background: rgba(34, 197, 94, 0.2);
+      color: #86efac;
+    }
+
+    .badge.warning {
+      background: rgba(59, 130, 246, 0.2);
+      color: #93c5fd;
+    }
+
+    .badge.pending {
+      background: rgba(168, 85, 247, 0.2);
+      color: #d8b4fe;
+    }
+
+    .stats {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1rem;
+      margin: 1rem 0;
+    }
+
+    .stat {
+      background: rgba(15, 23, 42, 0.5);
+      padding: 1rem;
+      border-radius: 6px;
+      border-left: 3px solid #1d4ed8;
+    }
+
+    .stat-label {
+      color: #94a3b8;
+      font-size: 0.9rem;
+    }
+
+    .stat-value {
+      font-size: 1.5rem;
+      font-weight: 700;
+      color: #60a5fa;
+      margin-top: 0.25rem;
+    }
+
+    .timeline {
+      position: relative;
+      padding-left: 2rem;
+    }
+
+    .timeline::before {
+      content: '';
+      position: absolute;
+      left: 0;
+      top: 0;
+      bottom: 0;
+      width: 2px;
+      background: linear-gradient(to bottom, #1d4ed8, transparent);
+    }
+
+    .timeline-item {
+      margin-bottom: 1.5rem;
+      position: relative;
+    }
+
+    .timeline-item::before {
+      content: '';
+      position: absolute;
+      left: -2.25rem;
+      top: 0.5rem;
+      width: 0.75rem;
+      height: 0.75rem;
+      background: #1d4ed8;
+      border: 3px solid #0f172a;
+      border-radius: 50%;
+    }
+
+    .timeline-item strong {
+      color: #60a5fa;
+    }
+
+    .tasks {
+      list-style: none;
+    }
+
+    .task {
+      padding: 1rem;
+      margin: 0.5rem 0;
+      background: rgba(15, 23, 42, 0.5);
+      border-left: 4px solid #475569;
+      border-radius: 4px;
+      display: flex;
+      align-items: flex-start;
+      gap: 1rem;
+    }
+
+    .task.urgent {
+      border-left-color: #ef4444;
+      background: rgba(127, 29, 29, 0.1);
+    }
+
+    .task.normal {
+      border-left-color: #3b82f6;
+    }
+
+    .task.low {
+      border-left-color: #8b5cf6;
+    }
+
+    .task-check {
+      width: 20px;
+      height: 20px;
+      border: 2px solid #475569;
+      border-radius: 4px;
+      flex-shrink: 0;
+      margin-top: 0.25rem;
+    }
+
+    .task-content {
+      flex: 1;
+    }
+
+    .task-title {
+      font-weight: 600;
+      color: #e2e8f0;
+    }
+
+    .task-meta {
+      font-size: 0.9rem;
+      color: #94a3b8;
+      margin-top: 0.25rem;
+    }
+
+    .section {
+      margin-bottom: 3rem;
+    }
+
+    .section-title {
+      font-size: 1.8rem;
+      font-weight: 700;
+      color: #60a5fa;
+      margin-bottom: 1.5rem;
+      padding-bottom: 0.5rem;
+      border-bottom: 2px solid #1d4ed8;
+    }
+
+    .progress-bar {
+      height: 8px;
+      background: rgba(15, 23, 42, 0.5);
+      border-radius: 4px;
+      overflow: hidden;
+      margin-top: 0.5rem;
+    }
+
+    .progress {
+      height: 100%;
+      background: linear-gradient(to right, #1d4ed8, #3b82f6);
+      width: 65%;
+      transition: width 0.3s ease;
+    }
+
+    a {
+      color: #60a5fa;
+      text-decoration: none;
+    }
+
+    a:hover {
+      text-decoration: underline;
+    }
+
+    code {
+      background: rgba(15, 23, 42, 0.8);
+      padding: 0.25rem 0.5rem;
+      border-radius: 3px;
+      font-family: 'Monaco', 'Courier New', monospace;
+      font-size: 0.9rem;
+      color: #86efac;
+    }
+
+    .alert {
+      padding: 1rem;
+      border-radius: 6px;
+      margin: 1rem 0;
+      border-left: 4px solid;
+    }
+
+    .alert.info {
+      background: rgba(59, 130, 246, 0.1);
+      border-color: #3b82f6;
+      color: #93c5fd;
+    }
+
+    .alert.warning {
+      background: rgba(217, 119, 6, 0.1);
+      border-color: #d97706;
+      color: #fca5a5;
+    }
+
+    @media (max-width: 768px) {
+      h1 {
+        font-size: 1.8rem;
+      }
+
+      .grid {
+        grid-template-columns: 1fr;
+      }
+
+      .stats {
+        grid-template-columns: 1fr;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <header>
+      <h1>🚀 VigieCity — Session 37</h1>
+      <p class="subtitle">Bilan complet & Roadmap 2026 Q3</p>
+      <p class="date">26 juin 2026 — État post-session 36</p>
+    </header>
+
+    <!-- Section État Général -->
+    <div class="section">
+      <h2 class="section-title">📊 État Général du Projet</h2>
+
+      <div class="grid">
+        <div class="card">
+          <div class="card-title">✅ Commits livrés (S31→S36)</div>
+          <div class="stats">
+            <div class="stat">
+              <div class="stat-label">Sessions</div>
+              <div class="stat-value">6</div>
+            </div>
+            <div class="stat">
+              <div class="stat-label">Jalons</div>
+              <div class="stat-value">J19-J24</div>
+            </div>
+          </div>
+          <div class="progress-bar"><div class="progress" style="width: 100%;"></div></div>
+          <p style="margin-top: 1rem; font-size: 0.9rem;">Phase 0 + 1 complétées</p>
+        </div>
+
+        <div class="card">
+          <div class="card-title">🎯 Architecture</div>
+          <div style="margin-top: 1rem;">
+            <p><strong style="color: #60a5fa;">Dual-domain stable :</strong></p>
+            <ul style="margin-left: 1rem; margin-top: 0.5rem;">
+              <li><code>vigiecity.fr</code> → Landing commercial</li>
+              <li><code>app.vigiecity.fr</code> → App citoyenne</li>
+            </ul>
+            <span class="badge success" style="margin-top: 1rem;">Deployable</span>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="card-title">📱 Mobile Status</div>
+          <div style="margin-top: 1rem;">
+            <p><strong style="color: #60a5fa;">Capacitor Android :</strong></p>
+            <ul style="margin-left: 1rem; margin-top: 0.5rem;">
+              <li>Routes : ✅ /auth splash</li>
+              <li>Icônes : ✅ 5 densités</li>
+              <li>DNS : ⏳ Pending (T1.1)</li>
+              <li>AAB : ⏳ Rebuild (T1.2)</li>
+            </ul>
+            <span class="badge warning" style="margin-top: 1rem;">Presque prêt</span>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="card-title">🔐 Backend</div>
+          <div style="margin-top: 1rem;">
+            <p><strong style="color: #60a5fa;">Supabase xfhkngecpbvmlstjymfy :</strong></p>
+            <ul style="margin-left: 1rem; margin-top: 0.5rem;">
+              <li>11 Edge Functions en prod</li>
+              <li>61 tables (types.ts à jour)</li>
+              <li>RLS complètes</li>
+              <li>pg_cron actifs (emails nurturing)</li>
+            </ul>
+            <span class="badge success">Production</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Section Sessions Récentes -->
+    <div class="section">
+      <h2 class="section-title">📅 Sessions Récentes (Rétrospective)</h2>
+
+      <div class="timeline">
+        <div class="timeline-item">
+          <strong>Session 31 (J19)</strong> — Email bienvenue commune
+          <br /><span style="color: #94a3b8;">send-welcome v2 + accept-invite fire-and-forget</span>
+        </div>
+        <div class="timeline-item">
+          <strong>Session 32 (J20)</strong> — SEO og:image
+          <br /><span style="color: #94a3b8;">og-image.png 1200×630 + meta OG/Twitter</span>
+        </div>
+        <div class="timeline-item">
+          <strong>Session 33 (J22)</strong> — Email nurturing
+          <br /><span style="color: #94a3b8;">send-nurturing J+3/J+7 + pg_cron + migration</span>
+        </div>
+        <div class="timeline-item">
+          <strong>Session 34 (J9)</strong> — Mobile route /auth
+          <br /><span style="color: #94a3b8;">Splash login + icônes Android + server.url correction</span>
+        </div>
+        <div class="timeline-item">
+          <strong>Session 35 (J9b)</strong> — Fix routeTree
+          <br /><span style="color: #94a3b8;">/accueil route missing → 404 error résolu</span>
+        </div>
+        <div class="timeline-item">
+          <strong>Session 36 (J9c)</strong> — Séparation domaine
+          <br /><span style="color: #94a3b8;">IS_APP_DOMAIN + navigateByRole() + /platform/mobile dashboard</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Section Tâches Immédiates -->
+    <div class="section">
+      <h2 class="section-title">⚡ Tâches Immédiates (SESSION 37)</h2>
+
+      <div class="alert info">
+        <strong>Durée estimée :</strong> 1-2 jours | <strong>Impact :</strong> 🔴 BLOCKER pour mobile launch
+      </div>
+
+      <ul class="tasks">
+        <li class="task urgent">
+          <div class="task-check"></div>
+          <div class="task-content">
+            <div class="task-title">T1.1 — Configurer DNS app.vigiecity.fr</div>
+            <div class="task-meta">⏱️ 15-30 min | Vercel Dashboard → Settings → Domains → CNAME</div>
+            <span class="badge success">Quick win</span>
+          </div>
+        </li>
+        <li class="task urgent">
+          <div class="task-check"></div>
+          <div class="task-content">
+            <div class="task-title">T1.2 — Rebuild AAB + upload Play Console</div>
+            <div class="task-meta">⏱️ 30-45 min | <code>.\build_aab.bat</code> → Play Console internal testing</div>
+            <span class="badge success">High impact</span>
+          </div>
+        </li>
+        <li class="task normal">
+          <div class="task-check"></div>
+          <div class="task-content">
+            <div class="task-title">T1.3 — QA dual-domain routing end-to-end</div>
+            <div class="task-meta">⏱️ 20 min | Tester 5 flows : landing → auth → app → admin → platform</div>
+            <span class="badge warning">Validation</span>
+          </div>
+        </li>
+      </ul>
+    </div>
+
+    <!-- Section Roadmap -->
+    <div class="section">
+      <h2 class="section-title">🗺️ Roadmap 2026 Q3 (J21-J29)</h2>
+
+      <div class="grid">
+        <div class="card">
+          <div class="card-title">🎯 Court terme (S38-S39)</div>
+          <ul class="tasks">
+            <li class="task low" style="margin-bottom: 0.5rem;">
+              <div class="task-check"></div>
+              <div class="task-content">
+                <div class="task-title">J21 — Témoignages landing</div>
+                <div class="task-meta">1-2j | Social proof → conversion</div>
+              </div>
+            </li>
+            <li class="task low">
+              <div class="task-check"></div>
+              <div class="task-content">
+                <div class="task-title">J23 — Template citoyen</div>
+                <div class="task-meta">1j | Email bienvenue signup</div>
+              </div>
+            </li>
+            <li class="task low">
+              <div class="task-check"></div>
+              <div class="task-content">
+                <div class="task-title">J24 — Digest hebdo</div>
+                <div class="task-meta">2j | Email résumé lundi 8h UTC</div>
+              </div>
+            </li>
+          </ul>
+        </div>
+
+        <div class="card">
+          <div class="card-title">🔧 Moyen terme (S40+)</div>
+          <ul class="tasks">
+            <li class="task low" style="margin-bottom: 0.5rem;">
+              <div class="task-check"></div>
+              <div class="task-content">
+                <div class="task-title">T3.1 — Paiements décision</div>
+                <div class="task-meta">Réunion 30 min | Chorus Pro vs Stripe</div>
+              </div>
+            </li>
+            <li class="task low">
+              <div class="task-check"></div>
+              <div class="task-content">
+                <div class="task-title">T3.2 — Mobile QA avancée</div>
+                <div class="task-meta">1-2j | Lighthouse 85+ score</div>
+              </div>
+            </li>
+            <li class="task low">
+              <div class="task-check"></div>
+              <div class="task-content">
+                <div class="task-title">T3.3 — iOS build</div>
+                <div class="task-meta">3-5j | Xcode + App Store</div>
+              </div>
+            </li>
+          </ul>
+        </div>
+
+        <div class="card">
+          <div class="card-title">💼 Long terme (Q3+)</div>
+          <ul class="tasks">
+            <li class="task low" style="margin-bottom: 0.5rem;">
+              <div class="task-check"></div>
+              <div class="task-content">
+                <div class="task-title">J27 — Dashboard collectivités</div>
+                <div class="task-meta">2-3j | Super-admin analytics</div>
+              </div>
+            </li>
+            <li class="task low">
+              <div class="task-check"></div>
+              <div class="task-content">
+                <div class="task-title">J28 — Régie pub avancée</div>
+                <div class="task-meta">2-3j | Targeting + reporting</div>
+              </div>
+            </li>
+            <li class="task low">
+              <div class="task-check"></div>
+              <div class="task-content">
+                <div class="task-title">J29 — Chorus Pro sync</div>
+                <div class="task-meta">1-2j | Licenses + historique</div>
+              </div>
+            </li>
+          </ul>
+        </div>
+
+        <div class="card">
+          <div class="card-title">📈 Gantt (estimé)</div>
+          <div style="font-size: 0.9rem; line-height: 2; margin-top: 1rem;">
+            <p><strong style="color: #60a5fa;">S37 :</strong> Mobile DNS + AAB ✅</p>
+            <p><strong style="color: #60a5fa;">S38 :</strong> J21 + J23</p>
+            <p><strong style="color: #60a5fa;">S39 :</strong> J24 + mobile QA</p>
+            <p><strong style="color: #60a5fa;">S40+ :</strong> Paiements + iOS</p>
+            <p style="color: #94a3b8; margin-top: 1rem;"><em>4-6 semaines horizon</em></p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Section Ressources -->
+    <div class="section">
+      <h2 class="section-title">📚 Ressources & Documentation</h2>
+
+      <div class="grid">
+        <div class="card">
+          <div class="card-title">📄 Fichiers générés S37</div>
+          <ul style="margin-left: 1rem; margin-top: 1rem;">
+            <li><code>SESSION37_BRIEF_ETAT_PROJET.md</code> — État détaillé + checklists</li>
+            <li><code>SESSION37_PLAN_TACHES.md</code> — Plan complet T1.1→T4.3</li>
+            <li><code>SESSION37_DASHBOARD.html</code> — Ce fichier 📍</li>
+          </ul>
+        </div>
+
+        <div class="card">
+          <div class="card-title">🔑 Credentials & Config</div>
+          <ul style="margin-left: 1rem; margin-top: 1rem;">
+            <li>Supabase : <code>xfhkngecpbvmlstjymfy</code> ✅</li>
+            <li>Vercel : <code>vigie-city</code> project ✅</li>
+            <li>Resend : <code>contact@vigiecity.fr</code> ✅</li>
+            <li>Capacitor : <code>app.vigiecity.fr</code> 🔜</li>
+          </ul>
+        </div>
+
+        <div class="card">
+          <div class="card-title">⚙️ Tech Stack</div>
+          <ul style="margin-left: 1rem; margin-top: 1rem;">
+            <li>Frontend : React + TanStack Router</li>
+            <li>Backend : Supabase (PostgreSQL + EF Deno)</li>
+            <li>Email : Resend API</li>
+            <li>Analytics : PostHog</li>
+            <li>Mobile : Capacitor v7</li>
+            <li>PWA : Service Worker v5</li>
+          </ul>
+        </div>
+
+        <div class="card">
+          <div class="card-title">📊 Données clés</div>
+          <ul style="margin-left: 1rem; margin-top: 1rem;">
+            <li>34,684 communes importées</li>
+            <li>35 communes test en prod</li>
+            <li>11 Edge Functions</li>
+            <li>61 tables Supabase</li>
+            <li>9 templates email (1 câblé)</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+
+    <!-- Footer -->
+    <footer style="text-align: center; margin-top: 4rem; padding-top: 2rem; border-top: 1px solid #334155; color: #64748b; font-size: 0.9rem;">
+      <p>Généré par Claude — 26/06/2026</p>
+      <p style="margin-top: 0.5rem;">Consultez <strong>SESSION37_BRIEF_ETAT_PROJET.md</strong> et <strong>SESSION37_PLAN_TACHES.md</strong> pour le détail complet</p>
+    </footer>
+  </div>
+</body>
+</html>
