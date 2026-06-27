@@ -5,7 +5,7 @@ import {
   BellRing, MapPin, CalendarDays, Newspaper, MessageSquare,
   Home, Network, Building2,
   LayoutDashboard, CheckSquare, BarChart3, Map as MapIcon, Users,
-  X, Sparkles, ToggleLeft, ToggleRight,
+  X, ToggleLeft, ToggleRight,
 } from "lucide-react";
 
 export const Route = createFileRoute("/")({
@@ -743,11 +743,12 @@ const ADMIN_FEATURES = [
 type CommuneResult = { nom: string; code: string; population: number };
 
 function getPopulationTierIndex(population: number): number {
-  if (population < 1000)  return 0; // Nano
-  if (population < 3501)  return 1; // Micro
-  if (population < 10001) return 2; // Local
-  if (population < 50001) return 3; // Urbain
-  return 4;                          // Métropole
+  if (population < 501)   return 0; // Hameau    (< 500)
+  if (population < 3501)  return 1; // Village   (501 – 3 500)
+  if (population < 10001) return 2; // Bourg     (3 501 – 10 000)
+  if (population < 25001) return 3; // Bastide   (10 001 – 25 000)
+  if (population < 50001) return 4; // Cité      (25 001 – 50 000)
+  return 5;                          // Métropole (> 50 000)
 }
 
 function CommuneCalculatorSection() {
@@ -806,11 +807,12 @@ function CommuneCalculatorSection() {
   // → on passe par les mêmes constantes définies plus bas dans le fichier
 
   const TIER_DATA = [
-    { name: "Nano",      range: "< 1 000 hab.",          monthly: 49,  annual: 490  },
-    { name: "Micro",     range: "1 001 – 3 500 hab.",    monthly: 99,  annual: 990  },
-    { name: "Local",     range: "3 501 – 10 000 hab.",   monthly: 189, annual: 1890 },
-    { name: "Urbain",    range: "10 001 – 50 000 hab.",  monthly: 490, annual: 4900 },
-    { name: "Métropole", range: "> 50 000 hab.",          monthly: null, annual: null },
+    { name: "Hameau",    range: "< 500 hab.",            monthly: 19,  annual: 190  },
+    { name: "Village",   range: "501 – 3 500 hab.",      monthly: 49,  annual: 490  },
+    { name: "Bourg",     range: "3 501 – 10 000 hab.",   monthly: 99,  annual: 990  },
+    { name: "Bastide",   range: "10 001 – 25 000 hab.",  monthly: 189, annual: 1890 },
+    { name: "Cité",      range: "25 001 – 50 000 hab.",  monthly: 390, annual: 3900 },
+    { name: "Métropole", range: "> 50 000 hab.",         monthly: 590, annual: 5900 },
   ] as const;
 
   const tier = tierIndex !== null ? TIER_DATA[tierIndex] : null;
@@ -994,11 +996,12 @@ function CommuneCalculatorSection() {
 // ── Grille tarifaire ──────────────────────────────────────────────────────────
 
 const PRICING_TIERS = [
-  { name: "Nano", range: "< 1 000 hab.", monthly: 49, annual: 490 },
-  { name: "Micro", range: "1 001 – 3 500 hab.", monthly: 99, annual: 990 },
-  { name: "Local",   range: "3 501 – 10 000 hab.", monthly: 189, annual: 1890 },
-  { name: "Urbain", range: "10 001 – 50 000 hab.", monthly: 490, annual: 4900 },
-  { name: "Métropole", range: "> 50 000 hab.", monthly: null, annual: null },
+  { name: "Hameau", range: "< 500 hab.", monthly: 19, annual: 190 },
+  { name: "Village", range: "501 – 3 500 hab.", monthly: 49, annual: 490 },
+  { name: "Bourg", range: "3 501 – 10 000 hab.", monthly: 99, annual: 990 },
+  { name: "Bastide", range: "10 001 – 25 000 hab.", monthly: 189, annual: 1890 },
+  { name: "Cité", range: "25 001 – 50 000 hab.", monthly: 390, annual: 3900 },
+  { name: "Métropole", range: "> 50 000 hab.", monthly: 590, annual: 5900 },
 ] as const;
 
 const FEATURES_LIST = [
@@ -1009,7 +1012,7 @@ const FEATURES_LIST = [
 ];
 
 function PricingSection() {
-  const [selected, setSelected] = useState(2); // Local par défaut
+  const [selected, setSelected] = useState(3); // Bastide par défaut
   const [isInterco, setIsInterco] = useState(false);
 
   const tier = PRICING_TIERS[selected];
@@ -1156,8 +1159,8 @@ function PricingSection() {
                   style={{ background: "#eff6ff" }}
                 >
                   Ex. CC de 30 000 hab. → tranche{" "}
-                  <strong>Urbain</strong> (490 €/mois) + 20 % interco ={" "}
-                  <strong>588 €/mois HT</strong> / 5 880 €/an HT
+                  <strong>Cité</strong> (390 €/mois) + 20 % interco ={" "}
+                  <strong>468 €/mois HT</strong> / 4 680 €/an HT
                 </div>
               )}
 
@@ -1181,59 +1184,6 @@ function PricingSection() {
         </p>
       </div>
     </section>
-  );
-}
-
-// ── Banner promo flottante ────────────────────────────────────────────────────
-
-function PromoBanner() {
-  const [dismissed, setDismissed] = useState(false);
-  if (dismissed) return null;
-  return (
-    <>
-      <style>{`
-        @keyframes vcSlideUp {
-          from { transform: translateY(24px); opacity: 0; }
-          to   { transform: translateY(0);    opacity: 1; }
-        }
-        .vc-promo { animation: vcSlideUp 0.45s cubic-bezier(0.22,1,0.36,1) both; }
-      `}</style>
-      <div
-        className="vc-promo fixed bottom-6 right-6 z-50 w-72 rounded-2xl bg-white p-5"
-        style={{ boxShadow: "0 20px 60px rgba(0,0,0,0.18), 0 4px 16px rgba(0,0,0,0.10)", border: "1px solid #e0e7ff" }}
-      >
-        {/* Close */}
-        <button
-          onClick={() => setDismissed(true)}
-          className="absolute right-3 top-3 rounded-lg p-1 text-gray-400 transition hover:bg-gray-100 hover:text-gray-700"
-          aria-label="Fermer"
-        >
-          <X className="h-4 w-4" />
-        </button>
-
-        {/* Content */}
-        <div className="flex items-center gap-2">
-          <Sparkles className="h-5 w-5 flex-shrink-0" style={{ color: "#f59e0b" }} />
-          <p className="text-sm font-extrabold text-gray-900">Offre à ne pas manquer</p>
-        </div>
-        <p className="mt-2.5 text-sm leading-relaxed text-gray-600">
-          Les <strong>premières collectivités partenaires</strong> bénéficient de{" "}
-          <strong className="text-blue-700">2 mois offerts</strong> avant le début de l'abonnement.
-        </p>
-        <p className="mt-1.5 text-xs text-gray-400">
-          Places limitées · Accès prioritaire aux nouvelles fonctionnalités
-        </p>
-        <a
-          href="#contact"
-          onClick={() => setDismissed(true)}
-          className="mt-4 flex items-center justify-center gap-1.5 rounded-xl py-2.5 text-sm font-bold text-white transition hover:opacity-90"
-          style={{ backgroundColor: "#1e3a8a" }}
-        >
-          En savoir plus
-          <ArrowRight className="h-3.5 w-3.5" />
-        </a>
-      </div>
-    </>
   );
 }
 
@@ -1509,9 +1459,6 @@ function LandingPage() {
           </div>
         </div>
       </footer>
-
-      {/* ── Floating promo banner ───────────────────── */}
-      <PromoBanner />
 
     </div>
   );
