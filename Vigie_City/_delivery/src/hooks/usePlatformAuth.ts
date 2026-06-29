@@ -27,7 +27,7 @@ async function fetchPlatformAuth(): Promise<{ email: string }> {
     .from("user_roles")
     .select("role")
     .eq("user_id", user.id)
-    .eq("role", "super_admin")
+    .in("role", ["super_admin", "epci_admin"])
     .maybeSingle();
 
   if (error || !roleRow) throw new Error("unauthorized");

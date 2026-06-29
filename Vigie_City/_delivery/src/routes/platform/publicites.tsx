@@ -131,7 +131,7 @@ function AdModal({ ad, onClose, onDone }: AdModalProps) {
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
       <div className="w-full max-w-lg rounded-2xl bg-card border border-border shadow-xl">
         <div className="flex items-center justify-between border-b border-border px-6 py-4">
-          <h2 className="font-bold text-lg">{ad ? "Modifier l\'annonce" : "Nouvelle annonce"}</h2>
+          <h2 className="font-bold text-lg">{ad ? "Modifier l'annonce" : "Nouvelle annonce"}</h2>
           <button onClick={onClose} className="text-muted-foreground hover:text-foreground">
             <X className="h-5 w-5" />
           </button>
@@ -146,7 +146,7 @@ function AdModal({ ad, onClose, onDone }: AdModalProps) {
                 placeholder="Campagne ete 2026" />
             </div>
             <div className="col-span-2">
-              <label className="block text-sm font-medium mb-1">Nom de l\'annonceur *</label>
+              <label className="block text-sm font-medium mb-1">Nom de l'annonceur *</label>
               <input value={form.advertiser_name} onChange={(e) => set("advertiser_name", e.target.value)}
                 className="w-full rounded-xl border border-border bg-background px-3 py-2 text-sm"
                 placeholder="Mairie de Perpignan" />
@@ -154,7 +154,7 @@ function AdModal({ ad, onClose, onDone }: AdModalProps) {
           </div>
 
           <div>
-            <label className="block text-sm font-medium mb-1">URL de l\'image * (1200x300 recommande)</label>
+            <label className="block text-sm font-medium mb-1">URL de l'image * (1200x300 recommande)</label>
             <input value={form.image_url} onChange={(e) => set("image_url", e.target.value)}
               className="w-full rounded-xl border border-border bg-background px-3 py-2 text-sm"
               placeholder="https://..." />
@@ -421,7 +421,7 @@ function PublicitesPage() {
             Facturation hors-app
           </div>
           Les annonces sont facturees directement par virement bancaire ou Chorus Pro.
-          Les prix saisis sont indicatifs pour le suivi interne — aucun paiement n\'est traite automatiquement.
+          Les prix saisis sont indicatifs pour le suivi interne — aucun paiement n'est traite automatiquement.
         </div>
       </div>
     </PlatformShell>

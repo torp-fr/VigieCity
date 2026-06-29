@@ -1353,7 +1353,8 @@ function ContactSection() {
     }
   }
 
-  return (
+  if (status === "success") {
+    return (
       <section id="contact" className="py-20" style={{ backgroundColor: "#1e3a8a" }}>
         <div className="mx-auto max-w-xl px-6 text-center">
           <div className="mx-auto mb-6 flex h-16 w-16 items-center justify-center rounded-full bg-green-400/20">

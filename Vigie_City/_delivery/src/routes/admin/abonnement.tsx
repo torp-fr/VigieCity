@@ -77,7 +77,7 @@ function AbonnementPage() {
             <CreditCard className="mx-auto h-10 w-10 text-muted-foreground mb-3" />
             <h2 className="font-bold text-lg">Aucun abonnement</h2>
             <p className="mt-1 text-sm text-muted-foreground">
-              Votre commune n\'a pas encore de licence VigieCity.
+              Votre commune n'a pas encore de licence VigieCity.
             </p>
             <a
               href="mailto:commercial@vigiecity.fr"
@@ -118,7 +118,7 @@ function AbonnementPage() {
                 <div className="mt-4 flex items-start gap-2 rounded-xl bg-blue-100 p-3 text-sm text-blue-800">
                   <Clock className="mt-0.5 h-4 w-4 shrink-0" />
                   <span>
-                    Periode d\'essai jusqu\'au {new Date(license.trial_ends_at).toLocaleDateString("fr-FR")}.
+                    Periode d'essai jusqu'au {new Date(license.trial_ends_at).toLocaleDateString("fr-FR")}.
                     Contactez-nous pour activer votre abonnement.
                   </span>
                 </div>

@@ -63,7 +63,11 @@ function PlatformOnboardingPage() {
       // 1. Créer la collectivité
       const { data: coll, error: collErr } = await supabase
         .from("collectivities")
-        .insert({ name: communeName, insee_code: codeInsee || null })
+        .insert({
+          name: communeName,
+          insee_code: codeInsee || null,
+          department_code: department || null,
+        })
         .select("id, name")
         .single();
       if (collErr) throw collErr;
@@ -76,7 +80,13 @@ function PlatformOnboardingPage() {
 
       const { error: licErr } = await supabase
         .from("commune_licenses")
-        .insert({ collectivity_id: coll.id, plan, status: "active", expires_at: expiresAt });
+        .insert({
+          collectivity_id: coll.id,
+          plan,
+          status: "active",
+          started_at: new Date().toISOString(),
+          expires_at: expiresAt,
+        });
       if (licErr) throw licErr;
 
       // 3. Appeler la Edge Function pour créer l'utilisateur auth
