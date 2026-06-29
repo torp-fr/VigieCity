@@ -6,6 +6,8 @@ import {
   CreditCard, Euro, BarChart3, UserPlus,
   TrendingUp, Newspaper, Package, BookOpen,
   Menu, Bell, Wrench,
+  Network, ShieldCheck, Receipt, KeyRound,
+  Clock, Activity, ToggleLeft, LifeBuoy,
 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { usePlatformAuth } from "@/hooks/usePlatformAuth";
@@ -18,6 +20,8 @@ const NAV_SECTIONS = [
     items: [
       { icon: LayoutDashboard, label: "Tableau de bord",  path: "/platform"                },
       { icon: Building2,       label: "Collectivités",    path: "/platform/collectivites"  },
+      { icon: Network,         label: "Intercommunalités", path: "/platform/intercommunalites" },
+      { icon: ShieldCheck,     label: "Modération",       path: "/platform/city/moderation" },
       { icon: UserPlus,        label: "Onboarding",       path: "/platform/onboarding"     },
       { icon: TrendingUp,      label: "Rétention",        path: "/platform/retention"      },
       { icon: Users,           label: "Utilisateurs",     path: "/platform/users"          },
@@ -37,12 +41,16 @@ const NAV_SECTIONS = [
       { icon: CreditCard,      label: "Plans tarifaires", path: "/platform/plans"          },
       { icon: Euro,            label: "Intercommunal",    path: "/platform/tarification"   },
       { icon: Package,         label: "Modules",          path: "/platform/modules"        },
+      { icon: Receipt,         label: "Facturation",      path: "/platform/facturation"    },
+      { icon: KeyRound,        label: "Licences & Finances", path: "/platform/licences"    },
+      { icon: Clock,           label: "Trials",           path: "/platform/trials"         },
     ],
   },
   {
     label: "DONNÉES",
     items: [
       { icon: BarChart3,       label: "Analytics",        path: "/platform/analytics"      },
+      { icon: Activity,        label: "Statistiques",     path: "/platform/stats"          },
     ],
   },
   {
@@ -50,6 +58,8 @@ const NAV_SECTIONS = [
     items: [
       { icon: Building2,       label: "EPCIs",            path: "/platform/epci-tarification"            },
       { icon: Wrench,          label: "Calc. tarif",      path: "/platform/support/tariff-calculator"    },
+      { icon: ToggleLeft,      label: "Feature Flags",    path: "/platform/features"                     },
+      { icon: LifeBuoy,        label: "Support",          path: "/platform/support"                      },
     ],
   },
   {
@@ -64,6 +74,8 @@ const NAV_SECTIONS = [
 const PAGE_TITLES: Record<string, string> = {
   "/platform":                  "Tableau de bord",
   "/platform/collectivites":    "Collectivités",
+  "/platform/intercommunalites": "Intercommunalités",
+  "/platform/city/moderation":  "Modération des Signalements",
   "/platform/onboarding":       "Onboarding",
   "/platform/retention":        "Rétention",
   "/platform/users":            "Utilisateurs",
@@ -73,9 +85,15 @@ const PAGE_TITLES: Record<string, string> = {
   "/platform/plans":            "Plans tarifaires",
   "/platform/tarification":     "Intercommunal",
   "/platform/modules":          "Modules",
+  "/platform/facturation":      "Facturation",
+  "/platform/licences":         "Licences & Finances",
+  "/platform/trials":           "Gestion des Trials",
   "/platform/analytics":        "Analytics",
+  "/platform/stats":            "Statistiques",
   "/platform/epci-tarification": "Gestion EPCIs",
   "/platform/support/tariff-calculator": "Calcul tarif",
+  "/platform/features":         "Feature Flags",
+  "/platform/support":          "Support",
   "/platform/settings":         "Paramètres",
 };
 

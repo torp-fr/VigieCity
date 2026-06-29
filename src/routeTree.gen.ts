@@ -57,7 +57,6 @@ import { Route as PlatformIntercommunalitesRouteImport } from './routes/platform
 import { Route as PlatformFeaturesRouteImport } from './routes/platform/features'
 import { Route as PlatformFacturationRouteImport } from './routes/platform/facturation'
 import { Route as PlatformEpciTarificationRouteImport } from './routes/platform/epci-tarification'
-import { Route as PlatformCommunesRouteImport } from './routes/platform/communes'
 import { Route as PlatformCollectivitesRouteImport } from './routes/platform/collectivites'
 import { Route as PlatformAnalyticsRouteImport } from './routes/platform/analytics'
 import { Route as OperateurTableauRouteImport } from './routes/operateur/tableau'
@@ -331,11 +330,6 @@ const PlatformEpciTarificationRoute =
     path: '/platform/epci-tarification',
     getParentRoute: () => rootRouteImport,
   } as any)
-const PlatformCommunesRoute = PlatformCommunesRouteImport.update({
-  id: '/platform/communes',
-  path: '/platform/communes',
-  getParentRoute: () => rootRouteImport,
-} as any)
 const PlatformCollectivitesRoute = PlatformCollectivitesRouteImport.update({
   id: '/platform/collectivites',
   path: '/platform/collectivites',
@@ -540,7 +534,6 @@ export interface FileRoutesByFullPath {
   '/operateur/tableau': typeof OperateurTableauRoute
   '/platform/analytics': typeof PlatformAnalyticsRoute
   '/platform/collectivites': typeof PlatformCollectivitesRoute
-  '/platform/communes': typeof PlatformCommunesRoute
   '/platform/epci-tarification': typeof PlatformEpciTarificationRoute
   '/platform/facturation': typeof PlatformFacturationRoute
   '/platform/features': typeof PlatformFeaturesRoute
@@ -620,7 +613,6 @@ export interface FileRoutesByTo {
   '/operateur/tableau': typeof OperateurTableauRoute
   '/platform/analytics': typeof PlatformAnalyticsRoute
   '/platform/collectivites': typeof PlatformCollectivitesRoute
-  '/platform/communes': typeof PlatformCommunesRoute
   '/platform/epci-tarification': typeof PlatformEpciTarificationRoute
   '/platform/facturation': typeof PlatformFacturationRoute
   '/platform/features': typeof PlatformFeaturesRoute
@@ -702,7 +694,6 @@ export interface FileRoutesById {
   '/operateur/tableau': typeof OperateurTableauRoute
   '/platform/analytics': typeof PlatformAnalyticsRoute
   '/platform/collectivites': typeof PlatformCollectivitesRoute
-  '/platform/communes': typeof PlatformCommunesRoute
   '/platform/epci-tarification': typeof PlatformEpciTarificationRoute
   '/platform/facturation': typeof PlatformFacturationRoute
   '/platform/features': typeof PlatformFeaturesRoute
@@ -785,7 +776,6 @@ export interface FileRouteTypes {
     | '/operateur/tableau'
     | '/platform/analytics'
     | '/platform/collectivites'
-    | '/platform/communes'
     | '/platform/epci-tarification'
     | '/platform/facturation'
     | '/platform/features'
@@ -865,7 +855,6 @@ export interface FileRouteTypes {
     | '/operateur/tableau'
     | '/platform/analytics'
     | '/platform/collectivites'
-    | '/platform/communes'
     | '/platform/epci-tarification'
     | '/platform/facturation'
     | '/platform/features'
@@ -946,7 +935,6 @@ export interface FileRouteTypes {
     | '/operateur/tableau'
     | '/platform/analytics'
     | '/platform/collectivites'
-    | '/platform/communes'
     | '/platform/epci-tarification'
     | '/platform/facturation'
     | '/platform/features'
@@ -1028,7 +1016,6 @@ export interface RootRouteChildren {
   OperateurTableauRoute: typeof OperateurTableauRoute
   PlatformAnalyticsRoute: typeof PlatformAnalyticsRoute
   PlatformCollectivitesRoute: typeof PlatformCollectivitesRoute
-  PlatformCommunesRoute: typeof PlatformCommunesRoute
   PlatformEpciTarificationRoute: typeof PlatformEpciTarificationRoute
   PlatformFacturationRoute: typeof PlatformFacturationRoute
   PlatformFeaturesRoute: typeof PlatformFeaturesRoute
@@ -1393,13 +1380,6 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof PlatformEpciTarificationRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/platform/communes': {
-      id: '/platform/communes'
-      path: '/platform/communes'
-      fullPath: '/platform/communes'
-      preLoaderRoute: typeof PlatformCommunesRouteImport
-      parentRoute: typeof rootRouteImport
-    }
     '/platform/collectivites': {
       id: '/platform/collectivites'
       path: '/platform/collectivites'
@@ -1691,7 +1671,6 @@ const rootRouteChildren: RootRouteChildren = {
   OperateurTableauRoute: OperateurTableauRoute,
   PlatformAnalyticsRoute: PlatformAnalyticsRoute,
   PlatformCollectivitesRoute: PlatformCollectivitesRoute,
-  PlatformCommunesRoute: PlatformCommunesRoute,
   PlatformEpciTarificationRoute: PlatformEpciTarificationRoute,
   PlatformFacturationRoute: PlatformFacturationRoute,
   PlatformFeaturesRoute: PlatformFeaturesRoute,
