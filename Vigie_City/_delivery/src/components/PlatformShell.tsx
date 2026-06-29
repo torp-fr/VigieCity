@@ -5,7 +5,7 @@ import {
   Settings, LogOut, Shield, ChevronRight,
   CreditCard, Euro, BarChart3, UserPlus,
   TrendingUp, Newspaper, Package, BookOpen,
-  Menu, Bell, Megaphone, PieChart,
+  Menu, Bell, Megaphone, PieChart, Wrench,
 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { usePlatformAuth } from "@/hooks/usePlatformAuth";
@@ -49,6 +49,13 @@ const NAV_SECTIONS = [
     ],
   },
   {
+    label: "OUTILS",
+    items: [
+      { icon: Building2,       label: "EPCIs",            path: "/platform/epci-tarification" },
+      { icon: Wrench,          label: "Calc. tarif",      path: "/platform/support/tariff-calculator" },
+    ],
+  },
+  {
     label: "SYSTÈME",
     items: [
       { icon: Settings,        label: "Paramètres",       path: "/platform/settings"       },
@@ -68,11 +75,13 @@ const PAGE_TITLES: Record<string, string> = {
   "/platform/publishers":       "Éditeurs",
   "/platform/plans":            "Plans tarifaires",
   "/platform/tarification":     "Intercommunal",
+  "/platform/epci-tarification": "Gestion EPCIs",
   "/platform/modules":          "Modules",
   "/platform/abonnements":      "Abonnements",
   "/platform/publicites":       "Publicités",
   "/platform/monetization":     "Monétisation",
   "/platform/analytics":        "Analytics",
+  "/platform/support/tariff-calculator": "Calcul tarif",
   "/platform/settings":         "Paramètres",
 };
 
