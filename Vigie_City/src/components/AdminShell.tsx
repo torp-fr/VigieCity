@@ -1,0 +1,310 @@
+import { useNavigate } from "@tanstack/react-router";
+import { useState, useEffect, type ReactNode } from "react";
+import {
+  LayoutDashboard,
+  FileText,
+  BookOpen,
+  Calendar,
+  MessageSquare,
+  Wrench,
+  Phone,
+  Radio,
+  Megaphone,
+  Building2,
+  LogOut,
+  Shield,
+  Loader2,
+  ChevronRight,
+  Tablet,
+  BarChart3,
+  BarChart2,
+  ShieldAlert,
+  Settings,
+  CreditCard,
+  AlertTriangle,
+} from "lucide-react";
+import { supabase } from "@/integrations/supabase/client";
+
+// ── Default commune theme ────────────────────────────────────────────────────
+const DEFAULT_PRIMARY   = "#1e3a8a";
+const DEFAULT_SECONDARY = "#065f46";
+
+// ── Nav items ─────────────────────────────────────────────────────────────────
+
+const BASE_NAV = [
+  { icon: LayoutDashboard, label: "Tableau de bord", path: "/admin"              },
+  { icon: FileText,        label: "Signalements",    path: "/admin/signalements" },
+  { icon: BookOpen,        label: "Publications",     path: "/admin/publications" },
+  { icon: Calendar,        label: "Événements",       path: "/admin/evenements"   },
+  { icon: MessageSquare,   label: "Messagerie",       path: "/admin/messagerie"   },
+  { icon: Wrench,          label: "Services",         path: "/admin/services"     },
+  { icon: Phone,           label: "Urgences",         path: "/admin/urgences"     },
+  { icon: Radio,           label: "Radio locale",     path: "/admin/radio"        },
+  { icon: Megaphone,       label: "Alertes",          path: "/admin/alertes"       },
+  { icon: BarChart2,       label: "Consultations",    path: "/admin/consultations"  },
+  { icon: ShieldAlert,     label: "Voisins vigilants", path: "/admin/voisins"       },
+  { icon: Tablet,          label: "Mode terrain",     path: "/admin/terrain"        },
+  { icon: BarChart3,       label: "Analytics",         path: "/admin/analytics"    },
+  { icon: Settings,        label: "Paramètres",        path: "/admin/settings"     },
+  { icon: CreditCard,      label: "Abonnement",        path: "/admin/abonnement"   },
+] as const;
+
+const EPCI_ITEM = { icon: Building2, label: "Intercommunal", path: "/admin/epci" } as const;
+
+// ── Props ─────────────────────────────────────────────────────────────────────
+
+export interface AdminShellProps {
+  /** Path of the currently active route, e.g. "/admin/signalements" */
+  activePath: string;
+  children: ReactNode;
+}
+
+// ── Component ─────────────────────────────────────────────────────────────────
+
+export function AdminShell({ activePath, children }: AdminShellProps) {
+  const navigate = useNavigate();
+  const [authReady,      setAuthReady]      = useState(false);
+  const [authError,      setAuthError]      = useState(false);
+  const [communeName,    setCommuneName]    = useState<string | null>(null);
+  const [hasEpci,        setHasEpci]        = useState(false);
+  const [logoUrl,        setLogoUrl]        = useState<string | null>(null);
+  const [primaryColor,   setPrimaryColor]   = useState(DEFAULT_PRIMARY);
+  const [secondaryColor, setSecondaryColor] = useState(DEFAULT_SECONDARY);
+  const [collectivityId, setCollectivityId] = useState<string | null>(null);
+  const [msgUnread,      setMsgUnread]      = useState(0);
+  const [licenseWarning, setLicenseWarning] = useState<"expiring_soon" | "expired" | null>(null);
+
+  useEffect(() => {
+    const timeout = setTimeout(() => setAuthError(true), 10_000);
+
+    (async () => {
+      try {
+        const { data: { session } } = await supabase.auth.getSession();
+        if (!session) { clearTimeout(timeout); navigate({ to: "/admin/login" }); return; }
+
+        const { data: profile } = await supabase
+          .from("profiles")
+          .select("role, collectivity_id")
+          .eq("id", session.user.id)
+          .single();
+
+        const ADMIN_ROLES = ["commune_admin", "interco_admin", "super_admin"];
+        if (!ADMIN_ROLES.includes(profile?.role ?? "")) {
+          clearTimeout(timeout);
+          navigate({ to: "/admin/login" });
+          return;
+        }
+
+        const showEpci = profile?.role === "interco_admin" || profile?.role === "super_admin";
+
+        // Fetch collectivity: name + theming
+        const collPromise = profile?.collectivity_id
+          ? supabase
+              .from("collectivities")
+              .select("name, logo_url, primary_color, secondary_color")
+              .eq("id", profile.collectivity_id)
+              .single()
+          : Promise.resolve({ data: null });
+
+        const [{ data: coll }] = await Promise.all([collPromise]);
+
+        const pc = coll?.primary_color  ?? DEFAULT_PRIMARY;
+        const sc = coll?.secondary_color ?? DEFAULT_SECONDARY;
+
+        // Inject CSS variables for the rest of the UI
+        document.documentElement.style.setProperty("--commune-primary",   pc);
+        document.documentElement.style.setProperty("--commune-secondary", sc);
+
+        setHasEpci(showEpci);
+        setCommuneName(coll?.name   ?? null);
+        setLogoUrl(coll?.logo_url   ?? null);
+        setPrimaryColor(pc);
+        setSecondaryColor(sc);
+        setCollectivityId(profile?.collectivity_id ?? null);
+
+        // Verif expiration licence
+        if (profile?.collectivity_id) {
+          supabase
+            .from("commune_licenses")
+            .select("status, expires_at")
+            .eq("collectivity_id", profile.collectivity_id)
+            .single()
+            .then(({ data: lic }) => {
+              if (!lic) return;
+              if (lic.status === "expired" || lic.status === "suspended") {
+                setLicenseWarning("expired");
+              } else if (lic.expires_at) {
+                const daysLeft = Math.ceil((new Date(lic.expires_at).getTime() - Date.now()) / 86400000);
+                if (daysLeft <= 30) setLicenseWarning("expiring_soon");
+              }
+            });
+        }
+
+        clearTimeout(timeout);
+        setAuthReady(true);
+
+        // Charge le badge messagerie initial
+        if (profile?.collectivity_id) {
+          supabase
+            .from("conversations")
+            .select("unread_admin")
+            .eq("collectivity_id", profile.collectivity_id)
+            .eq("status", "open")
+            .gt("unread_admin", 0)
+            .then(({ data }) => {
+              setMsgUnread((data ?? []).reduce((s, c) => s + (c.unread_admin ?? 0), 0));
+            });
+        }
+      } catch {
+        clearTimeout(timeout);
+        setAuthError(true);
+      }
+    })();
+
+    return () => clearTimeout(timeout);
+  }, [navigate]);
+
+  // Realtime: met à jour le badge messagerie en temps réel
+  useEffect(() => {
+    if (!collectivityId) return;
+    const ch = supabase
+      .channel(`admin-shell-convs-${collectivityId}`)
+      .on(
+        "postgres_changes",
+        { event: "*", schema: "public", table: "conversations", filter: `collectivity_id=eq.${collectivityId}` },
+        async () => {
+          const { data } = await supabase
+            .from("conversations")
+            .select("unread_admin")
+            .eq("collectivity_id", collectivityId)
+            .eq("status", "open")
+            .gt("unread_admin", 0);
+          setMsgUnread((data ?? []).reduce((s, c) => s + (c.unread_admin ?? 0), 0));
+        },
+      )
+      .subscribe();
+    return () => { supabase.removeChannel(ch); };
+  }, [collectivityId]);
+
+  async function handleSignOut() {
+    await supabase.auth.signOut();
+    navigate({ to: "/admin/login" });
+  }
+
+  // ── Error / timeout ────────────────────────────────────────────────────────
+  if (authError) {
+    return (
+      <div className="flex min-h-screen flex-col items-center justify-center gap-4 bg-slate-50 px-4 text-center">
+        <Shield className="h-10 w-10 text-slate-300" />
+        <p className="text-sm font-medium text-slate-600">Impossible de charger le panneau</p>
+        <p className="text-xs text-slate-400">Vérifiez votre connexion et réessayez.</p>
+        <button
+          onClick={() => { setAuthError(false); setAuthReady(false); window.location.reload(); }}
+          className="rounded-xl bg-emerald-600 px-5 py-2 text-sm font-semibold text-white hover:bg-emerald-700"
+        >
+          Réessayer
+        </button>
+      </div>
+    );
+  }
+
+  // ── Loading ────────────────────────────────────────────────────────────────
+  if (!authReady) {
+    return (
+      <div className="flex min-h-screen items-center justify-center bg-slate-50">
+        <Loader2 className="h-7 w-7 animate-spin text-emerald-600" />
+      </div>
+    );
+  }
+
+  const navItems = hasEpci
+    ? [...BASE_NAV, EPCI_ITEM]
+    : [...BASE_NAV];
+
+  // ── Render ─────────────────────────────────────────────────────────────────
+  return (
+    <div className="flex min-h-screen bg-slate-50">
+      {/* ── Sidebar ── */}
+      <aside
+        className="fixed inset-y-0 left-0 flex w-60 flex-col px-3 py-6 shadow-lg"
+        style={{ backgroundColor: secondaryColor }}
+      >
+        {/* Logo */}
+        <div className="mb-6 flex items-center gap-2.5 px-2">
+          <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-white/15 overflow-hidden">
+            {logoUrl
+              ? <img src={logoUrl} alt="logo" className="h-full w-full object-contain p-0.5" />
+              : <Shield className="h-[18px] w-[18px] text-white" />
+            }
+          </div>
+          <div>
+            <span className="text-sm font-extrabold text-white">VigieCity</span>
+            <p className="truncate text-[10px] leading-none text-white/60">
+              {communeName ?? "Administration"}
+            </p>
+          </div>
+        </div>
+
+        {/* Nav */}
+        <nav className="flex-1 space-y-0.5 overflow-y-auto">
+          {navItems.map(({ icon: Icon, label, path }) => {
+            const isActive = activePath === path;
+            return (
+              <button
+                key={path}
+                onClick={() => navigate({ to: path as any })}
+                className={`flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium transition ${
+                  isActive
+                    ? "bg-white/20 text-white"
+                    : "text-emerald-200 hover:bg-white/10 hover:text-white"
+                }`}
+              >
+                <Icon className="h-4 w-4 shrink-0" />
+                <span className="flex-1 text-left">{label}</span>
+                {path === "/admin/messagerie" && msgUnread > 0 && !isActive && (
+                  <span className="flex h-5 min-w-[20px] items-center justify-center rounded-full bg-white/30 px-1 text-[10px] font-bold text-white">
+                    {msgUnread > 9 ? "9+" : msgUnread}
+                  </span>
+                )}
+                {isActive && <ChevronRight className="h-3.5 w-3.5 opacity-60" />}
+              </button>
+            );
+          })}
+        </nav>
+
+        {/* Footer */}
+        <div className="border-t border-white/10 pt-3">
+          <button
+            onClick={handleSignOut}
+            className="flex w-full items-center gap-2 rounded-xl px-3 py-2 text-sm text-emerald-200 transition hover:bg-white/10 hover:text-white"
+          >
+            <LogOut className="h-4 w-4" />
+            Déconnexion
+          </button>
+        </div>
+      </aside>
+
+      {/* -- Main -- */}
+      <main className="ml-60 flex-1 overflow-auto">
+        {/* Banner expiration licence */}
+        {licenseWarning === "expired" && (
+          <div className="flex items-center gap-3 bg-red-600 px-5 py-2.5 text-sm text-white">
+            <AlertTriangle className="h-4 w-4 shrink-0" />
+            <span className="font-medium">Votre licence VigieCity a expire.</span>
+            <span className="opacity-80">Certaines fonctionnalites peuvent etre limitees.</span>
+            <a href="/admin/abonnement" className="ml-auto underline font-semibold hover:opacity-90 whitespace-nowrap">Voir mon abonnement</a>
+          </div>
+        )}
+        {licenseWarning === "expiring_soon" && (
+          <div className="flex items-center gap-3 bg-amber-500 px-5 py-2.5 text-sm text-white">
+            <AlertTriangle className="h-4 w-4 shrink-0" />
+            <span className="font-medium">Votre licence expire bientot.</span>
+            <span className="opacity-80">Contactez-nous pour renouveler votre abonnement.</span>
+            <a href="/admin/abonnement" className="ml-auto underline font-semibold hover:opacity-90 whitespace-nowrap">Voir mon abonnement</a>
+          </div>
+        )}
+        {children}
+      </main>
+    </div>
+  );
+}

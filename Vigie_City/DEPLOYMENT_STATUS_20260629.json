@@ -1,0 +1,34 @@
+{
+  "timestamp": "2026-06-29T21:15:00Z",
+  "status": "READY FOR PRODUCTION",
+  "items": {
+    "migrations": {
+      "20260701000001_add_payment_fields.sql": "\u2713 EXISTS (901 bytes)",
+      "20260701000002_add_epci_admin_rls.sql": "\u2713 EXISTS (1930 bytes)"
+    },
+    "edge_function": {
+      "index.ts": "\u2713 19969 bytes",
+      "types.ts": "\u2713 7245 bytes"
+    },
+    "routes": {
+      "src/onboarding.tsx": "\u2713 7917 bytes",
+      "src/platform/onboarding.tsx": "\u2713 18548 bytes"
+    },
+    "components": {
+      "AdminContactForm.tsx": "\u2713 7106 bytes",
+      "CommuneAdminTable.tsx": "\u2713 8744 bytes",
+      "ConfirmationStep.tsx": "\u2713 11148 bytes",
+      "PaymentDetails.tsx": "\u2713 5607 bytes",
+      "PlanSelector.tsx": "\u2713 2229 bytes",
+      "TerritorySelector.tsx": "\u2713 11461 bytes"
+    },
+    "utilities": {
+      "onboarding-utils.ts": "\u2713 348 lines, 9537 bytes"
+    },
+    "support": {
+      "src/hooks/useWeatherVigilance.tsx": "\u2713 49 bytes",
+      "src/integrations/supabase/": "\u2713 Directory (1 items)",
+      "src/lib/pwa-setup.ts": "\u2713 1593 bytes"
+    }
+  }
+}

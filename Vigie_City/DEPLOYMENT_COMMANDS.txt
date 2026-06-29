@@ -1,0 +1,189 @@
+================================================================================
+EPCI ONBOARDING - DEPLOYMENT COMMANDS
+================================================================================
+
+Project: VigieCity
+Date: 2026-07-01
+Status: Ready for deployment
+
+================================================================================
+1. SUPABASE MIGRATIONS
+================================================================================
+
+Apply migrations to production Supabase:
+
+  cd C:\Users\Baptiste-\VigieCity\Vigie_City
+  supabase migration up --linked
+
+This applies:
+  - 20260701000001_add_payment_fields.sql
+  - 20260701000002_add_epci_admin_rls.sql
+
+Verify migrations applied:
+  SELECT tablename FROM pg_tables
+  WHERE schemaname='public' AND tablename='commune_licenses';
+
+  SELECT payment_date, payment_type FROM commune_licenses LIMIT 1;
+
+================================================================================
+2. EDGE FUNCTION DEPLOYMENT
+================================================================================
+
+Deploy create-commune-batch:
+
+  cd C:\Users\Baptiste-\VigieCity\Vigie_City
+  supabase functions deploy create-commune-batch --linked
+
+Verify function deployed:
+  curl -X POST https://xfhkngecpbvmlstjymfy.supabase.co/functions/v1/create-commune-batch \
+    -H "Authorization: Bearer $SUPABASE_SERVICE_KEY" \
+    -H "Content-Type: application/json" \
+    -d '{
+      "epci_id": "test",
+      "admin_email": "test@example.com",
+      "admin_name": "Test",
+      "admin_password": "Password123!",
+      "communes": [],
+      "payment_date": "2026-07-01",
+      "payment_type": "chorus_pro",
+      "payment_validated": false
+    }'
+
+Expected response: 200 with communes_created: 0
+
+================================================================================
+3. FRONTEND BUILD & DEPLOY
+================================================================================
+
+Build and deploy to Vercel:
+
+  cd C:\Users\Baptiste-\VigieCity\Vigie_City
+  npm run build
+  vercel deploy --prod
+
+Or with Vercel CLI:
+
+  vercel deploy --prod --scope vigiecity
+
+Verify deployment:
+  Open https://vigiecity.fr/platform/onboarding
+  Should load 5-step form without errors
+
+================================================================================
+4. ENVIRONMENT VARIABLES
+================================================================================
+
+Ensure these are set in Supabase project (xfhkngecpbvmlstjymfy):
+
+  SUPABASE_URL = https://xfhkngecpbvmlstjymfy.supabase.co
+  SUPABASE_SERVICE_ROLE_KEY = [from Supabase dashboard → Settings → API Keys → service_role]
+  APP_URL = https://vigiecity.fr (for edge function email links)
+
+Check in Supabase:
+  1. Go to Dashboard → Settings → API keys
+  2. Copy Service Role Key
+  3. Verify it matches in edge function environment
+
+================================================================================
+5. TESTING CHECKLIST
+================================================================================
+
+After deployment, manually test:
+
+[] 1. Load /platform/onboarding in browser
+[] 2. Step 1: Select commune, search works
+[] 3. Step 1: Select EPCI, dropdown loads EPCIs
+[] 4. Step 2: Enter admin email & strong password, validation shows
+[] 5. Step 3 (Commune): Plan selector shows 4 options
+[] 6. Step 3 (EPCI): Table loads communes from EPCI
+[] 7. Step 4: Date picker works, payment type dropdown loads
+[] 8. Step 5: Summary displays correctly
+[] 9. Submit commune path: Admin & license created
+[] 10. Submit EPCI path: EPCI admin + commune admins created
+[] 11. Payment fields populated: payment_date, payment_type in DB
+[] 12. Licenses have expiry_at set to +12 months
+[] 13. User roles created: admin_epci and admin roles
+[] 14. Welcome emails sent to admins
+
+================================================================================
+6. ROLLBACK (if needed)
+================================================================================
+
+If issues occur:
+
+Reverse migrations:
+  cd C:\Users\Baptiste-\VigieCity\Vigie_City
+  supabase db reset  # This resets entire DB (dev only)
+
+Or manually drop the policies in Supabase SQL editor:
+  DROP POLICY IF EXISTS "epci_admin_can_create_licenses" ON commune_licenses;
+  DROP POLICY IF EXISTS "epci_admin_can_read_licenses" ON commune_licenses;
+  DROP POLICY IF EXISTS "epci_admin_can_update_licenses" ON commune_licenses;
+  DROP POLICY IF EXISTS "epci_admin_can_delete_licenses" ON commune_licenses;
+  DROP POLICY IF EXISTS "service_role_full_access" ON commune_licenses;
+
+Remove edge function:
+  Remove /supabase/functions/create-commune-batch directory
+  Redeploy without it
+
+Frontend rollback:
+  vercel rollback --scope vigiecity
+
+================================================================================
+7. MONITORING AFTER DEPLOYMENT
+================================================================================
+
+Check error logs in Vercel:
+  vercel logs <project-id>
+
+Monitor Supabase:
+  - Edge function logs: Supabase → Functions → Logs
+  - Database: Check commune_licenses table for new records
+  - Auth: Check auth.users for new admin accounts
+  - Check for RLS policy violations in logs
+
+Watch for errors:
+  - "Commune not found" → INSEE code mismatch
+  - "Email already registered" → User exists, will reuse
+  - "RLS policy denied" → Check epci_id in JWT token
+
+================================================================================
+8. FILE LOCATIONS
+================================================================================
+
+Migrations:
+  C:\Users\Baptiste-\VigieCity\Vigie_City\supabase\migrations\20260701000001_add_payment_fields.sql
+  C:\Users\Baptiste-\VigieCity\Vigie_City\supabase\migrations\20260701000002_add_epci_admin_rls.sql
+
+Edge Function:
+  C:\Users\Baptiste-\VigieCity\Vigie_City\supabase\functions\create-commune-batch\index.ts
+  C:\Users\Baptiste-\VigieCity\Vigie_City\supabase\functions\create-commune-batch\types.ts
+
+Frontend:
+  C:\Users\Baptiste-\VigieCity\Vigie_City\src\routes\platform\onboarding.tsx
+  C:\Users\Baptiste-\VigieCity\Vigie_City\src\components\onboarding\*.tsx (6 components)
+  C:\Users\Baptiste-\VigieCity\Vigie_City\src\lib\onboarding-utils.ts
+
+Documentation:
+  C:\Users\Baptiste-\VigieCity\Vigie_City\EPCI_ONBOARDING_DEPLOYMENT.md (full guide)
+  C:\Users\Baptiste-\VigieCity\Vigie_City\_delivery\IMPLEMENTATION_NOTES.md (technical details)
+
+================================================================================
+9. SUPPORT CONTACTS
+================================================================================
+
+For Supabase issues:
+  Dashboard: https://app.supabase.com/project/xfhkngecpbvmlstjymfy
+  Docs: https://supabase.com/docs
+
+For Vercel issues:
+  Dashboard: https://vercel.com/dashboard
+  Docs: https://vercel.com/docs
+
+For local development:
+  supabase start
+  supabase stop
+
+================================================================================
+END OF DEPLOYMENT COMMANDS
+================================================================================
