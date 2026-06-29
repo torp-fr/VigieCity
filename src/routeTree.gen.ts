@@ -39,7 +39,7 @@ import { Route as ServicesIndexRouteImport } from './routes/services/index'
 import { Route as PlatformIndexRouteImport } from './routes/platform/index'
 import { Route as OperateurIndexRouteImport } from './routes/operateur/index'
 import { Route as AdminIndexRouteImport } from './routes/admin/index'
-import { Route as PlatformUsersRouteImport } from './routes/platform/users'
+import { Route as PlatformUtilisateursRouteImport } from './routes/platform/utilisateurs'
 import { Route as PlatformTrialsRouteImport } from './routes/platform/trials'
 import { Route as PlatformTarificationRouteImport } from './routes/platform/tarification'
 import { Route as PlatformSupportRouteImport } from './routes/platform/support'
@@ -53,7 +53,6 @@ import { Route as PlatformOnboardingRouteImport } from './routes/platform/onboar
 import { Route as PlatformModulesRouteImport } from './routes/platform/modules'
 import { Route as PlatformLicencesRouteImport } from './routes/platform/licences'
 import { Route as PlatformKnowledgeRouteImport } from './routes/platform/knowledge'
-import { Route as PlatformIntercommunalitesRouteImport } from './routes/platform/intercommunalites'
 import { Route as PlatformFeaturesRouteImport } from './routes/platform/features'
 import { Route as PlatformFacturationRouteImport } from './routes/platform/facturation'
 import { Route as PlatformEpciTarificationRouteImport } from './routes/platform/epci-tarification'
@@ -238,9 +237,9 @@ const AdminIndexRoute = AdminIndexRouteImport.update({
   path: '/admin/',
   getParentRoute: () => rootRouteImport,
 } as any)
-const PlatformUsersRoute = PlatformUsersRouteImport.update({
-  id: '/platform/users',
-  path: '/platform/users',
+const PlatformUtilisateursRoute = PlatformUtilisateursRouteImport.update({
+  id: '/platform/utilisateurs',
+  path: '/platform/utilisateurs',
   getParentRoute: () => rootRouteImport,
 } as any)
 const PlatformTrialsRoute = PlatformTrialsRouteImport.update({
@@ -308,12 +307,6 @@ const PlatformKnowledgeRoute = PlatformKnowledgeRouteImport.update({
   path: '/platform/knowledge',
   getParentRoute: () => rootRouteImport,
 } as any)
-const PlatformIntercommunalitesRoute =
-  PlatformIntercommunalitesRouteImport.update({
-    id: '/platform/intercommunalites',
-    path: '/platform/intercommunalites',
-    getParentRoute: () => rootRouteImport,
-  } as any)
 const PlatformFeaturesRoute = PlatformFeaturesRouteImport.update({
   id: '/platform/features',
   path: '/platform/features',
@@ -537,7 +530,6 @@ export interface FileRoutesByFullPath {
   '/platform/epci-tarification': typeof PlatformEpciTarificationRoute
   '/platform/facturation': typeof PlatformFacturationRoute
   '/platform/features': typeof PlatformFeaturesRoute
-  '/platform/intercommunalites': typeof PlatformIntercommunalitesRoute
   '/platform/knowledge': typeof PlatformKnowledgeRoute
   '/platform/licences': typeof PlatformLicencesRoute
   '/platform/modules': typeof PlatformModulesRoute
@@ -551,7 +543,7 @@ export interface FileRoutesByFullPath {
   '/platform/support': typeof PlatformSupportRouteWithChildren
   '/platform/tarification': typeof PlatformTarificationRoute
   '/platform/trials': typeof PlatformTrialsRoute
-  '/platform/users': typeof PlatformUsersRoute
+  '/platform/utilisateurs': typeof PlatformUtilisateursRoute
   '/admin/': typeof AdminIndexRoute
   '/operateur/': typeof OperateurIndexRoute
   '/platform/': typeof PlatformIndexRoute
@@ -616,7 +608,6 @@ export interface FileRoutesByTo {
   '/platform/epci-tarification': typeof PlatformEpciTarificationRoute
   '/platform/facturation': typeof PlatformFacturationRoute
   '/platform/features': typeof PlatformFeaturesRoute
-  '/platform/intercommunalites': typeof PlatformIntercommunalitesRoute
   '/platform/knowledge': typeof PlatformKnowledgeRoute
   '/platform/licences': typeof PlatformLicencesRoute
   '/platform/modules': typeof PlatformModulesRoute
@@ -630,7 +621,7 @@ export interface FileRoutesByTo {
   '/platform/support': typeof PlatformSupportRouteWithChildren
   '/platform/tarification': typeof PlatformTarificationRoute
   '/platform/trials': typeof PlatformTrialsRoute
-  '/platform/users': typeof PlatformUsersRoute
+  '/platform/utilisateurs': typeof PlatformUtilisateursRoute
   '/admin': typeof AdminIndexRoute
   '/operateur': typeof OperateurIndexRoute
   '/platform': typeof PlatformIndexRoute
@@ -697,7 +688,6 @@ export interface FileRoutesById {
   '/platform/epci-tarification': typeof PlatformEpciTarificationRoute
   '/platform/facturation': typeof PlatformFacturationRoute
   '/platform/features': typeof PlatformFeaturesRoute
-  '/platform/intercommunalites': typeof PlatformIntercommunalitesRoute
   '/platform/knowledge': typeof PlatformKnowledgeRoute
   '/platform/licences': typeof PlatformLicencesRoute
   '/platform/modules': typeof PlatformModulesRoute
@@ -711,7 +701,7 @@ export interface FileRoutesById {
   '/platform/support': typeof PlatformSupportRouteWithChildren
   '/platform/tarification': typeof PlatformTarificationRoute
   '/platform/trials': typeof PlatformTrialsRoute
-  '/platform/users': typeof PlatformUsersRoute
+  '/platform/utilisateurs': typeof PlatformUtilisateursRoute
   '/admin/': typeof AdminIndexRoute
   '/operateur/': typeof OperateurIndexRoute
   '/platform/': typeof PlatformIndexRoute
@@ -779,7 +769,6 @@ export interface FileRouteTypes {
     | '/platform/epci-tarification'
     | '/platform/facturation'
     | '/platform/features'
-    | '/platform/intercommunalites'
     | '/platform/knowledge'
     | '/platform/licences'
     | '/platform/modules'
@@ -793,7 +782,7 @@ export interface FileRouteTypes {
     | '/platform/support'
     | '/platform/tarification'
     | '/platform/trials'
-    | '/platform/users'
+    | '/platform/utilisateurs'
     | '/admin/'
     | '/operateur/'
     | '/platform/'
@@ -858,7 +847,6 @@ export interface FileRouteTypes {
     | '/platform/epci-tarification'
     | '/platform/facturation'
     | '/platform/features'
-    | '/platform/intercommunalites'
     | '/platform/knowledge'
     | '/platform/licences'
     | '/platform/modules'
@@ -872,7 +860,7 @@ export interface FileRouteTypes {
     | '/platform/support'
     | '/platform/tarification'
     | '/platform/trials'
-    | '/platform/users'
+    | '/platform/utilisateurs'
     | '/admin'
     | '/operateur'
     | '/platform'
@@ -938,7 +926,6 @@ export interface FileRouteTypes {
     | '/platform/epci-tarification'
     | '/platform/facturation'
     | '/platform/features'
-    | '/platform/intercommunalites'
     | '/platform/knowledge'
     | '/platform/licences'
     | '/platform/modules'
@@ -952,7 +939,7 @@ export interface FileRouteTypes {
     | '/platform/support'
     | '/platform/tarification'
     | '/platform/trials'
-    | '/platform/users'
+    | '/platform/utilisateurs'
     | '/admin/'
     | '/operateur/'
     | '/platform/'
@@ -1019,7 +1006,6 @@ export interface RootRouteChildren {
   PlatformEpciTarificationRoute: typeof PlatformEpciTarificationRoute
   PlatformFacturationRoute: typeof PlatformFacturationRoute
   PlatformFeaturesRoute: typeof PlatformFeaturesRoute
-  PlatformIntercommunalitesRoute: typeof PlatformIntercommunalitesRoute
   PlatformKnowledgeRoute: typeof PlatformKnowledgeRoute
   PlatformLicencesRoute: typeof PlatformLicencesRoute
   PlatformModulesRoute: typeof PlatformModulesRoute
@@ -1033,7 +1019,7 @@ export interface RootRouteChildren {
   PlatformSupportRoute: typeof PlatformSupportRouteWithChildren
   PlatformTarificationRoute: typeof PlatformTarificationRoute
   PlatformTrialsRoute: typeof PlatformTrialsRoute
-  PlatformUsersRoute: typeof PlatformUsersRoute
+  PlatformUtilisateursRoute: typeof PlatformUtilisateursRoute
   AdminIndexRoute: typeof AdminIndexRoute
   OperateurIndexRoute: typeof OperateurIndexRoute
   PlatformIndexRoute: typeof PlatformIndexRoute
@@ -1254,11 +1240,11 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminIndexRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/platform/users': {
-      id: '/platform/users'
-      path: '/platform/users'
-      fullPath: '/platform/users'
-      preLoaderRoute: typeof PlatformUsersRouteImport
+    '/platform/utilisateurs': {
+      id: '/platform/utilisateurs'
+      path: '/platform/utilisateurs'
+      fullPath: '/platform/utilisateurs'
+      preLoaderRoute: typeof PlatformUtilisateursRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/platform/trials': {
@@ -1350,13 +1336,6 @@ declare module '@tanstack/react-router' {
       path: '/platform/knowledge'
       fullPath: '/platform/knowledge'
       preLoaderRoute: typeof PlatformKnowledgeRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/platform/intercommunalites': {
-      id: '/platform/intercommunalites'
-      path: '/platform/intercommunalites'
-      fullPath: '/platform/intercommunalites'
-      preLoaderRoute: typeof PlatformIntercommunalitesRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/platform/features': {
@@ -1674,7 +1653,6 @@ const rootRouteChildren: RootRouteChildren = {
   PlatformEpciTarificationRoute: PlatformEpciTarificationRoute,
   PlatformFacturationRoute: PlatformFacturationRoute,
   PlatformFeaturesRoute: PlatformFeaturesRoute,
-  PlatformIntercommunalitesRoute: PlatformIntercommunalitesRoute,
   PlatformKnowledgeRoute: PlatformKnowledgeRoute,
   PlatformLicencesRoute: PlatformLicencesRoute,
   PlatformModulesRoute: PlatformModulesRoute,
@@ -1688,7 +1666,7 @@ const rootRouteChildren: RootRouteChildren = {
   PlatformSupportRoute: PlatformSupportRouteWithChildren,
   PlatformTarificationRoute: PlatformTarificationRoute,
   PlatformTrialsRoute: PlatformTrialsRoute,
-  PlatformUsersRoute: PlatformUsersRoute,
+  PlatformUtilisateursRoute: PlatformUtilisateursRoute,
   AdminIndexRoute: AdminIndexRoute,
   OperateurIndexRoute: OperateurIndexRoute,
   PlatformIndexRoute: PlatformIndexRoute,

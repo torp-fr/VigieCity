@@ -65,7 +65,7 @@ const NAV_SECTIONS: NavSection[] = [
   {
     heading: "Utilisateurs",
     items: [
-      { label: "Tous les users", to: "/platform/users", icon: Users },
+      { label: "Tous les users", to: "/platform/utilisateurs", icon: Users },
     ],
   },
   {

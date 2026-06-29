@@ -6,7 +6,7 @@ import {
   CreditCard, Euro, BarChart3, UserPlus,
   TrendingUp, Newspaper, Package, BookOpen,
   Menu, Bell, Wrench,
-  Network, ShieldCheck, Receipt, KeyRound,
+  ShieldCheck, Receipt, KeyRound,
   Clock, Activity, ToggleLeft, LifeBuoy,
 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
@@ -20,11 +20,10 @@ const NAV_SECTIONS = [
     items: [
       { icon: LayoutDashboard, label: "Tableau de bord",  path: "/platform"                },
       { icon: Building2,       label: "Collectivités",    path: "/platform/collectivites"  },
-      { icon: Network,         label: "Intercommunalités", path: "/platform/intercommunalites" },
       { icon: ShieldCheck,     label: "Modération",       path: "/platform/city/moderation" },
       { icon: UserPlus,        label: "Onboarding",       path: "/platform/onboarding"     },
       { icon: TrendingUp,      label: "Rétention",        path: "/platform/retention"      },
-      { icon: Users,           label: "Utilisateurs",     path: "/platform/users"          },
+      { icon: Users,           label: "Utilisateurs, Collectivités & Citoyens", path: "/platform/utilisateurs" },
     ],
   },
   {
@@ -74,11 +73,10 @@ const NAV_SECTIONS = [
 const PAGE_TITLES: Record<string, string> = {
   "/platform":                  "Tableau de bord",
   "/platform/collectivites":    "Collectivités",
-  "/platform/intercommunalites": "Intercommunalités",
   "/platform/city/moderation":  "Modération des Signalements",
   "/platform/onboarding":       "Onboarding",
   "/platform/retention":        "Rétention",
-  "/platform/users":            "Utilisateurs",
+  "/platform/utilisateurs":     "Utilisateurs, Collectivités & Citoyens",
   "/platform/rss":              "Flux RSS",
   "/platform/knowledge":        "Connaissances",
   "/platform/publishers":       "Éditeurs",
@@ -270,3 +268,4 @@ export function PlatformShell({
     </div>
   );
 }
+

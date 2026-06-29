@@ -6,7 +6,7 @@ import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { PlatformShell } from "@/components/PlatformShell";
 
-export const Route = createFileRoute("/platform/users")({
+export const Route = createFileRoute("/platform/utilisateurs")({
   component: PlatformUsersPage,
 });
 
@@ -52,7 +52,7 @@ const ROLE_BADGE: Record<string, string> = {
 
 function PlatformUsersPage() {
   return (
-    <PlatformShell activePath="/platform/users">
+    <PlatformShell activePath="/platform/utilisateurs">
       <PlatformUsersContent />
     </PlatformShell>
   );
