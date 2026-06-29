@@ -6,6 +6,7 @@ interface Commune {
   nom: string;
   population: number;
   codesPostaux?: string[];
+  isEPCI?: boolean;  // Flag if this is an EPCI (not a single commune)
 }
 
 interface DualTerritorySelectorProps {
@@ -186,6 +187,7 @@ export function DualTerritorySelector({
       code: epci.code,
       nom: epci.nom,
       population: epci.population || 0,
+      isEPCI: true,  // ← Flag this as an EPCI selection
     };
     setSelectedCommune(epciAsCommune);
     onSelect(epciAsCommune);

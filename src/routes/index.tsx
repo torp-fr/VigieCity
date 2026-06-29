@@ -8,6 +8,7 @@ import {
   X, ToggleLeft, ToggleRight,
 } from "lucide-react";
 import { DualTerritorySelector } from "@/components/DualTerritorySelector";
+import { TIER_DATA, calculateEPCITariff, getTariffByPopulation } from "@/utils/tariffCalculation";
 
 export const Route = createFileRoute("/")({
   head: () => ({
@@ -753,32 +754,68 @@ function getPopulationTierIndex(population: number): number {
 }
 
 function CommuneCalculatorSection() {
-  const [selected, setSelected] = useState<{ id: string; name: string; population: number; epci_name?: string } | null>(null);
+  const [selected, setSelected] = useState<{ id: string; name: string; population: number; epci_name?: string; isEPCI?: boolean; communes?: any[] } | null>(null);
+  const [epciTariff, setEpciTariff] = useState<{ brut: number; final: number; reduction: number; count: number } | null>(null);
+  const [loadingEPCI, setLoadingEPCI] = useState(false);
 
-  const handleCommuneSelect = (commune: any) => {
-    setSelected({
+  const handleCommuneSelect = async (commune: any) => {
+    setEpciTariff(null);
+
+    const selectedData = {
       id: commune.code,
       name: commune.nom,
       population: commune.population,
-    });
+      isEPCI: commune.isEPCI || false,
+    };
+
+    setSelected(selectedData);
+
+    // If this is an EPCI, fetch its communes and calculate dynamic tariff
+    if (commune.isEPCI) {
+      setLoadingEPCI(true);
+      try {
+        const response = await fetch(
+          `https://geo.api.gouv.fr/epcis/${encodeURIComponent(commune.code)}`
+        );
+        if (!response.ok) throw new Error("Failed to fetch EPCI details");
+        const epciDetails = await response.json();
+
+        // Fetch communes of this EPCI
+        if (epciDetails.code) {
+          const communesResponse = await fetch(
+            `https://geo.api.gouv.fr/epcis/${encodeURIComponent(epciDetails.code)}/communes`
+          );
+          if (!communesResponse.ok) throw new Error("Failed to fetch communes");
+          const communes = await communesResponse.json();
+
+          if (communes && communes.length > 0) {
+            const result = calculateEPCITariff(communes);
+            setEpciTariff({
+              brut: result.brut,
+              final: result.final,
+              reduction: result.reductionPercent,
+              count: communes.length,
+            });
+          }
+        }
+      } catch (error) {
+        console.error("Error fetching EPCI communes:", error);
+      } finally {
+        setLoadingEPCI(false);
+      }
+    }
   };
 
   const handlePopulationChange = (population: number) => {
     // Utilisé pour synchroniser si besoin
   };
 
-  const tierIndex = selected ? getPopulationTierIndex(selected.population) : null;
-
-  const TIER_DATA = [
-    { name: "Hameau",    range: "< 500 hab.",            monthly: 19,  annual: 190  },
-    { name: "Village",   range: "501 – 3 500 hab.",      monthly: 49,  annual: 490  },
-    { name: "Bourg",     range: "3 501 – 10 000 hab.",   monthly: 99,  annual: 990  },
-    { name: "Bastide",   range: "10 001 – 25 000 hab.",  monthly: 189, annual: 1890 },
-    { name: "Cité",      range: "25 001 – 50 000 hab.",  monthly: 390, annual: 3900 },
-    { name: "Métropole", range: "> 50 000 hab.",         monthly: 590, annual: 5900 },
-  ] as const;
-
+  const tierIndex = selected && !selected.isEPCI ? getPopulationTierIndex(selected.population) : null;
   const tier = tierIndex !== null ? TIER_DATA[tierIndex] : null;
+
+  // Final tariff to display: either EPCI tariff or single commune tariff
+  const displayTariff = selected?.isEPCI && epciTariff ? epciTariff.final : (tier?.monthly || null);
+  const displayAnnual = displayTariff ? Math.round(displayTariff * 12) : null;
 
   return (
     <section style={{ background: "linear-gradient(150deg, #1e3a8a 0%, #1d4ed8 100%)" }} className="py-20">
@@ -808,12 +845,12 @@ function CommuneCalculatorSection() {
         </div>
 
         {/* Résultat : plan adapté */}
-        {selected && tier && (
+        {selected && (tier || epciTariff) && (
           <div
             className="mt-8 overflow-hidden rounded-2xl bg-white"
             style={{ boxShadow: "0 24px 64px rgba(0,0,0,0.22)" }}
           >
-            {/* Bandeau commune */}
+            {/* Bandeau commune / EPCI */}
             <div
               className="flex items-center gap-3 px-7 py-4"
               style={{ background: "#f8faff", borderBottom: "1px solid #e0e7ff" }}
@@ -822,13 +859,25 @@ function CommuneCalculatorSection() {
                 className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-xl text-lg"
                 style={{ background: "#eff6ff" }}
               >
-                🏛️
+                {selected.isEPCI ? "🌐" : "🏛️"}
               </div>
               <div>
                 <p className="font-bold text-gray-900">{selected.name}</p>
                 <p className="text-xs text-gray-500">
-                  {selected.population.toLocaleString("fr-FR")} habitants
-                  {selected.epci_name && ` · EPCI: ${selected.epci_name}`}
+                  {selected.isEPCI && epciTariff ? (
+                    <>
+                      {epciTariff.count} commune{epciTariff.count > 1 ? "s" : ""} · {selected.population.toLocaleString("fr-FR")} habitants
+                      {" · "}
+                      <span style={{ color: "#059669" }}>
+                        Réduction {epciTariff.reduction * 100 | 0}%
+                      </span>
+                    </>
+                  ) : (
+                    <>
+                      {selected.population.toLocaleString("fr-FR")} habitants
+                      {selected.epci_name && ` · EPCI: ${selected.epci_name}`}
+                    </>
+                  )}
                 </p>
               </div>
               <button
@@ -845,24 +894,44 @@ function CommuneCalculatorSection() {
                 className="text-xs font-bold uppercase tracking-widest"
                 style={{ color: "#1e3a8a" }}
               >
-                Plan recommandé
+                {selected.isEPCI ? "Tarif Intercommunalité" : "Plan recommandé"}
               </p>
-              <p className="mt-1 text-2xl font-extrabold text-gray-900">
-                {tier.name}
-              </p>
-              <p className="text-sm text-gray-400">{tier.range}</p>
 
-              {tier.monthly === null ? (
+              {selected.isEPCI && epciTariff ? (
                 <>
-                  <p className="mt-5 text-4xl font-extrabold text-gray-900">
-                    Sur devis
+                  <p className="mt-1 text-2xl font-extrabold text-gray-900">
+                    Intercommunalité
                   </p>
-                  <p className="mt-2 text-sm text-gray-500">
-                    Tarif personnalisé · SLA et accompagnement adaptés
-                  </p>
+                  {loadingEPCI ? (
+                    <p className="mt-4 text-gray-500">Calcul du tarif dynamique...</p>
+                  ) : (
+                    <>
+                      <p className="text-xs text-gray-400 mt-2">
+                        Tarif brut: {epciTariff.brut.toFixed(2)}€
+                        {" · "}
+                        Réduction: -{(epciTariff.reduction * 100).toFixed(0)}%
+                      </p>
+
+                      <div className="mt-5 flex items-end justify-center gap-2">
+                        <span className="text-5xl font-extrabold text-gray-900">
+                          {epciTariff.final.toFixed(0)} €
+                        </span>
+                        <span className="mb-2 text-gray-400">/mois HT</span>
+                      </div>
+                      <p className="mt-1.5 text-sm font-semibold" style={{ color: "#1e3a8a" }}>
+                        ou {(epciTariff.final * 12).toLocaleString("fr-FR", { maximumFractionDigits: 0 })} €/an HT{" "}
+                        <span className="font-normal text-gray-400">(2 mois offerts)</span>
+                      </p>
+                    </>
+                  )}
                 </>
-              ) : (
+              ) : tier ? (
                 <>
+                  <p className="mt-1 text-2xl font-extrabold text-gray-900">
+                    {tier.name}
+                  </p>
+                  <p className="text-sm text-gray-400">{tier.range}</p>
+
                   <div className="mt-5 flex items-end justify-center gap-2">
                     <span className="text-5xl font-extrabold text-gray-900">
                       {tier.monthly} €
@@ -874,7 +943,7 @@ function CommuneCalculatorSection() {
                     <span className="font-normal text-gray-400">(2 mois offerts)</span>
                   </p>
                 </>
-              )}
+              ) : null}
 
               {/* Features condensées */}
               <div className="mt-5 flex flex-wrap justify-center gap-2">
@@ -917,15 +986,13 @@ function CommuneCalculatorSection() {
 }
 
 // ── Grille tarifaire ──────────────────────────────────────────────────────────
-
-const PRICING_TIERS = [
-  { name: "Hameau", range: "< 500 hab.", monthly: 19, annual: 190 },
-  { name: "Village", range: "501 – 3 500 hab.", monthly: 49, annual: 490 },
-  { name: "Bourg", range: "3 501 – 10 000 hab.", monthly: 99, annual: 990 },
-  { name: "Bastide", range: "10 001 – 25 000 hab.", monthly: 189, annual: 1890 },
-  { name: "Cité", range: "25 001 – 50 000 hab.", monthly: 390, annual: 3900 },
-  { name: "Métropole", range: "> 50 000 hab.", monthly: 590, annual: 5900 },
-] as const;
+// Use the tariffs from tariffCalculation utility
+const PRICING_TIERS = TIER_DATA.map(t => ({
+  name: t.name,
+  range: t.range,
+  monthly: t.monthly,
+  annual: t.annual,
+}));
 
 const FEATURES_LIST = [
   "Tous les modules inclus (alertes, signalements, agenda, infos, messagerie)",
