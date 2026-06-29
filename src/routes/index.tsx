@@ -7,6 +7,7 @@ import {
   LayoutDashboard, CheckSquare, BarChart3, Map as MapIcon, Users,
   X, ToggleLeft, ToggleRight,
 } from "lucide-react";
+import { DualTerritorySelector } from "@/components/DualTerritorySelector";
 
 export const Route = createFileRoute("/")({
   head: () => ({
@@ -752,59 +753,21 @@ function getPopulationTierIndex(population: number): number {
 }
 
 function CommuneCalculatorSection() {
-  const [query, setQuery]             = useState("");
-  const [results, setResults]         = useState<CommuneResult[]>([]);
-  const [loading, setLoading]         = useState(false);
-  const [selected, setSelected]       = useState<CommuneResult | null>(null);
-  const [showDropdown, setShowDropdown] = useState(false);
-  const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
-  const containerRef = useRef<HTMLDivElement>(null);
+  const [selected, setSelected] = useState<{ id: string; name: string; population: number; epci_name?: string } | null>(null);
 
-  // Ferme le dropdown si clic extérieur
-  useEffect(() => {
-    const handler = (e: MouseEvent) => {
-      if (containerRef.current && !containerRef.current.contains(e.target as Node)) {
-        setShowDropdown(false);
-      }
-    };
-    document.addEventListener("mousedown", handler);
-    return () => document.removeEventListener("mousedown", handler);
-  }, []);
-
-  const search = async (q: string) => {
-    if (q.trim().length < 2) { setResults([]); setLoading(false); return; }
-    setLoading(true);
-    try {
-      const url = `https://geo.api.gouv.fr/communes?nom=${encodeURIComponent(q)}&fields=nom,code,population&limit=7&boost=population`;
-      const res  = await fetch(url);
-      const data = await res.json() as CommuneResult[];
-      setResults(data.filter((c) => c.population != null && c.population > 0));
-    } catch {
-      setResults([]);
-    } finally {
-      setLoading(false);
-    }
+  const handleCommuneSelect = (commune: any) => {
+    setSelected({
+      id: commune.code,
+      name: commune.nom,
+      population: commune.population,
+    });
   };
 
-  const handleInput = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const val = e.target.value;
-    setQuery(val);
-    setSelected(null);
-    setShowDropdown(true);
-    if (debounceRef.current) clearTimeout(debounceRef.current);
-    debounceRef.current = setTimeout(() => search(val), 280);
-  };
-
-  const handleSelect = (c: CommuneResult) => {
-    setSelected(c);
-    setQuery(c.nom);
-    setResults([]);
-    setShowDropdown(false);
+  const handlePopulationChange = (population: number) => {
+    // Utilisé pour synchroniser si besoin
   };
 
   const tierIndex = selected ? getPopulationTierIndex(selected.population) : null;
-  // PRICING_TIERS n'est pas encore déclaré ici, on le référence après
-  // → on passe par les mêmes constantes définies plus bas dans le fichier
 
   const TIER_DATA = [
     { name: "Hameau",    range: "< 500 hab.",            monthly: 19,  annual: 190  },
@@ -834,55 +797,14 @@ function CommuneCalculatorSection() {
           </p>
         </div>
 
-        {/* Champ de recherche */}
-        <div ref={containerRef} className="relative mt-10">
-          <div
-            className="flex items-center gap-3 rounded-2xl bg-white px-5 py-4 shadow-xl"
-            style={{ border: "2px solid transparent" }}
-          >
-            <MapPin className="h-5 w-5 flex-shrink-0 text-blue-400" />
-            <input
-              type="text"
-              value={query}
-              onChange={handleInput}
-              onFocus={() => query.length >= 2 && results.length > 0 && setShowDropdown(true)}
-              placeholder="Nom de votre commune ou code postal..."
-              className="flex-1 bg-transparent text-base font-medium text-gray-900 placeholder-gray-400 outline-none"
+        {/* Sélecteur Dual: Commune directe OU Cascadé EPCI */}
+        <div className="mx-auto max-w-2xl mt-10">
+          <div className="bg-white rounded-2xl shadow-xl p-8">
+            <DualTerritorySelector
+              onSelect={handleCommuneSelect}
+              onPopulationChange={handlePopulationChange}
             />
-            {loading && (
-              <span className="text-xs text-gray-400">Recherche…</span>
-            )}
           </div>
-
-          {/* Dropdown résultats */}
-          {showDropdown && results.length > 0 && (
-            <div
-              className="absolute left-0 right-0 top-full z-50 mt-2 overflow-hidden rounded-2xl bg-white"
-              style={{ boxShadow: "0 20px 60px rgba(0,0,0,0.18), 0 4px 16px rgba(0,0,0,0.08)" }}
-            >
-              {results.map((c, i) => (
-                <button
-                  key={c.code}
-                  onClick={() => handleSelect(c)}
-                  className="flex w-full items-center justify-between px-5 py-3 text-left transition hover:bg-blue-50"
-                  style={{
-                    borderTop: i > 0 ? "1px solid #f1f5f9" : "none",
-                  }}
-                >
-                  <div>
-                    <span className="font-semibold text-gray-900">{c.nom}</span>
-                    <span className="ml-2 text-xs text-gray-400">{c.code}</span>
-                  </div>
-                  <span
-                    className="rounded-full px-2.5 py-0.5 text-xs font-bold"
-                    style={{ background: "#eff6ff", color: "#1e3a8a" }}
-                  >
-                    {c.population.toLocaleString("fr-FR")} hab.
-                  </span>
-                </button>
-              ))}
-            </div>
-          )}
         </div>
 
         {/* Résultat : plan adapté */}
@@ -903,13 +825,14 @@ function CommuneCalculatorSection() {
                 🏛️
               </div>
               <div>
-                <p className="font-bold text-gray-900">{selected.nom}</p>
+                <p className="font-bold text-gray-900">{selected.name}</p>
                 <p className="text-xs text-gray-500">
-                  {selected.population.toLocaleString("fr-FR")} habitants · Code INSEE {selected.code}
+                  {selected.population.toLocaleString("fr-FR")} habitants
+                  {selected.epci_name && ` · EPCI: ${selected.epci_name}`}
                 </p>
               </div>
               <button
-                onClick={() => { setSelected(null); setQuery(""); }}
+                onClick={() => setSelected(null)}
                 className="ml-auto rounded-lg p-1.5 text-gray-400 transition hover:bg-gray-100 hover:text-gray-700"
               >
                 <X className="h-4 w-4" />
@@ -968,11 +891,11 @@ function CommuneCalculatorSection() {
               </div>
 
               <a
-                href={`mailto:contact@vigiecity.fr?subject=Demande de proposition VigieCity — ${encodeURIComponent(selected.nom)}&body=Bonjour,%0A%0AJe souhaite obtenir une proposition pour la commune de ${encodeURIComponent(selected.nom)} (${selected.population.toLocaleString("fr-FR")} habitants).%0A%0AMerci.`}
+                href={`mailto:contact@vigiecity.fr?subject=Demande de proposition VigieCity — ${encodeURIComponent(selected.name)}&body=Bonjour,%0A%0AJe souhaite obtenir une proposition pour la commune de ${encodeURIComponent(selected.name)} (${selected.population.toLocaleString("fr-FR")} habitants).%0A%0AMerci.`}
                 className="mt-6 inline-flex items-center gap-2 rounded-xl px-8 py-4 text-sm font-bold text-white shadow-lg transition hover:opacity-90"
                 style={{ backgroundColor: "#1e3a8a" }}
               >
-                Demander une proposition pour {selected.nom}
+                Demander une proposition pour {selected.name}
                 <ArrowRight className="h-4 w-4" />
               </a>
             </div>
@@ -981,8 +904,8 @@ function CommuneCalculatorSection() {
 
         {/* Note de bas de section */}
         <p className="mt-8 text-center text-xs text-blue-300">
-          Données population source :{" "}
-          <span className="font-medium text-blue-200">INSEE via geo.api.gouv.fr</span>{" "}
+          Données issues du répertoire officiel des collectivités{" "}
+          <span className="font-medium text-blue-200">(INSEE & EPCI)</span>{" "}
           ·{" "}
           <a href="#tarifs" className="underline transition hover:text-white">
             Voir la grille tarifaire complète ↓
