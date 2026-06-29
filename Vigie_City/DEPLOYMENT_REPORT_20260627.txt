@@ -1,0 +1,287 @@
+================================================================================
+VIGIECITY FREEMIUM MODERATION SYSTEM - DEPLOYMENT REPORT
+================================================================================
+Date: 2026-06-27
+Project: xfhkngecpbvmlstjymfy
+Supabase URL: https://xfhkngecpbvmlstjymfy.supabase.co
+
+================================================================================
+TASK 1: MIGRATION DEPLOYMENT
+================================================================================
+
+File: supabase/migrations/20260626000001_freemium_moderation.sql
+Size: 7,097 bytes
+Statements: 39 SQL statements
+
+MIGRATION CONTENTS:
+- Creates/extends reports table with moderation columns:
+  * status (pending_review, public, hidden, escalated)
+  * auto_filter_score (0-1 range, >0.7 triggers review)
+  * citizen_flags_count (counts citizen reports)
+  * visible_to_public (boolean visibility flag)
+  * city_response & city_response_date (city admin responses)
+
+- Creates moderation_queue table (3 columns):
+  * report_id (FK to reports)
+  * status (pending, approved, rejected, escalated)
+  * reason (auto-filter score & flag details)
+  * reviewed_by_admin, reviewed_at (audit trail)
+
+- Creates report_flags table (citizen voting):
+  * report_id, citizen_id FKs
+  * flag_type (spam, profanity, abuse, misinformation)
+  * UNIQUE constraint: one vote per citizen per report
+
+- Extends municipalities table:
+  * subscription_status (freemium, active, paused, canceled)
+  * subscription_tier (Hameau through Métropole)
+  * subscription_started_at, subscription_ends_at
+
+- Implements RLS policies:
+  * Public reports visible to all
+  * Super-admin sees all reports for moderation
+  * City admins see their municipality reports (if active subscription)
+  * Citizens see their own reports
+  * Report flags limited to public reports
+
+- Triggers:
+  * Auto-update citizen_flags_count on new flags
+  * Auto-escalate when flags >= 3
+
+CURRENT STATUS:
+- Reports table: EXISTS (but missing moderation columns)
+- Moderation queue table: DOES NOT EXIST
+- Report flags table: DOES NOT EXIST
+- Municipalities table: Exists (needs subscription columns)
+
+DEPLOYMENT COMMAND:
+From the project root directory on Windows or macOS with Supabase CLI:
+
+  supabase migration up
+
+Alternative (via Supabase Dashboard SQL Editor):
+  1. Navigate to: https://app.supabase.com/project/xfhkngecpbvmlstjymfy/sql/editor
+  2. Create new query
+  3. Copy entire contents of: supabase/migrations/20260626000001_freemium_moderation.sql
+  4. Click "Run"
+
+EXPECTED OUTCOME AFTER MIGRATION:
+✓ reports table has 4 new columns: status, auto_filter_score, citizen_flags_count, visible_to_public
+✓ moderation_queue table created with 6 columns
+✓ report_flags table created with 4 columns
+✓ 2 triggers active (count update, escalation)
+✓ RLS policies enforced on all 3 tables
+✓ 5 indexes created for query performance
+
+================================================================================
+TASK 2: EDGE FUNCTIONS DEPLOYMENT
+================================================================================
+
+FUNCTION 1: freemium-auto-filter
+File: supabase/functions/freemium-auto-filter/index.ts
+Size: 3,262 bytes
+Purpose: Auto-filter incoming reports for spam/profanity
+
+Algorithm:
+- Detects spam patterns (Viagra, casino, limited offers, URLs) → 0.2 per pattern
+- Detects ALL CAPS aggression (10+ chars) → 0.15
+- Detects excessive punctuation (!!! or ???) → 0.1
+- Detects French profanity (putain, connard, etc.) → 0.25
+- Score capped at 1.0
+
+Behavior:
+- If score > 0.7: sets visible_to_public=false, status=pending_review
+- If score ≤ 0.7: sets visible_to_public=true, status=public
+- Creates moderation_queue entry if flagged
+
+Input: POST with { report_id, content, municipality_id }
+Output: { success, report_id, auto_filter_score, visible_to_public, status }
+
+FUNCTION 2: city-fetch-reports
+File: supabase/functions/city-fetch-reports/index.ts
+Size: 3,290 bytes
+Purpose: Fetch reports for city admin dashboard during Phase 2
+
+Features:
+- Requires Bearer token in Authorization header
+- Verifies user is admin of an active subscription municipality
+- Returns all reports for that municipality, categorized:
+  * pending_response: status='pending_review'
+  * resolved: status='public' with city_response set
+  * escalated: status='escalated'
+
+Input: POST with Authorization header
+Output: {
+  municipality_count,
+  municipalities: [{ id, name }],
+  reports: {
+    total,
+    pending_response,
+    resolved,
+    escalated,
+    data: { pending[], resolved[], escalated[] }
+  }
+}
+
+DEPLOYMENT COMMAND (both functions):
+From project root with Supabase CLI:
+
+  supabase functions deploy freemium-auto-filter
+  supabase functions deploy city-fetch-reports
+
+Alternative (via Supabase Dashboard → Functions):
+  1. Navigate to: https://app.supabase.com/project/xfhkngecpbvmlstjymfy/functions
+  2. Create new function from scratch OR upload via git
+  3. Paste index.ts contents from each function directory
+  4. Set environment: SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY (auto-populated)
+  5. Deploy
+
+EXPECTED URLS AFTER DEPLOYMENT:
+- freemium-auto-filter:
+  https://xfhkngecpbvmlstjymfy.supabase.co/functions/v1/freemium-auto-filter
+
+- city-fetch-reports:
+  https://xfhkngecpbvmlstjymfy.supabase.co/functions/v1/city-fetch-reports
+
+================================================================================
+TASK 3: VERIFICATION
+================================================================================
+
+STEP 1: Verify Migration Applied
+Command:
+  supabase migration list
+
+Expected output should include:
+  20260626000001_freemium_moderation.sql ... applied
+
+Or check via Supabase Dashboard:
+  1. SQL Editor → new query
+  2. Run: SELECT * FROM information_schema.tables WHERE table_name IN ('moderation_queue', 'report_flags')
+  3. Should return 2 rows
+
+STEP 2: Verify Edge Functions Deployed
+Command:
+  supabase functions list
+
+Expected output:
+  freemium-auto-filter (status: ready)
+  city-fetch-reports (status: ready)
+
+Or check Supabase Dashboard:
+  1. Functions tab
+  2. Both functions should appear with "Active" status
+
+STEP 3: Test Functions
+Test freemium-auto-filter:
+  curl -X POST https://xfhkngecpbvmlstjymfy.supabase.co/functions/v1/freemium-auto-filter \
+    -H "Content-Type: application/json" \
+    -d '{
+      "report_id": "test-id",
+      "content": "This is a legitimate report",
+      "municipality_id": 75056
+    }'
+
+Test city-fetch-reports:
+  curl -X POST https://xfhkngecpbvmlstjymfy.supabase.co/functions/v1/city-fetch-reports \
+    -H "Authorization: Bearer YOUR_JWT_TOKEN" \
+    -H "Content-Type: application/json"
+
+STEP 4: Verify RLS Policies
+Via Supabase Dashboard:
+  1. Authentication → Policies
+  2. Reports table should show 4 policies:
+     - reports_public_visible
+     - reports_admin_moderation
+     - reports_city_own_municipality
+     - reports_citizen_own
+
+================================================================================
+DEPLOYMENT CHECKLIST
+================================================================================
+
+PRE-DEPLOYMENT:
+[ ] Migration file exists: supabase/migrations/20260626000001_freemium_moderation.sql
+[ ] Function 1 exists: supabase/functions/freemium-auto-filter/index.ts
+[ ] Function 2 exists: supabase/functions/city-fetch-reports/index.ts
+[ ] Supabase CLI installed locally
+[ ] Logged into Supabase CLI: supabase login
+[ ] Project linked: supabase link --project-ref xfhkngecpbvmlstjymfy
+
+DEPLOYMENT:
+[ ] Apply migration: supabase migration up
+[ ] Deploy function 1: supabase functions deploy freemium-auto-filter
+[ ] Deploy function 2: supabase functions deploy city-fetch-reports
+
+POST-DEPLOYMENT:
+[ ] Verify migration: supabase migration list | grep 20260626000001
+[ ] Verify functions: supabase functions list
+[ ] Test moderation_queue table exists
+[ ] Test report_flags table exists
+[ ] Test RLS policies applied
+[ ] Test auto-filter function with sample spam content
+[ ] Test city-fetch-reports function with admin token
+
+================================================================================
+KNOWN ISSUES & NOTES
+================================================================================
+
+1. Profanity List: The French profanity list in freemium-auto-filter is minimal
+   - Current: putain, connard, salaud, imbécile, idiot
+   - Recommendation: Expand with more terms or use external API (OpenAI Moderation, etc.)
+
+2. Auto-filter Score Threshold: Currently 0.7
+   - Adjust in freemium-auto-filter/index.ts:75 if needed
+   - Lower threshold = more aggressive filtering
+   - Higher threshold = less false positives
+
+3. City Admin Transition (Phase 2):
+   - City-fetch-reports requires subscription_status='active'
+   - Ensure municipalities table has proper subscription status before Phase 2
+   - Add API endpoint to update subscription status (likely via Stripe webhook)
+
+4. Citizen Flags Escalation: Currently at 3 flags
+   - Adjust trigger_escalate_flagged_reports in migration if needed
+   - Consider notification system for admins when escalated
+
+5. Testing in Production:
+   - Edge functions will execute against production database immediately
+   - Consider adding test mode / dry-run flag in function logic
+   - Test thoroughly with staging first if possible
+
+================================================================================
+ROLLBACK INSTRUCTIONS (if needed)
+================================================================================
+
+To rollback the migration:
+  supabase migration down
+
+This will:
+  - Drop moderation_queue, report_flags tables
+  - Remove new columns from reports, municipalities
+  - Remove RLS policies and triggers
+  - Leave main reports table intact (just removes moderation-related schema)
+
+To unpublish edge functions:
+  supabase functions delete freemium-auto-filter
+  supabase functions delete city-fetch-reports
+
+================================================================================
+SUPPORTING LINKS
+================================================================================
+
+Supabase Project Dashboard:
+  https://app.supabase.com/project/xfhkngecpbvmlstjymfy
+
+SQL Editor (for manual migration execution):
+  https://app.supabase.com/project/xfhkngecpbvmlstjymfy/sql/editor
+
+Edge Functions:
+  https://app.supabase.com/project/xfhkngecpbvmlstjymfy/functions
+
+Database Policies:
+  https://app.supabase.com/project/xfhkngecpbvmlstjymfy/auth/policies
+
+Supabase CLI Docs:
+  https://supabase.com/docs/guides/cli
+
+================================================================================

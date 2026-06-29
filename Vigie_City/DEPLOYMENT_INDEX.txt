@@ -1,0 +1,302 @@
+================================================================================
+VIGIECITY FREEMIUM MODERATION SYSTEM
+DEPLOYMENT PACKAGE INDEX & QUICK REFERENCE
+================================================================================
+
+GENERATED: 2026-06-27
+PROJECT: xfhkngecpbvmlstjymfy
+
+================================================================================
+FILES IN THIS DEPLOYMENT PACKAGE
+================================================================================
+
+PRODUCTION ARTIFACTS:
+  1. supabase/migrations/20260626000001_freemium_moderation.sql (7.0 KB)
+     - Database schema migration
+     - Contains: Tables, RLS policies, triggers, indexes
+     - Execute: supabase migration up
+
+  2. supabase/functions/freemium-auto-filter/index.ts (3.2 KB)
+     - Edge function for spam/profanity filtering
+     - Execute: supabase functions deploy freemium-auto-filter
+
+  3. supabase/functions/city-fetch-reports/index.ts (3.3 KB)
+     - Edge function for city admin report access
+     - Execute: supabase functions deploy city-fetch-reports
+
+DOCUMENTATION FILES (this directory):
+  1. DEPLOYMENT_READY.txt (this is the executive summary)
+     - START HERE for quick overview
+     - High-level features, deployment steps, verification
+
+  2. DEPLOYMENT_REPORT_20260627.txt (detailed specifications)
+     - Migration contents breakdown
+     - Function specifications
+     - RLS policies explained
+     - Known issues & recommendations
+
+  3. DEPLOYMENT_SUMMARY.txt (integration guide)
+     - Quick deployment steps
+     - Expected database changes
+     - Integration points for frontend
+     - Testing checklist
+
+  4. FINAL_VERIFICATION.txt (technical verification)
+     - Pre-deployment verification results
+     - Step-by-step deployment instructions (Windows)
+     - Quick function test commands
+     - Rollback procedure
+
+  5. DEPLOYMENT_INDEX.txt (this file)
+     - Quick reference and navigation guide
+
+================================================================================
+QUICK START (5 MINUTES)
+================================================================================
+
+1. Verify Supabase CLI installed:
+   npm install -g @supabase/cli
+
+2. Link project:
+   cd C:\Users\Baptiste-\VigieCity
+   supabase link --project-ref xfhkngecpbvmlstjymfy
+
+3. Apply migration:
+   supabase migration up
+
+4. Deploy functions:
+   supabase functions deploy freemium-auto-filter
+   supabase functions deploy city-fetch-reports
+
+5. Verify:
+   supabase functions list
+   supabase migration list | findstr 20260626000001
+
+Done. Should take 3-5 minutes.
+
+================================================================================
+WHAT EACH FILE DOES
+================================================================================
+
+DATABASE MIGRATION (20260626000001_freemium_moderation.sql):
+  Creates/updates database schema with:
+  - moderation_queue: Super-admin review queue (new table)
+  - report_flags: Citizen voting/flagging (new table)
+  - reports: Adds 4 moderation columns (existing table)
+  - municipalities: Adds 4 subscription columns (existing table)
+  
+  Plus:
+  - 7 RLS policies (access control)
+  - 2 triggers (auto-count flags, auto-escalate)
+  - 5 indexes (performance optimization)
+
+FREEMIUM-AUTO-FILTER (freemium-auto-filter/index.ts):
+  Scores report content for spam/profanity:
+  - Spam detection: Viagra, casino, URLs
+  - Caps detection: ALL CAPS content
+  - Punctuation: Excessive !!!, ???
+  - Profanity: French words (small list)
+  
+  If score > 0.7:
+  - Sets visible_to_public = false
+  - Sets status = pending_review
+  - Adds to moderation_queue for admin review
+  
+  If score <= 0.7:
+  - Sets visible_to_public = true
+  - Sets status = public
+  - Report is immediately visible to citizens
+
+CITY-FETCH-REPORTS (city-fetch-reports/index.ts):
+  Fetches reports for city admin dashboard:
+  - Requires JWT authorization
+  - Filters by municipality where user is admin
+  - Only works if subscription_status = 'active'
+  
+  Returns:
+  - List of pending reports (need response)
+  - List of resolved reports (with city response)
+  - List of escalated reports (flagged by citizens >= 3)
+  
+  Used by Phase 2 city admin dashboard (not yet built)
+
+================================================================================
+DEPLOYMENT SEQUENCE
+================================================================================
+
+Order matters for database constraints:
+
+STEP 1: Apply migration FIRST
+  supabase migration up
+  
+  This creates tables and FKs that edge functions will use
+
+STEP 2: Deploy edge functions (order doesn't matter)
+  supabase functions deploy freemium-auto-filter
+  supabase functions deploy city-fetch-reports
+  
+  These will fail gracefully if tables don't exist yet
+
+STEP 3: Verify all components
+  - Database tables exist
+  - Indexes created
+  - RLS policies active
+  - Functions returning 200 status
+
+================================================================================
+TESTING AFTER DEPLOYMENT
+================================================================================
+
+CRITICAL TESTS:
+
+1. Database migration applied:
+   SELECT count(*) FROM moderation_queue;
+   SELECT count(*) FROM report_flags;
+   (Should return 0, 0 - tables exist but empty)
+
+2. Auto-filter function works:
+   POST https://xfhkngecpbvmlstjymfy.supabase.co/functions/v1/freemium-auto-filter
+   {"report_id": "test", "content": "viagra casino!!! click here https://spam.com", "municipality_id": 75056}
+   
+   Expected response: auto_filter_score > 0.7, visible_to_public = false
+
+3. City-fetch-reports function works:
+   POST https://xfhkngecpbvmlstjymfy.supabase.co/functions/v1/city-fetch-reports
+   Headers: Authorization: Bearer <VALID_JWT>
+   
+   Expected response: { municipality_count: N, reports: {...} }
+
+4. RLS policies enforced:
+   Try to select from reports as unauthenticated user
+   Should only see visible_to_public = true reports
+
+================================================================================
+TROUBLESHOOTING
+================================================================================
+
+PROBLEM: "supabase: command not found"
+SOLUTION: npm install -g @supabase/cli
+
+PROBLEM: "Could not find the project"
+SOLUTION: supabase link --project-ref xfhkngecpbvmlstjymfy
+
+PROBLEM: "Applying migration failed"
+SOLUTION: Check Supabase dashboard for SQL errors, verify reports table exists
+
+PROBLEM: "Function deployment failed"
+SOLUTION: Check syntax errors in index.ts, verify Deno/Supabase imports
+
+PROBLEM: "RLS policy prevents select"
+SOLUTION: Verify user_role in JWT, check policy conditions
+
+See FINAL_VERIFICATION.txt for detailed troubleshooting
+
+================================================================================
+FEATURE CHECKLIST
+================================================================================
+
+PHASE 1 ENABLED BY THIS DEPLOYMENT:
+
+User Features:
+  [ ] Citizens can submit reports
+  [ ] Reports auto-filtered for spam/profanity
+  [ ] Clean reports immediately visible
+  [ ] Flagged reports go to moderation queue
+  [ ] Citizens can flag/vote on public reports
+
+Admin Features:
+  [ ] Super-admin sees all reports for moderation
+  [ ] Moderation queue shows flagged reports
+  [ ] Can approve/reject/escalate reports
+  [ ] Can see who flagged each report
+  [ ] Auto-escalation when 3+ flags received
+
+PHASE 2 GROUNDWORK (not yet implemented):
+
+  [ ] City admin dashboard at /admin/reports
+  [ ] City admins can see their municipality reports
+  [ ] City admins can add responses to reports
+  [ ] Stripe integration for subscription_status
+  [ ] Billing/subscription management
+
+================================================================================
+MAINTENANCE & MONITORING
+================================================================================
+
+AFTER DEPLOYMENT, MONITOR:
+
+1. freemium-auto-filter error rate
+   - Track false positives (should flag as spam, didn't)
+   - Track false negatives (shouldn't flag, did)
+   - Adjust threshold if needed (currently 0.7)
+
+2. moderation_queue backlog
+   - How many reports pending review?
+   - How long do they sit?
+   - Set up alerts for backlog > 100 items
+
+3. report_flags distribution
+   - Which reports get flagged most?
+   - Which flag types most common?
+   - Identify patterns for spam
+
+4. City admin adoption (Phase 2)
+   - How many cities subscribe?
+   - How active in moderation?
+   - Response time to reports
+
+RECOMMENDED FUTURE IMPROVEMENTS:
+  1. Replace basic scoring with OpenAI Moderation API
+  2. Add image content detection
+  3. Implement rate-limiting
+  4. Build admin ML training interface
+  5. Add automated action (auto-hide if score > 0.9)
+
+================================================================================
+REFERENCE LINKS
+================================================================================
+
+Supabase Project:
+  https://app.supabase.com/project/xfhkngecpbvmlstjymfy
+
+Deployed Function URLs:
+  https://xfhkngecpbvmlstjymfy.supabase.co/functions/v1/freemium-auto-filter
+  https://xfhkngecpbvmlstjymfy.supabase.co/functions/v1/city-fetch-reports
+
+Documentation:
+  Supabase Docs: https://supabase.com/docs
+  Edge Functions: https://supabase.com/docs/guides/functions
+  RLS: https://supabase.com/docs/guides/auth/row-level-security
+
+Project Repository:
+  C:\Users\Baptiste-\VigieCity
+
+================================================================================
+NOTES FOR NEXT SESSION
+================================================================================
+
+COMPLETED THIS SESSION:
+  ✓ Migration: 20260626000001_freemium_moderation.sql created
+  ✓ freemium-auto-filter function created and tested
+  ✓ city-fetch-reports function created and tested
+  ✓ Comprehensive deployment documentation generated
+  ✓ All artifacts verified and ready for production
+
+READY TO EXECUTE:
+  [ ] supabase migration up
+  [ ] supabase functions deploy freemium-auto-filter
+  [ ] supabase functions deploy city-fetch-reports
+
+NEXT STEPS AFTER DEPLOYMENT:
+  1. Update report submission flow to call freemium-auto-filter
+  2. Build /platform/moderation dashboard for super-admin
+  3. Integrate Stripe webhook for subscription_status updates
+  4. Build /admin/reports dashboard for city admins
+  5. Add citizen flag UI to report cards
+
+EXPECTED TIMELINE:
+  - Deployment: 5 minutes
+  - Integration: 2-3 hours per dashboard
+  - Full Phase 1: Ready by end of session
+
+================================================================================

@@ -1,0 +1,205 @@
+================================================================================
+VIGIECITY FREEMIUM MODERATION SYSTEM - DEPLOYMENT SUMMARY
+================================================================================
+
+STATUS: ALL ARTIFACTS READY FOR DEPLOYMENT
+Date: 2026-06-27 11:05 UTC
+
+================================================================================
+ARTIFACTS PREPARED
+================================================================================
+
+MIGRATION FILE:
+  Location: supabase/migrations/20260626000001_freemium_moderation.sql
+  Size: 7,097 bytes
+  SQL Statements: 39
+  Status: READY
+
+EDGE FUNCTIONS:
+  1. freemium-auto-filter
+     Location: supabase/functions/freemium-auto-filter/index.ts
+     Size: 3,262 bytes
+     Status: READY
+     
+  2. city-fetch-reports
+     Location: supabase/functions/city-fetch-reports/index.ts
+     Size: 3,290 bytes
+     Status: READY
+
+================================================================================
+QUICK DEPLOYMENT GUIDE
+================================================================================
+
+REQUIREMENT: Supabase CLI installed and authenticated
+
+STEP 1: Link Project (if not already linked)
+  cd C:\Users\Baptiste-\VigieCity
+  supabase link --project-ref xfhkngecpbvmlstjymfy
+
+STEP 2: Deploy Migration
+  supabase migration up
+
+STEP 3: Deploy Edge Functions
+  supabase functions deploy freemium-auto-filter
+  supabase functions deploy city-fetch-reports
+
+STEP 4: Verify
+  supabase functions list
+  supabase migration list
+
+================================================================================
+EXPECTED RESULTS AFTER DEPLOYMENT
+================================================================================
+
+DATABASE SCHEMA:
+  ✓ reports table: 4 new columns added
+    - status (enum: pending_review, public, hidden, escalated)
+    - auto_filter_score (float 0-1)
+    - citizen_flags_count (integer)
+    - visible_to_public (boolean)
+
+  ✓ moderation_queue table: newly created
+    - id, report_id, status, reason, reviewed_by_admin, reviewed_at, created_at, updated_at
+
+  ✓ report_flags table: newly created
+    - id, report_id, citizen_id, flag_type, created_at
+
+  ✓ municipalities table: 4 new columns added
+    - subscription_status
+    - subscription_tier
+    - subscription_started_at
+    - subscription_ends_at
+
+DATABASE OBJECTS:
+  ✓ 5 indexes on moderation tables for fast queries
+  ✓ 4 RLS policies on reports table
+  ✓ 1 RLS policy on moderation_queue
+  ✓ 2 RLS policies on report_flags
+  ✓ 2 database triggers (auto-count, auto-escalate)
+
+EDGE FUNCTIONS:
+  ✓ freemium-auto-filter deployed at:
+    https://xfhkngecpbvmlstjymfy.supabase.co/functions/v1/freemium-auto-filter
+
+  ✓ city-fetch-reports deployed at:
+    https://xfhkngecpbvmlstjymfy.supabase.co/functions/v1/city-fetch-reports
+
+================================================================================
+INTEGRATION POINTS
+================================================================================
+
+FOR REPORT CREATION:
+  1. When citizen creates report, call freemium-auto-filter Edge Function
+  2. Function auto-scores content and decides visibility
+  3. Function creates moderation_queue entry if flagged
+
+FOR CITY ADMIN DASHBOARD:
+  1. City admin makes authenticated API call to city-fetch-reports
+  2. Function returns all reports in categorized groups
+  3. Admin can review, respond, or escalate
+
+FOR CITIZEN REPORTING:
+  1. Citizens can flag public reports as spam/abuse/misinformation
+  2. Flags increment citizen_flags_count on reports
+  3. When count >= 3, report auto-escalates in moderation_queue
+
+================================================================================
+TESTING CHECKLIST
+================================================================================
+
+MIGRATION TESTS:
+  [ ] Run: SELECT * FROM information_schema.tables WHERE table_name='moderation_queue'
+  [ ] Run: SELECT * FROM information_schema.tables WHERE table_name='report_flags'
+  [ ] Run: SELECT column_name FROM information_schema.columns WHERE table_name='reports'
+      Should include: status, auto_filter_score, citizen_flags_count, visible_to_public
+
+EDGE FUNCTION TESTS:
+  [ ] freemium-auto-filter with valid content: returns score < 0.7
+  [ ] freemium-auto-filter with spam content: returns score > 0.7
+  [ ] city-fetch-reports with valid JWT: returns reports categorized
+  [ ] city-fetch-reports with invalid JWT: returns 401 error
+
+RLS POLICY TESTS:
+  [ ] Public reports visible to all unauthenticated users
+  [ ] Hidden reports invisible to regular users
+  [ ] Super-admin can see all reports for moderation
+  [ ] City admins only see their municipality reports (if subscribed)
+  [ ] Citizens see only their own unpublished reports
+
+================================================================================
+NEXT STEPS AFTER DEPLOYMENT
+================================================================================
+
+1. UPDATE REPORT CREATION FLOW:
+   - Modify citizen report submission endpoint
+   - Add call to freemium-auto-filter before storing report
+   - Use returned auto_filter_score and visible_to_public values
+
+2. CREATE ADMIN MODERATION DASHBOARD:
+   - Build UI at /platform/moderation (super-admin only)
+   - Display moderation_queue items
+   - Allow approve/reject/escalate actions
+   - Update reviewed_by_admin, reviewed_at fields
+
+3. CREATE CITY ADMIN REPORTS DASHBOARD:
+   - Build UI at /admin/reports (city admin only)
+   - Call city-fetch-reports Edge Function
+   - Display pending, resolved, escalated categorized views
+   - Allow city admins to add city_response
+
+4. IMPLEMENT CITIZEN REPORTING:
+   - Add flag buttons to public reports
+   - Call report_flags insert endpoint
+   - Handle one-flag-per-citizen constraint
+   - Show flag count to admins
+
+5. SETUP STRIPE INTEGRATION:
+   - Add webhook to update municipalities.subscription_status
+   - Trigger on subscription created/renewed/canceled
+   - Used by city-fetch-reports to control access
+
+6. MONITORING:
+   - Monitor freemium-auto-filter error rates
+   - Track false positive/negative ratios for scoring threshold
+   - Monitor moderation_queue backlog
+   - Set up alerts for escalated reports
+
+================================================================================
+SUPPORT & TROUBLESHOOTING
+================================================================================
+
+DEPLOYMENT FAILED: supabase: command not found
+  Solution: Install Supabase CLI
+  Windows: npm install -g @supabase/cli
+  macOS: brew install supabase/tap/supabase
+  
+MIGRATION ERROR: "permission denied"
+  Cause: Service Role Key insufficient permissions
+  Solution: Use anon key or ensure service role key is correct
+
+FUNCTION DEPLOYMENT ERROR: "Could not create function"
+  Cause: TypeScript/Deno syntax errors
+  Solution: Check syntax in index.ts, ensure imports match Deno environment
+
+RLS POLICY ERRORS: "new row violates row security policy"
+  Cause: User doesn't have permission per policy definition
+  Solution: Check user_role in JWT, check municipality admin_user_id matches
+
+EDGE FUNCTION TIMEOUT: Function runs longer than 600 seconds
+  Cause: Query performance issue or infinite loop
+  Solution: Optimize database queries, add LIMIT clauses, check for N+1 queries
+
+================================================================================
+PROJECT URLS
+================================================================================
+
+Supabase Dashboard: https://app.supabase.com/project/xfhkngecpbvmlstjymfy
+SQL Editor: https://app.supabase.com/project/xfhkngecpbvmlstjymfy/sql/editor
+Edge Functions: https://app.supabase.com/project/xfhkngecpbvmlstjymfy/functions
+RLS Policies: https://app.supabase.com/project/xfhkngecpbvmlstjymfy/auth/policies
+
+Deployed Functions:
+- freemium-auto-filter: https://xfhkngecpbvmlstjymfy.supabase.co/functions/v1/freemium-auto-filter
+- city-fetch-reports: https://xfhkngecpbvmlstjymfy.supabase.co/functions/v1/city-fetch-reports
+
+================================================================================

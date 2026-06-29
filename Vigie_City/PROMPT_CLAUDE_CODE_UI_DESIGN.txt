@@ -1,0 +1,190 @@
+# 🎨 VigieCity — UI/UX Design Brief for Claude Code
+
+**Mission:** Propose a new visual identity (templates + logos) → create clickable UI/UX prototype → validate and refine chart graphique.
+
+---
+
+## PROJECT OVERVIEW
+
+**VigieCity** — B2B SaaS application citoyenne for French municipalities.
+
+**Users:**
+- Citizens (habitants) : report municipal issues, see local alerts, access civic info
+- City admins (agents) : moderate reports, send alerts, manage events/news
+- Super-admin (TORP internal) : oversee platform, manage municipalities, handle escalations
+
+**Core Features:**
+1. **Alerts & Urgencies** — push notifications for municipal emergencies (water cuts, security, weather)
+2. **Citizen Reports** — geolocated problem reports (potholes, vandalism, etc.) with photo/location
+3. **Civic Agenda** — public events & municipal activities
+4. **Local News** — official municipal updates & deliberations
+5. **Citizen Messaging** — direct channel between residents and city services
+6. **Freemium Moderation** — auto-filter spam → super-admin review → city admin moderation (when subscribed)
+7. **Subscription Tiers** — 6 pricing tiers (Hameau 19€ → Métropole 590€/month) based on population
+
+**Target Devices:**
+- iOS app (via Progressive Web App / Capacitor)
+- Android app (via Capacitor)
+- Web (responsive, desktop + tablet)
+
+---
+
+## CURRENT STATE (Session 39, 27 June 2026)
+
+**Done:**
+- Landing page (vigiecity.fr) with pricing calculator
+- 6 pricing tiers deployed
+- Freemium moderation backend (ready to deploy)
+
+**Missing:**
+- Modern, cohesive visual identity
+- Native app screens (Figma or clickable prototype)
+- Marketing/sales branded materials
+- Admin dashboard UI
+
+**Current branding:** Generic blue (#1e3a8a) + TailwindCSS defaults — needs personality & differentiation
+
+---
+
+## YOUR TASK
+
+**You (Claude Code) will:**
+
+### STEP 1: PROPOSE (you decide, no constraints from us)
+Suggest 3-4 complete visual directions for VigieCity. For each:
+- **Brand identity**: name + 1-sentence philosophy (e.g., "Modern civic engagement" or "Trustworthy municipal tech")
+- **Primary color palette**: 2-3 core colors + 2-3 accent colors (with hex codes)
+- **Secondary elements**: suggested typography, icon style, spatial rhythm
+- **Logo concept**: 1 description of what the logo would represent (civic theme, geometric, etc.) — NO actual logo design yet
+- **Target feeling**: 3 words describing the vibe (trustworthy, modern, approachable, etc.)
+
+Example format (DO THIS):
+```
+Direction A: "CivicHub"
+- Philosophy: Empowering communities through transparent dialogue
+- Colors: Emerald (#10b981) + Warm White (#fafaf8) + Slate (#475569)
+- Typography: Geometric sans-serif (modern, friendly)
+- Logo concept: Interlocking circles representing citizen-city connection
+- Vibe: Trustworthy, human-centered, accessible
+```
+
+### STEP 2: ITERATE (user will validate one direction)
+Once user picks a direction, you will:
+- Refine color palette (generate 7-color system: primary, secondary, accents, grays)
+- Create a complete Design System (spacing scale, corner radius, shadows, typography sizes)
+- Define icon guidelines (style, stroke weight, 24px grid)
+
+### STEP 3: BUILD PROTOTYPE (clickable, HTML/React, NOT Figma)
+Create a standalone HTML/React prototype with:
+
+**Pages to include:**
+1. **Landing page** — hero, features grid (6 modules), pricing section, footer
+2. **Mobile app mockup** — citizen home screen (alerts, quick actions, feed)
+3. **City admin dashboard** — reports pending moderation, response queue
+4. **Super-admin moderation** — flagged reports, auto-filter queue, escalations
+5. **Pricing page** — 6 tiers with feature matrix, CTA
+
+**Requirements:**
+- Fully clickable navigation (pages link to each other)
+- Responsive (mobile-first, works on desktop/tablet)
+- Use ONLY the validated color palette + typography
+- Icons: Lucide React or similar (not custom graphics)
+- No placeholder text — use real copy (you know the product)
+- Include micro-interactions (hover states, focus rings, active nav)
+
+**Output format:** Single `.html` file (self-contained) or `.jsx` file for React (use bundled deps like Tailwind, Lucide)
+
+### STEP 4: EXPORT & FEEDBACK LOOP
+Once prototype is done:
+- Export as .html (or React preview link)
+- Include a design guide PDF (colors, typography, spacing rules)
+- User will validate → provide feedback → you iterate
+
+---
+
+## CONTEXT YOU NEED TO KNOW
+
+### Features & Screens
+**Citizen-facing:**
+- Home: alerts (red banner), quick actions (4 cards), local feed
+- Report: form to create issue (category, photo, location, description)
+- Map: geolocated reports layer
+- Agenda: events with calendar integration
+- News: local news feed (official municipal updates)
+- Messaging: direct messages with city services
+
+**City admin-facing:**
+- Dashboard: KPIs (active alerts, pending reports, citizen engagement)
+- Reports queue: pending responses, status tracker, escalations
+- Moderation: flagged reports (from freemium auto-filter), approve/reject/escalate
+- Settings: tier info, subscription status, user management
+
+**Super-admin (internal):**
+- Moderation queue: all flagged reports across municipalities
+- City management: add/remove cities, subscription status, billing
+- Analytics: municipality KPIs, feature adoption
+
+### Pricing Tiers (6 total)
+- **Hameau** (< 500 hab): 19€/month — basic alerts + reports
+- **Village** (501–3.5k): 49€/month — + agenda + news
+- **Bourg** (3.5k–10k): 99€/month — + messaging
+- **Bastide** (10k–25k): 189€/month — + advanced reporting + analytics
+- **Cité** (25k–50k): 390€/month — + custom branding + priority support
+- **Métropole** (>50k): 590€/month — + white-label + dedicated account manager
+
+### Target Tone
+- Accessible to non-tech municipalities
+- Professional but approachable
+- Emphasizes citizen trust & civic engagement
+- NOT corporate/sterile — should feel human
+
+---
+
+## WHAT WE DON'T WANT
+
+- ❌ Anything that looks like government/bureaucratic (gray, rigid, cold)
+- ❌ Corporate fintech vibes (too slick, impersonal)
+- ❌ Over-designed (trendy colors that age poorly)
+- ❌ Unreadable typography or low contrast
+- ❌ Placeholder/stock images
+
+---
+
+## DELIVERABLES CHECKLIST
+
+Once done, confirm:
+- [ ] 3-4 visual directions proposed with philosophy + colors + vibe
+- [ ] User selects 1 direction
+- [ ] Full design system created (color scale, typography, spacing, icons)
+- [ ] Clickable HTML/React prototype built (all 5 pages interactive)
+- [ ] Responsive design verified (mobile + desktop)
+- [ ] Design guide exported (colors, typography, rules)
+- [ ] Ready for user iteration/feedback
+
+---
+
+## CONSTRAINTS
+
+- **No actual logo design** in step 1 (you describe the concept, user approves direction first)
+- **HTML/React only** for prototype (no Figma, no design tool exports)
+- **Self-contained** (single file or minimal deps)
+- **Real copy** (not Lorem ipsum)
+- **Production-ready code** (clean, accessible, responsive)
+
+---
+
+## INSPIRATION DIRECTION AREAS (just hints — you decide)
+
+You might explore:
+- Civic engagement platforms (democratic, participatory)
+- Smart city apps (modern, connected)
+- Community apps (human, friendly, local)
+- Municipal services (trustworthy, efficient)
+
+But these are JUST hints. Propose YOUR vision.
+
+---
+
+**Start now. Propose 3-4 visual directions. User will pick one and you'll build the prototype.**
+
+Go.
