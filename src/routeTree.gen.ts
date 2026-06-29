@@ -56,6 +56,7 @@ import { Route as PlatformKnowledgeRouteImport } from './routes/platform/knowled
 import { Route as PlatformIntercommunalitesRouteImport } from './routes/platform/intercommunalites'
 import { Route as PlatformFeaturesRouteImport } from './routes/platform/features'
 import { Route as PlatformFacturationRouteImport } from './routes/platform/facturation'
+import { Route as PlatformEpciTarificationRouteImport } from './routes/platform/epci-tarification'
 import { Route as PlatformCommunesRouteImport } from './routes/platform/communes'
 import { Route as PlatformCollectivitesRouteImport } from './routes/platform/collectivites'
 import { Route as PlatformAnalyticsRouteImport } from './routes/platform/analytics'
@@ -84,6 +85,7 @@ import { Route as AdminAgentsRouteImport } from './routes/admin/agents'
 import { Route as AdminAcceptInviteRouteImport } from './routes/admin/accept-invite'
 import { Route as AdminTerrainIndexRouteImport } from './routes/admin/terrain/index'
 import { Route as ServicesSignalementIdRouteImport } from './routes/services/signalement.$id'
+import { Route as PlatformSupportTariffCalculatorRouteImport } from './routes/platform/support/tariff-calculator'
 import { Route as PlatformCityModerationRouteImport } from './routes/platform/city/moderation'
 import { Route as AdminTerrainTraitesRouteImport } from './routes/admin/terrain/traites'
 
@@ -323,6 +325,12 @@ const PlatformFacturationRoute = PlatformFacturationRouteImport.update({
   path: '/platform/facturation',
   getParentRoute: () => rootRouteImport,
 } as any)
+const PlatformEpciTarificationRoute =
+  PlatformEpciTarificationRouteImport.update({
+    id: '/platform/epci-tarification',
+    path: '/platform/epci-tarification',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 const PlatformCommunesRoute = PlatformCommunesRouteImport.update({
   id: '/platform/communes',
   path: '/platform/communes',
@@ -463,6 +471,12 @@ const ServicesSignalementIdRoute = ServicesSignalementIdRouteImport.update({
   path: '/signalement/$id',
   getParentRoute: () => ServicesRoute,
 } as any)
+const PlatformSupportTariffCalculatorRoute =
+  PlatformSupportTariffCalculatorRouteImport.update({
+    id: '/tariff-calculator',
+    path: '/tariff-calculator',
+    getParentRoute: () => PlatformSupportRoute,
+  } as any)
 const PlatformCityModerationRoute = PlatformCityModerationRouteImport.update({
   id: '/platform/city/moderation',
   path: '/platform/city/moderation',
@@ -527,6 +541,7 @@ export interface FileRoutesByFullPath {
   '/platform/analytics': typeof PlatformAnalyticsRoute
   '/platform/collectivites': typeof PlatformCollectivitesRoute
   '/platform/communes': typeof PlatformCommunesRoute
+  '/platform/epci-tarification': typeof PlatformEpciTarificationRoute
   '/platform/facturation': typeof PlatformFacturationRoute
   '/platform/features': typeof PlatformFeaturesRoute
   '/platform/intercommunalites': typeof PlatformIntercommunalitesRoute
@@ -540,7 +555,7 @@ export interface FileRoutesByFullPath {
   '/platform/rss': typeof PlatformRssRoute
   '/platform/settings': typeof PlatformSettingsRoute
   '/platform/stats': typeof PlatformStatsRoute
-  '/platform/support': typeof PlatformSupportRoute
+  '/platform/support': typeof PlatformSupportRouteWithChildren
   '/platform/tarification': typeof PlatformTarificationRoute
   '/platform/trials': typeof PlatformTrialsRoute
   '/platform/users': typeof PlatformUsersRoute
@@ -550,6 +565,7 @@ export interface FileRoutesByFullPath {
   '/services/': typeof ServicesIndexRoute
   '/admin/terrain/traites': typeof AdminTerrainTraitesRoute
   '/platform/city/moderation': typeof PlatformCityModerationRoute
+  '/platform/support/tariff-calculator': typeof PlatformSupportTariffCalculatorRoute
   '/services/signalement/$id': typeof ServicesSignalementIdRoute
   '/admin/terrain/': typeof AdminTerrainIndexRoute
 }
@@ -605,6 +621,7 @@ export interface FileRoutesByTo {
   '/platform/analytics': typeof PlatformAnalyticsRoute
   '/platform/collectivites': typeof PlatformCollectivitesRoute
   '/platform/communes': typeof PlatformCommunesRoute
+  '/platform/epci-tarification': typeof PlatformEpciTarificationRoute
   '/platform/facturation': typeof PlatformFacturationRoute
   '/platform/features': typeof PlatformFeaturesRoute
   '/platform/intercommunalites': typeof PlatformIntercommunalitesRoute
@@ -618,7 +635,7 @@ export interface FileRoutesByTo {
   '/platform/rss': typeof PlatformRssRoute
   '/platform/settings': typeof PlatformSettingsRoute
   '/platform/stats': typeof PlatformStatsRoute
-  '/platform/support': typeof PlatformSupportRoute
+  '/platform/support': typeof PlatformSupportRouteWithChildren
   '/platform/tarification': typeof PlatformTarificationRoute
   '/platform/trials': typeof PlatformTrialsRoute
   '/platform/users': typeof PlatformUsersRoute
@@ -628,6 +645,7 @@ export interface FileRoutesByTo {
   '/services': typeof ServicesIndexRoute
   '/admin/terrain/traites': typeof AdminTerrainTraitesRoute
   '/platform/city/moderation': typeof PlatformCityModerationRoute
+  '/platform/support/tariff-calculator': typeof PlatformSupportTariffCalculatorRoute
   '/services/signalement/$id': typeof ServicesSignalementIdRoute
   '/admin/terrain': typeof AdminTerrainIndexRoute
 }
@@ -685,6 +703,7 @@ export interface FileRoutesById {
   '/platform/analytics': typeof PlatformAnalyticsRoute
   '/platform/collectivites': typeof PlatformCollectivitesRoute
   '/platform/communes': typeof PlatformCommunesRoute
+  '/platform/epci-tarification': typeof PlatformEpciTarificationRoute
   '/platform/facturation': typeof PlatformFacturationRoute
   '/platform/features': typeof PlatformFeaturesRoute
   '/platform/intercommunalites': typeof PlatformIntercommunalitesRoute
@@ -698,7 +717,7 @@ export interface FileRoutesById {
   '/platform/rss': typeof PlatformRssRoute
   '/platform/settings': typeof PlatformSettingsRoute
   '/platform/stats': typeof PlatformStatsRoute
-  '/platform/support': typeof PlatformSupportRoute
+  '/platform/support': typeof PlatformSupportRouteWithChildren
   '/platform/tarification': typeof PlatformTarificationRoute
   '/platform/trials': typeof PlatformTrialsRoute
   '/platform/users': typeof PlatformUsersRoute
@@ -708,6 +727,7 @@ export interface FileRoutesById {
   '/services/': typeof ServicesIndexRoute
   '/admin/terrain/traites': typeof AdminTerrainTraitesRoute
   '/platform/city/moderation': typeof PlatformCityModerationRoute
+  '/platform/support/tariff-calculator': typeof PlatformSupportTariffCalculatorRoute
   '/services/signalement/$id': typeof ServicesSignalementIdRoute
   '/admin/terrain/': typeof AdminTerrainIndexRoute
 }
@@ -766,6 +786,7 @@ export interface FileRouteTypes {
     | '/platform/analytics'
     | '/platform/collectivites'
     | '/platform/communes'
+    | '/platform/epci-tarification'
     | '/platform/facturation'
     | '/platform/features'
     | '/platform/intercommunalites'
@@ -789,6 +810,7 @@ export interface FileRouteTypes {
     | '/services/'
     | '/admin/terrain/traites'
     | '/platform/city/moderation'
+    | '/platform/support/tariff-calculator'
     | '/services/signalement/$id'
     | '/admin/terrain/'
   fileRoutesByTo: FileRoutesByTo
@@ -844,6 +866,7 @@ export interface FileRouteTypes {
     | '/platform/analytics'
     | '/platform/collectivites'
     | '/platform/communes'
+    | '/platform/epci-tarification'
     | '/platform/facturation'
     | '/platform/features'
     | '/platform/intercommunalites'
@@ -867,6 +890,7 @@ export interface FileRouteTypes {
     | '/services'
     | '/admin/terrain/traites'
     | '/platform/city/moderation'
+    | '/platform/support/tariff-calculator'
     | '/services/signalement/$id'
     | '/admin/terrain'
   id:
@@ -923,6 +947,7 @@ export interface FileRouteTypes {
     | '/platform/analytics'
     | '/platform/collectivites'
     | '/platform/communes'
+    | '/platform/epci-tarification'
     | '/platform/facturation'
     | '/platform/features'
     | '/platform/intercommunalites'
@@ -946,6 +971,7 @@ export interface FileRouteTypes {
     | '/services/'
     | '/admin/terrain/traites'
     | '/platform/city/moderation'
+    | '/platform/support/tariff-calculator'
     | '/services/signalement/$id'
     | '/admin/terrain/'
   fileRoutesById: FileRoutesById
@@ -1003,6 +1029,7 @@ export interface RootRouteChildren {
   PlatformAnalyticsRoute: typeof PlatformAnalyticsRoute
   PlatformCollectivitesRoute: typeof PlatformCollectivitesRoute
   PlatformCommunesRoute: typeof PlatformCommunesRoute
+  PlatformEpciTarificationRoute: typeof PlatformEpciTarificationRoute
   PlatformFacturationRoute: typeof PlatformFacturationRoute
   PlatformFeaturesRoute: typeof PlatformFeaturesRoute
   PlatformIntercommunalitesRoute: typeof PlatformIntercommunalitesRoute
@@ -1016,7 +1043,7 @@ export interface RootRouteChildren {
   PlatformRssRoute: typeof PlatformRssRoute
   PlatformSettingsRoute: typeof PlatformSettingsRoute
   PlatformStatsRoute: typeof PlatformStatsRoute
-  PlatformSupportRoute: typeof PlatformSupportRoute
+  PlatformSupportRoute: typeof PlatformSupportRouteWithChildren
   PlatformTarificationRoute: typeof PlatformTarificationRoute
   PlatformTrialsRoute: typeof PlatformTrialsRoute
   PlatformUsersRoute: typeof PlatformUsersRoute
@@ -1359,6 +1386,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof PlatformFacturationRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/platform/epci-tarification': {
+      id: '/platform/epci-tarification'
+      path: '/platform/epci-tarification'
+      fullPath: '/platform/epci-tarification'
+      preLoaderRoute: typeof PlatformEpciTarificationRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/platform/communes': {
       id: '/platform/communes'
       path: '/platform/communes'
@@ -1555,6 +1589,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ServicesSignalementIdRouteImport
       parentRoute: typeof ServicesRoute
     }
+    '/platform/support/tariff-calculator': {
+      id: '/platform/support/tariff-calculator'
+      path: '/tariff-calculator'
+      fullPath: '/platform/support/tariff-calculator'
+      preLoaderRoute: typeof PlatformSupportTariffCalculatorRouteImport
+      parentRoute: typeof PlatformSupportRoute
+    }
     '/platform/city/moderation': {
       id: '/platform/city/moderation'
       path: '/platform/city/moderation'
@@ -1584,6 +1625,18 @@ const ServicesRouteChildren: ServicesRouteChildren = {
 
 const ServicesRouteWithChildren = ServicesRoute._addFileChildren(
   ServicesRouteChildren,
+)
+
+interface PlatformSupportRouteChildren {
+  PlatformSupportTariffCalculatorRoute: typeof PlatformSupportTariffCalculatorRoute
+}
+
+const PlatformSupportRouteChildren: PlatformSupportRouteChildren = {
+  PlatformSupportTariffCalculatorRoute: PlatformSupportTariffCalculatorRoute,
+}
+
+const PlatformSupportRouteWithChildren = PlatformSupportRoute._addFileChildren(
+  PlatformSupportRouteChildren,
 )
 
 const rootRouteChildren: RootRouteChildren = {
@@ -1639,6 +1692,7 @@ const rootRouteChildren: RootRouteChildren = {
   PlatformAnalyticsRoute: PlatformAnalyticsRoute,
   PlatformCollectivitesRoute: PlatformCollectivitesRoute,
   PlatformCommunesRoute: PlatformCommunesRoute,
+  PlatformEpciTarificationRoute: PlatformEpciTarificationRoute,
   PlatformFacturationRoute: PlatformFacturationRoute,
   PlatformFeaturesRoute: PlatformFeaturesRoute,
   PlatformIntercommunalitesRoute: PlatformIntercommunalitesRoute,
@@ -1652,7 +1706,7 @@ const rootRouteChildren: RootRouteChildren = {
   PlatformRssRoute: PlatformRssRoute,
   PlatformSettingsRoute: PlatformSettingsRoute,
   PlatformStatsRoute: PlatformStatsRoute,
-  PlatformSupportRoute: PlatformSupportRoute,
+  PlatformSupportRoute: PlatformSupportRouteWithChildren,
   PlatformTarificationRoute: PlatformTarificationRoute,
   PlatformTrialsRoute: PlatformTrialsRoute,
   PlatformUsersRoute: PlatformUsersRoute,
