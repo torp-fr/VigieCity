@@ -1149,8 +1149,8 @@ function PricingSection() {
                   style={{ background: "#eff6ff" }}
                 >
                   Ex. CC de 30 000 hab. → tranche{" "}
-                  <strong>Cité</strong> (390 €/mois) + 20 % interco ={" "}
-                  <strong>468 €/mois HT</strong> / 4 680 €/an HT
+                  <strong>Cité</strong> (289 €/mois) + 20 % interco ={" "}
+                  <strong>347 €/mois HT</strong> / 3 468 €/an HT
                 </div>
               )}
 
