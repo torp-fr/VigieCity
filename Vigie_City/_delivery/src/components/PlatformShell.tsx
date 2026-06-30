@@ -21,6 +21,7 @@ const NAV_SECTIONS = [
       { icon: UserPlus,        label: "Onboarding",       path: "/platform/onboarding"     },
       { icon: TrendingUp,      label: "Rétention",        path: "/platform/retention"      },
       { icon: Users,           label: "Utilisateurs",     path: "/platform/users"          },
+      { icon: Shield,          label: "Modération",       path: "/platform/moderation"     },
     ],
   },
   {
@@ -70,6 +71,7 @@ const PAGE_TITLES: Record<string, string> = {
   "/platform/onboarding":       "Onboarding",
   "/platform/retention":        "Rétention",
   "/platform/users":            "Utilisateurs",
+  "/platform/moderation":       "Modération",
   "/platform/rss":              "Flux RSS",
   "/platform/knowledge":        "Connaissances",
   "/platform/publishers":       "Éditeurs",
