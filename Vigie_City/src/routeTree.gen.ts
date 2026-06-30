@@ -75,6 +75,8 @@ import { Route as AdminAbonnementRouteImport } from './routes/admin/abonnement'
 import { Route as PlatformPublicitesRouteImport } from './routes/platform/publicites'
 import { Route as PlatformMonetizationRouteImport } from './routes/platform/monetization'
 import { Route as PlatformMobileRouteImport } from './routes/platform/mobile'
+import { Route as PlatformModerationRouteImport } from './routes/platform/moderation'
+import { Route as PlatformUtilisateursRouteImport } from './routes/platform/utilisateurs'
 
 // ── Déclarations de routes ────────────────────────────────────────────────────
 const IndexRoute = IndexRouteImport.update({
@@ -379,6 +381,18 @@ const PlatformMobileRoute = PlatformMobileRouteImport.update({
   getParentRoute: () => rootRouteImport,
 } as any)
 
+const PlatformModerationRoute = PlatformModerationRouteImport.update({
+  id: '/platform/moderation',
+  path: '/platform/moderation',
+  getParentRoute: () => rootRouteImport,
+} as any)
+
+const PlatformUtilisateursRoute = PlatformUtilisateursRouteImport.update({
+  id: '/platform/utilisateurs',
+  path: '/platform/utilisateurs',
+  getParentRoute: () => rootRouteImport,
+} as any)
+
 // ── Interfaces de types ───────────────────────────────────────────────────────
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -439,6 +453,8 @@ export interface FileRoutesByFullPath {
   '/platform/publicites': typeof PlatformPublicitesRoute
   '/platform/monetization': typeof PlatformMonetizationRoute
   '/platform/mobile': typeof PlatformMobileRoute
+  '/platform/moderation': typeof PlatformModerationRoute
+  '/platform/utilisateurs': typeof PlatformUtilisateursRoute
   '/accueil': typeof AccueilRoute
 }
 export interface FileRoutesByTo {
@@ -499,6 +515,8 @@ export interface FileRoutesByTo {
   '/platform/publicites': typeof PlatformPublicitesRoute
   '/platform/monetization': typeof PlatformMonetizationRoute
   '/platform/mobile': typeof PlatformMobileRoute
+  '/platform/moderation': typeof PlatformModerationRoute
+  '/platform/utilisateurs': typeof PlatformUtilisateursRoute
   '/accueil': typeof AccueilRoute
 }
 export interface FileRoutesById {
@@ -560,6 +578,8 @@ export interface FileRoutesById {
   '/platform/publicites': typeof PlatformPublicitesRoute
   '/platform/monetization': typeof PlatformMonetizationRoute
   '/platform/mobile': typeof PlatformMobileRoute
+  '/platform/moderation': typeof PlatformModerationRoute
+  '/platform/utilisateurs': typeof PlatformUtilisateursRoute
   '/accueil': typeof AccueilRoute
 }
 export interface FileRouteTypes {
@@ -623,6 +643,8 @@ export interface FileRouteTypes {
     | '/platform/publicites'
     | '/platform/monetization'
     | '/platform/mobile'
+    | '/platform/moderation'
+    | '/platform/utilisateurs'
     | '/accueil'
   fileRoutesByTo: FileRoutesByTo
   to:
@@ -684,6 +706,8 @@ export interface FileRouteTypes {
     | '/platform/publicites'
     | '/platform/monetization'
     | '/platform/mobile'
+    | '/platform/moderation'
+    | '/platform/utilisateurs'
     | '/accueil'
   id:
     | '__root__'
@@ -745,6 +769,8 @@ export interface FileRouteTypes {
     | '/platform/publicites'
     | '/platform/monetization'
     | '/platform/mobile'
+    | '/platform/moderation'
+    | '/platform/utilisateurs'
     | '/accueil'
   fileRoutesById: FileRoutesById
 }
@@ -807,6 +833,8 @@ export interface RootRouteChildren {
   PlatformPublicitesRoute: typeof PlatformPublicitesRoute
   PlatformMonetizationRoute: typeof PlatformMonetizationRoute
   PlatformMobileRoute: typeof PlatformMobileRoute
+  PlatformModerationRoute: typeof PlatformModerationRoute
+  PlatformUtilisateursRoute: typeof PlatformUtilisateursRoute
   AccueilRoute: typeof AccueilRoute
 }
 
@@ -1211,6 +1239,20 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof PlatformMobileRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/platform/moderation': {
+      id: '/platform/moderation'
+      path: '/platform/moderation'
+      fullPath: '/platform/moderation'
+      preLoaderRoute: typeof PlatformModerationRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/platform/utilisateurs': {
+      id: '/platform/utilisateurs'
+      path: '/platform/utilisateurs'
+      fullPath: '/platform/utilisateurs'
+      preLoaderRoute: typeof PlatformUtilisateursRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/admin/abonnement': {
       id: '/admin/abonnement'
       path: '/admin/abonnement'
@@ -1288,19 +1330,8 @@ const rootRouteChildren: RootRouteChildren = {
   PlatformPublicitesRoute,
   PlatformMonetizationRoute,
   PlatformMobileRoute,
+  PlatformModerationRoute,
+  PlatformUtilisateursRoute,
   AccueilRoute,
 }
-
-export const routeTree = rootRouteImport
-  ._addFileChildren(rootRouteChildren)
-  ._addFileTypes<FileRouteTypes>()
-
-import type { getRouter } from './router.tsx'
-import type { startInstance } from './start.ts'
-declare module '@tanstack/react-start' {
-  interface Register {
-    ssr: true
-    router: Awaited<ReturnType<typeof getRouter>>
-    config: Awaited<ReturnType<typeof startInstance.getOptions>>
-  }
-}
+export const routeTree = rootRouteImport._addFileChildren(rootRouteChildren)
