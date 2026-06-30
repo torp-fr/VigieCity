@@ -6,6 +6,7 @@ import {
   CreditCard, Euro, BarChart3, UserPlus,
   TrendingUp, Newspaper, Package, BookOpen,
   Menu, Bell, Megaphone, PieChart, Wrench,
+  AlertTriangle,
 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { usePlatformAuth } from "@/hooks/usePlatformAuth";
@@ -29,6 +30,7 @@ const NAV_SECTIONS = [
       { icon: Rss,             label: "Flux RSS",         path: "/platform/rss"            },
       { icon: BookOpen,        label: "Connaissances",    path: "/platform/knowledge"      },
       { icon: Newspaper,       label: "Éditeurs",         path: "/platform/publishers"     },
+      { icon: AlertTriangle,   label: "Modération",       path: "/platform/moderation"     },
     ],
   },
   {
@@ -73,6 +75,7 @@ const PAGE_TITLES: Record<string, string> = {
   "/platform/rss":              "Flux RSS",
   "/platform/knowledge":        "Connaissances",
   "/platform/publishers":       "Éditeurs",
+  "/platform/moderation":       "Modération",
   "/platform/plans":            "Plans tarifaires",
   "/platform/tarification":     "Intercommunal",
   "/platform/epci-tarification": "Gestion EPCIs",

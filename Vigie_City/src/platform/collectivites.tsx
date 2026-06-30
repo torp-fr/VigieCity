@@ -89,7 +89,8 @@ function PlatformCollectivitesContent() {
     status: "dormant", mayor_name: "", email: "", phone: "", website: "",
   });
   const [inviteEmail, setInviteEmail] = useState("");
-  const [inviteTab,   setInviteTab]   = useState<"edit" | "invite">("edit");
+  const [inviteTab,   setInviteTab]   = useState<"edit" | "invite" | "notes">("edit");
+  const [newNote,     setNewNote]     = useState("");
 
   // Debounce search 350 ms
   useEffect(() => {
@@ -163,6 +164,41 @@ function PlatformCollectivitesContent() {
     staleTime: 30_000,
   });
 
+  // ── Fetch license info for the commune being edited ────────────────────────
+  const { data: license } = useQuery({
+    queryKey: ["platform/commune_license", editTarget?.id],
+    enabled:  !!editTarget,
+    queryFn:  async () => {
+      const { data } = await supabase
+        .from("commune_licenses")
+        .select("id, plan, status, started_at, expires_at, payment_type, payment_validated")
+        .eq("collectivity_id", editTarget!.id)
+        .maybeSingle();
+      return data ?? null;
+    },
+    staleTime: 60_000,
+  });
+
+  // ── Fetch CRM notes for the commune being edited ─────────────────────────────
+  const { data: crmNotes, refetch: refetchNotes } = useQuery({
+    queryKey: ["platform/commune_crm_notes", editTarget?.id],
+    enabled:  !!editTarget,
+    queryFn:  async () => {
+      const { data, error } = await supabase
+        .from("commune_crm_notes")
+        .select("id, note_text, created_by_admin, created_at")
+        .eq("collectivity_id", editTarget!.id)
+        .order("created_at", { ascending: false })
+        .limit(10);
+      if (error) {
+        // Table might not exist yet if migration hasn't run
+        return [];
+      }
+      return (data ?? []) as any[];
+    },
+    staleTime: 30_000,
+  });
+
   const totalPages = Math.ceil((data?.total ?? 0) / PAGE_SIZE);
 
   // ── Toggle is_active ────────────────────────────────────────────────────────
@@ -225,6 +261,26 @@ function PlatformCollectivitesContent() {
       toast.success("Invitation envoyée avec succès !");
       setInviteEmail("");
       refetchInvite();
+    },
+    onError: (e: Error) => toast.error(`Erreur : ${e.message}`),
+  });
+
+  // ── Add CRM note ─────────────────────────────────────────────────────────────
+  const addNoteMut = useMutation({
+    mutationFn: async () => {
+      if (!editTarget || !newNote.trim()) return;
+      const { error } = await supabase
+        .from("commune_crm_notes")
+        .insert({
+          collectivity_id: editTarget.id,
+          note_text: newNote.trim(),
+        });
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      toast.success("Note ajoutée");
+      setNewNote("");
+      refetchNotes();
     },
     onError: (e: Error) => toast.error(`Erreur : ${e.message}`),
   });
@@ -582,12 +638,85 @@ function PlatformCollectivitesContent() {
                 <UserPlus className="h-3.5 w-3.5" />
                 Accès admin
               </button>
+              <button
+                onClick={() => setInviteTab("notes")}
+                className={`flex-1 py-2.5 text-xs font-semibold transition ${
+                  inviteTab === "notes"
+                    ? "border-b-2 border-blue-600 text-blue-600"
+                    : "text-slate-500 hover:text-slate-700"
+                }`}
+              >
+                Notes CRM
+              </button>
             </div>
 
             <div className="p-6">
               {/* ── TAB: Edit CRM ── */}
               {inviteTab === "edit" && (
-                <div className="space-y-3">
+                <div className="space-y-4">
+                  {/* License Card */}
+                  {license && (
+                    <div className="rounded-xl border border-emerald-200 bg-emerald-50 p-4">
+                      <h3 className="mb-3 text-xs font-semibold uppercase tracking-wide text-emerald-900">
+                        Licence active
+                      </h3>
+                      <div className="grid grid-cols-2 gap-3 text-sm">
+                        <div>
+                          <p className="text-[10px] font-semibold uppercase tracking-wide text-emerald-700">
+                            Plan
+                          </p>
+                          <p className="mt-1 font-bold text-emerald-900">
+                            {license.plan ?? "—"}
+                          </p>
+                        </div>
+                        <div>
+                          <p className="text-[10px] font-semibold uppercase tracking-wide text-emerald-700">
+                            Statut
+                          </p>
+                          <p className="mt-1 font-bold text-emerald-900">
+                            {license.status ?? "—"}
+                          </p>
+                        </div>
+                        <div>
+                          <p className="text-[10px] font-semibold uppercase tracking-wide text-emerald-700">
+                            Début
+                          </p>
+                          <p className="mt-1 text-xs text-emerald-800">
+                            {license.started_at
+                              ? new Date(license.started_at).toLocaleDateString("fr-FR")
+                              : "—"}
+                          </p>
+                        </div>
+                        <div>
+                          <p className="text-[10px] font-semibold uppercase tracking-wide text-emerald-700">
+                            Expiration
+                          </p>
+                          <p className="mt-1 text-xs text-emerald-800">
+                            {license.expires_at
+                              ? new Date(license.expires_at).toLocaleDateString("fr-FR")
+                              : "—"}
+                          </p>
+                        </div>
+                        <div>
+                          <p className="text-[10px] font-semibold uppercase tracking-wide text-emerald-700">
+                            Type paiement
+                          </p>
+                          <p className="mt-1 text-xs text-emerald-800">
+                            {license.payment_type ?? "—"}
+                          </p>
+                        </div>
+                        <div>
+                          <p className="text-[10px] font-semibold uppercase tracking-wide text-emerald-700">
+                            Validé
+                          </p>
+                          <p className="mt-1 text-xs text-emerald-800">
+                            {license.payment_validated ? "✅ Oui" : "⏳ En attente"}
+                          </p>
+                        </div>
+                      </div>
+                    </div>
+                  )}
+
                   {/* Statut lifecycle */}
                   <div>
                     <label className="mb-1 block text-[11px] font-semibold uppercase tracking-wide text-slate-400">
@@ -703,6 +832,60 @@ function PlatformCollectivitesContent() {
                           : <Send className="h-4 w-4" />}
                         {inviteMut.isPending ? "Envoi…" : "Envoyer l'invitation"}
                       </button>
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {/* ── TAB: CRM Notes ── */}
+              {inviteTab === "notes" && (
+                <div className="space-y-4">
+                  {/* New note input */}
+                  <div>
+                    <label className="mb-2 block text-[11px] font-semibold uppercase tracking-wide text-slate-400">
+                      Ajouter une note
+                    </label>
+                    <textarea
+                      value={newNote}
+                      onChange={e => setNewNote(e.target.value)}
+                      maxLength={500}
+                      placeholder="Écrivez vos observations..."
+                      className="h-24 w-full rounded-xl border border-slate-200 px-3 py-2.5 text-sm focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    />
+                    <p className="mt-1 text-[10px] text-slate-400">
+                      {newNote.length}/500
+                    </p>
+                    <button
+                      onClick={() => addNoteMut.mutate()}
+                      disabled={addNoteMut.isPending || !newNote.trim()}
+                      className="mt-2 w-full rounded-xl bg-blue-600 py-2 text-sm font-semibold text-white hover:bg-blue-700 disabled:opacity-60"
+                    >
+                      {addNoteMut.isPending ? "Enregistrement…" : "Ajouter une note"}
+                    </button>
+                  </div>
+
+                  {/* Notes history */}
+                  <div>
+                    <p className="mb-2 text-[11px] font-semibold uppercase tracking-wide text-slate-400">
+                      Historique ({crmNotes?.length ?? 0})
+                    </p>
+                    <div className="max-h-48 space-y-2 overflow-y-auto">
+                      {!crmNotes || crmNotes.length === 0 ? (
+                        <p className="text-xs text-slate-400">Aucune note</p>
+                      ) : (
+                        crmNotes.map(note => (
+                          <div key={note.id} className="rounded-lg border border-slate-100 bg-slate-50 p-2.5">
+                            <p className="text-[11px] text-slate-600">
+                              {new Date(note.created_at).toLocaleDateString("fr-FR")}{" "}
+                              {new Date(note.created_at).toLocaleTimeString("fr-FR", {
+                                hour: "2-digit",
+                                minute: "2-digit",
+                              })}
+                            </p>
+                            <p className="mt-1 text-xs text-slate-900">{note.note_text}</p>
+                          </div>
+                        ))
+                      )}
                     </div>
                   </div>
                 </div>
